@@ -1,0 +1,422 @@
+"""
+Excel Report Generator for Credit Analysis
+Generates comprehensive Excel workbooks with multiple sheets
+"""
+import xlsxwriter
+from datetime import datetime
+from typing import Dict, List
+
+class ExcelReportGenerator:
+    """Generate Excel reports with multiple worksheets"""
+    
+    def __init__(self, language='es'):
+        self.language = language
+        
+    def generate(self, analysis_data: Dict, company_data: Dict, financial_statements: List[Dict], output_path: str):
+        """Generate complete Excel workbook"""
+        workbook = xlsxwriter.Workbook(output_path)
+        
+        # Define formats
+        formats = self._create_formats(workbook)
+        
+        # Create worksheets
+        self._create_company_info_sheet(workbook, company_data, formats)
+        self._create_balance_sheet(workbook, financial_statements, formats)
+        self._create_income_statement(workbook, financial_statements, formats)
+        self._create_financial_ratios_sheet(workbook, analysis_data, formats)
+        self._create_swot_sheet(workbook, analysis_data, formats)
+        self._create_credit_score_sheet(workbook, analysis_data, formats)
+        self._create_recommendation_sheet(workbook, analysis_data, formats)
+        
+        workbook.close()
+    
+    def _create_formats(self, workbook):
+        """Create cell formats"""
+        return {
+            'header': workbook.add_format({
+                'bold': True,
+                'font_size': 14,
+                'bg_color': '#253746',
+                'font_color': 'white',
+                'align': 'center',
+                'valign': 'vcenter',
+                'border': 1
+            }),
+            'subheader': workbook.add_format({
+                'bold': True,
+                'font_size': 12,
+                'bg_color': '#425563',
+                'font_color': 'white',
+                'align': 'center',
+                'border': 1
+            }),
+            'label': workbook.add_format({
+                'bold': True,
+                'align': 'left',
+                'border': 1
+            }),
+            'value': workbook.add_format({
+                'align': 'right',
+                'border': 1,
+                'num_format': '#,##0.00'
+            }),
+            'percent': workbook.add_format({
+                'align': 'right',
+                'border': 1,
+                'num_format': '0.00%'
+            }),
+            'currency': workbook.add_format({
+                'align': 'right',
+                'border': 1,
+                'num_format': '$#,##0.00'
+            }),
+            'good': workbook.add_format({
+                'bg_color': '#10b981',
+                'font_color': 'white',
+                'bold': True,
+                'align': 'center',
+                'border': 1
+            }),
+            'warning': workbook.add_format({
+                'bg_color': '#f59e0b',
+                'font_color': 'white',
+                'bold': True,
+                'align': 'center',
+                'border': 1
+            }),
+            'danger': workbook.add_format({
+                'bg_color': '#ef4444',
+                'font_color': 'white',
+                'bold': True,
+                'align': 'center',
+                'border': 1
+            })
+        }
+    
+    def _create_company_info_sheet(self, workbook, company_data: Dict, formats):
+        """Sheet 1: Company Information"""
+        worksheet = workbook.add_worksheet('Company Info' if self.language == 'en' else 'Información')
+        
+        worksheet.set_column('A:A', 30)
+        worksheet.set_column('B:B', 40)
+        
+        # Title
+        worksheet.merge_range('A1:B1', 'COMPANY INFORMATION' if self.language == 'en' else 'INFORMACIÓN DE LA EMPRESA', formats['header'])
+        
+        row = 2
+        # Company details
+        labels = {
+            'en': ['Company Name', 'Industry', 'Years in Business', 'Analysis Date', 'Analyzed By'],
+            'es': ['Nombre de Empresa', 'Industria', 'Años en Negocio', 'Fecha de Análisis', 'Analizado Por']
+        }[self.language]
+        
+        values = [
+            company_data.get('name', 'N/A'),
+            company_data.get('industry', 'N/A'),
+            company_data.get('years_in_business', 'N/A'),
+            datetime.now().strftime('%d/%m/%Y'),
+            company_data.get('analyzed_by', 'System')
+        ]
+        
+        for label, value in zip(labels, values):
+            worksheet.write(row, 0, label, formats['label'])
+            worksheet.write(row, 1, value)
+            row += 1
+    
+    def _create_balance_sheet(self, workbook, statements: List[Dict], formats):
+        """Sheet 2: Balance Sheet (Multiple Years)"""
+        worksheet = workbook.add_worksheet('Balance Sheet' if self.language == 'en' else 'Balance General')
+        
+        # Extract years
+        years = sorted([stmt.get('year') for stmt in statements if stmt.get('year')])
+        
+        worksheet.set_column('A:A', 40)
+        for i in range(len(years)):
+            worksheet.set_column(i+1, i+1, 15)
+        
+        # Title
+        merge_range = f'A1:{chr(65+len(years))}1'
+        worksheet.merge_range(merge_range, 'BALANCE SHEET' if self.language == 'en' else 'BALANCE GENERAL', formats['header'])
+        
+        # Headers
+        row = 2
+        worksheet.write(row, 0, 'Item' if self.language == 'en' else 'Concepto', formats['subheader'])
+        for i, year in enumerate(years):
+            worksheet.write(row, i+1, str(year), formats['subheader'])
+        
+        # Balance sheet items
+        row = 3
+        bs_items = {
+            'en': [
+                ('ASSETS', None),
+                ('Current Assets', 'current_assets'),
+                ('  Cash', 'cash'),
+                ('  Accounts Receivable', 'accounts_receivable'),
+                ('  Inventory', 'inventory'),
+                ('Fixed Assets', 'fixed_assets'),
+                ('Total Assets', 'total_assets'),
+                ('', None),
+                ('LIABILITIES', None),
+                ('Current Liabilities', 'current_liabilities'),
+                ('  Accounts Payable', 'accounts_payable'),
+                ('Long-term Debt', 'long_term_debt'),
+                ('Total Liabilities', 'total_liabilities'),
+                ('', None),
+                ('EQUITY', None),
+                ('Shareholder Equity', 'shareholder_equity'),
+            ],
+            'es': [
+                ('ACTIVOS', None),
+                ('Activos Circulantes', 'current_assets'),
+                ('  Efectivo', 'cash'),
+                ('  Cuentas por Cobrar', 'accounts_receivable'),
+                ('  Inventario', 'inventory'),
+                ('Activos Fijos', 'fixed_assets'),
+                ('Total Activos', 'total_assets'),
+                ('', None),
+                ('PASIVOS', None),
+                ('Pasivos Circulantes', 'current_liabilities'),
+                ('  Cuentas por Pagar', 'accounts_payable'),
+                ('Deuda a Largo Plazo', 'long_term_debt'),
+                ('Total Pasivos', 'total_liabilities'),
+                ('', None),
+                ('CAPITAL', None),
+                ('Capital Contable', 'shareholder_equity'),
+            ]
+        }[self.language]
+        
+        for label, field in bs_items:
+            worksheet.write(row, 0, label, formats['label'] if field else formats['subheader'])
+            if field:
+                for i, year in enumerate(years):
+                    # Find statement for this year
+                    stmt = next((s for s in statements if s.get('year') == year), {})
+                    value = stmt.get(field, 0)
+                    worksheet.write(row, i+1, value, formats['currency'])
+            row += 1
+    
+    def _create_income_statement(self, workbook, statements:   List[Dict], formats):
+        """Sheet 3: Income Statement (Multiple Years)"""
+        worksheet = workbook.add_worksheet('Income Statement' if self.language == 'en' else 'Estado de Resultados')
+        
+        years = sorted([stmt.get('year') for stmt in statements if stmt.get('year')])
+        
+        worksheet.set_column('A:A', 40)
+        for i in range(len(years)):
+            worksheet.set_column(i+1, i+1, 15)
+        
+        # Title
+        merge_range = f'A1:{chr(65+len(years))}1'
+        worksheet.merge_range(merge_range, 'INCOME STATEMENT' if self.language == 'en' else 'ESTADO DE RESULTADOS', formats['header'])
+        
+        row = 2
+        worksheet.write(row, 0, 'Item' if self.language == 'en' else 'Concepto', formats['subheader'])
+        for i, year in enumerate(years):
+            worksheet.write(row, i+1, str(year), formats['subheader'])
+        
+        row = 3
+        is_items = {
+            'en': [
+                ('Revenue', 'revenue'),
+                ('Cost of Goods Sold', 'cost_of_goods_sold'),
+                ('Gross Profit', 'gross_profit'),
+                ('Operating Expenses', 'operating_expenses'),
+                ('Operating Income', 'operating_income'),
+                ('Interest Expense', 'interest_expense'),
+                ('Tax Expense', 'tax_expense'),
+                ('Net Profit', 'net_profit'),
+                ('EBITDA', 'ebitda'),
+            ],
+            'es': [
+                ('Ingresos', 'revenue'),
+                ('Costo de Ventas', 'cost_of_goods_sold'),
+                ('Utilidad Bruta', 'gross_profit'),
+                ('Gastos Operativos', 'operating_expenses'),
+                ('Utilidad Operativa', 'operating_income'),
+                ('Gastos Financieros', 'interest_expense'),
+                ('Impuestos', 'tax_expense'),
+                ('Utilidad Neta', 'net_profit'),
+                ('EBITDA', 'ebitda'),
+            ]
+        }[self.language]
+        
+        for label, field in is_items:
+            worksheet.write(row, 0, label, formats['label'])
+            for i, year in enumerate(years):
+                stmt = next((s for s in statements if s.get('year') == year), {})
+                value = stmt.get(field, 0)
+                worksheet.write(row, i+1, value, formats['currency'])
+            row += 1
+    
+    def _create_financial_ratios_sheet(self, workbook, analysis_data: Dict, formats):
+        """Sheet 4: Financial Ratios"""
+        worksheet = workbook.add_worksheet('Ratios' if self.language == 'en' else 'Razones Financieras')
+        
+        worksheet.set_column('A:A', 35)
+        worksheet.set_column('B:B', 15)
+        worksheet.set_column('C:C', 30)
+        
+        worksheet.merge_range('A1:C1', 'FINANCIAL RATIOS' if self.language == 'en' else 'RAZONES FINANCIERAS', formats['header'])
+        
+        row = 2
+        headers = ['Ratio' if self.language == 'en' else 'Razón', 'Value' if self.language == 'en' else 'Valor', 'Interpretation' if self.language == 'en' else 'Interpretación']
+        for col, header in enumerate(headers):
+            worksheet.write(row, col, header, formats['subheader'])
+        
+        row = 3
+        ratios = {
+            'en': [
+                ('Current Ratio', 'current_ratio', False),
+                ('Debt-to-Assets', 'debt_to_assets', True),
+                ('Leverage Ratio', 'leverage_ratio', False),
+                ('ROE (%)', 'roe', True),
+                ('ROA (%)', 'roa', True),
+                ('Profit Margin (%)', 'profit_margin', True),
+                ('EBITDA Margin (%)', 'ebitda_margin', True),
+                ('Interest Coverage', 'interest_coverage', False),
+                ('Asset Turnover', 'asset_turnover', False),
+            ],
+            'es': [
+                ('Razón Corriente', 'current_ratio', False),
+                ('Deuda/Activos', 'debt_to_assets', True),
+                ('Apalancamiento', 'leverage_ratio', False),
+                ('ROE (%)', 'roe', True),
+                ('ROA (%)', 'roa', True),
+                ('Margen de Utilidad (%)', 'profit_margin', True),
+                ('Margen EBITDA (%)', 'ebitda_margin', True),
+                ('Cobertura de Intereses', 'interest_coverage', False),
+                ('Rotación de Activos', 'asset_turnover', False),
+            ]
+        }[self.language]
+        
+        for label, field, is_percent in ratios:
+            worksheet.write(row, 0, label, formats['label'])
+            value = analysis_data.get(field, 0)
+            worksheet.write(row, 1, value, formats['percent'] if is_percent else formats['value'])
+            worksheet.write(row, 2, self._interpret_ratio(field, value))
+            row += 1
+    
+    def _create_swot_sheet(self, workbook, analysis_data: Dict, formats):
+        """Sheet 5: SWOT Analysis"""
+        worksheet = workbook.add_worksheet('SWOT' if self.language == 'en' else 'FODA')
+        
+        worksheet.set_column('A:B', 50)
+        
+        worksheet.merge_range('A1:B1', 'SWOT ANALYSIS' if self.language == 'en' else 'ANÁLISIS FODA', formats['header'])
+        
+        swot = analysis_data.get('swot_analysis', {})
+        
+        row = 2
+        # Strengths & Opportunities
+        worksheet.write(row, 0, 'STRENGTHS' if self.language == 'en' else 'FORTALEZAS', formats['good'])
+        worksheet.write(row, 1, 'OPPORTUNITIES' if self.language == 'en' else 'OPORTUNIDADES', formats['good'])
+        
+        strengths = swot.get('strengths', [])
+        opportunities = swot.get('opportunities', [])
+        max_rows = max(len(strengths), len(opportunities))
+        
+        for i in range(max_rows):
+            row += 1
+            if i < len(strengths):
+                worksheet.write(row, 0, f"• {strengths[i]}")
+            if i < len(opportunities):
+                worksheet.write(row, 1, f"• {opportunities[i]}")
+        
+        row += 2
+        # Weaknesses & Threats
+        worksheet.write(row, 0, 'WEAKNESSES' if self.language == 'en' else 'DEBILIDADES', formats['warning'])
+        worksheet.write(row, 1, 'THREATS' if self.language == 'en' else 'AMENAZAS', formats['danger'])
+        
+        weaknesses = swot.get('weaknesses', [])
+        threats = swot.get('threats', [])
+        max_rows = max(len(weaknesses), len(threats))
+        
+        for i in range(max_rows):
+            row += 1
+            if i < len(weaknesses):
+                worksheet.write(row, 0, f"• {weaknesses[i]}")
+            if i < len(threats):
+                worksheet.write(row, 1, f"• {threats[i]}")
+    
+    def _create_credit_score_sheet(self, workbook, analysis_data: Dict, formats):
+        """Sheet 6: Credit Score Breakdown"""
+        worksheet = workbook.add_worksheet('Credit Score' if self.language == 'en' else 'Calificación')
+        
+        worksheet.set_column('A:B', 30)
+        
+        worksheet.merge_range('A1:B1', 'CREDIT SCORE BREAKDOWN' if self.language == 'en' else 'DESGLOSE DE CALIFICACIÓN', formats['header'])
+        
+        row = 2
+        worksheet.write(row, 0, 'Component' if self.language == 'en' else 'Componente', formats['subheader'])
+        worksheet.write(row, 1, 'Score' if self.language == 'en' else 'Puntaje', formats['subheader'])
+        
+        row = 3
+        components = {
+            'en': [
+                ('Credit History (40%)', 'credit_history_score'),
+                ('Solvency (30%)', 'solvency_score'),
+                ('Profitability (30%)', 'profitability_score'),
+                ('TOTAL SCORE', 'total_credit_score'),
+            ],
+            'es': [
+                ('Historial Crediticio (40%)', 'credit_history_score'),
+                ('Solvencia (30%)', 'solvency_score'),
+                ('Rentabilidad (30%)', 'profitability_score'),
+                ('PUNTAJE TOTAL', 'total_credit_score'),
+            ]
+        }[self.language]
+        
+        for label, field in components:
+            worksheet.write(row, 0, label, formats['label'])
+            value = analysis_data.get(field, 0)
+            cell_format = formats['header'] if 'TOTAL' in label else formats['value']
+            worksheet.write(row, 1, value, cell_format)
+            row += 1
+        
+        row += 1
+        worksheet.write(row, 0, 'Category' if self.language == 'en' else 'Categoría', formats['label'])
+        category = analysis_data.get('credit_category', 'N/A')
+        worksheet.write(row, 1, category, formats['header'])
+    
+    def _create_recommendation_sheet(self, workbook, analysis_data: Dict, formats):
+        """Sheet 7: Recommendation"""
+        worksheet = workbook.add_worksheet('Recommendation' if self.language == 'en' else 'Recomendación')
+        
+        worksheet.set_column('A:A', 80)
+        
+        worksheet.merge_range('A1:A1', 'FINAL RECOMMENDATION' if self.language == 'en' else 'RECOMENDACIÓN FINAL', formats['header'])
+        
+        row = 2
+        recommendation = analysis_data.get('recommendation', 'PENDING')
+        
+        # Decision
+        worksheet.write(row, 0, f"Decision: {recommendation}" if self.language == 'en' else f"Decisión: {recommendation}", 
+                       formats['good'] if recommendation == 'APPROVE' else (formats['warning'] if 'CONDITIONAL' in recommendation else formats['danger']))
+        
+        # Justification
+        row += 2
+        worksheet.write(row, 0, 'Justification:' if self.language == 'en' else 'Justificación:', formats['subheader'])
+        
+        justification = analysis_data.get('recommendation_justification', [])
+        for item in justification:
+            row += 1
+            worksheet.write(row, 0, f"• {item}")
+        
+        # Conditions
+        conditions = analysis_data.get('conditions', [])
+        if conditions:
+            row += 2
+            worksheet.write(row, 0, 'Conditions:' if self.language == 'en' else 'Condiciones:', formats['subheader'])
+            for item in conditions:
+                row += 1
+                worksheet.write(row, 0, f"• {item}")
+    
+    def _interpret_ratio(self, ratio_name: str, value: float) -> str:
+        """Interpret financial ratio"""
+        # Same logic as PDF generator
+        interpretations = {
+            'current_ratio': 'Good' if value > 1.5 else ('Adequate' if value > 1.0 else 'Low'),
+            'roe': 'Excellent' if value > 15 else ('Good' if value > 10 else 'Low'),
+            'roa': 'Excellent' if value > 10 else ('Good' if value > 5 else 'Low'),
+        }
+        return interpretations.get(ratio_name, 'N/A')

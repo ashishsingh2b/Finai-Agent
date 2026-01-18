@@ -30,14 +30,14 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
 
     return (
         <div className="bg-white rounded-xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300">
-            <div className="bg-[#2D5A9E] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider">
+            <div className="bg-[#253746] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider">
                 Financial Indicators
             </div>
             <div className="p-5 bg-white">
                 <div className="border border-gray-200 rounded-lg flex items-stretch divide-x divide-gray-200 bg-gray-50/30 shadow-sm overflow-hidden">
                     {indicators.map((ind, i) => (
                         <div key={i} className="flex-1 flex flex-col items-center py-5 px-2 hover:bg-white/60 transition-colors group">
-                            <div className="text-[10px] font-black text-gray-500 mb-3 group-hover:text-[#2D5A9E] transition-colors whitespace-nowrap uppercase tracking-widest leading-none">
+                            <div className="text-[10px] font-black text-gray-500 mb-3 group-hover:text-[#253746] transition-colors whitespace-nowrap uppercase tracking-widest leading-none">
                                 {ind.label}
                             </div>
                             <div className="text-3xl font-black text-gray-900 tracking-tight mb-5 group-hover:scale-105 transition-transform leading-none">

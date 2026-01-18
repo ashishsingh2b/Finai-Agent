@@ -18,9 +18,9 @@ export const LanguageSelector = ({ className = '' }: { className?: string }) => 
         <div className={`relative z-50 ${className}`}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition-all text-gray-700 group hover:border-[#2D5A9E]/30"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition-all text-gray-700 group hover:border-[#253746]/30"
             >
-                <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#2D5A9E] transition-colors" />
+                <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#253746] transition-colors" />
                 <span className="text-sm font-bold">{currentLanguage.label}</span>
                 <span className="text-xs">{currentLanguage.flag}</span>
             </button>
@@ -54,7 +54,7 @@ export const LanguageSelector = ({ className = '' }: { className?: string }) => 
                                         </span>
                                     </div>
                                     {i18n.language === lang.code && (
-                                        <Check className="w-4 h-4 text-[#2D5A9E]" />
+                                        <Check className="w-4 h-4 text-[#253746]" />
                                     )}
                                 </button>
                             ))}

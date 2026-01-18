@@ -57,13 +57,13 @@ export const LoginForm: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-[#2D5A9E]/20">
+        <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-[#253746]/20">
             {/* Animated Grid Background */}
             <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
                 <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2D5A9E" strokeWidth="0.5" opacity="0.3" />
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#253746" strokeWidth="0.5" opacity="0.3" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#grid)" />
@@ -78,17 +78,17 @@ export const LoginForm: React.FC = () => {
             {/* Moving Graph Lines Animation */}
             <div className="absolute inset-0 z-0 opacity-30 pointer-events-none overflow-hidden">
                 <svg className="absolute w-[200%] h-full animate-graph-slide" preserveAspectRatio="none" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 200 Q 150 100, 300 200 T 600 200 T 900 200 T 1200 100" stroke="#2D5A9E" strokeWidth="2" fill="none" className="drop-shadow-lg" />
+                    <path d="M0 200 Q 150 100, 300 200 T 600 200 T 900 200 T 1200 100" stroke="#253746" strokeWidth="2" fill="none" className="drop-shadow-lg" />
                     <path d="M0 250 Q 150 150, 300 250 T 600 250 T 900 300 T 1200 200" stroke="#4F83CC" strokeWidth="2" fill="none" opacity="0.6" />
                 </svg>
                 {/* Second layer for depth */}
                 <svg className="absolute top-20 w-[200%] h-full animate-graph-slide-slow" preserveAspectRatio="none" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 300 Q 200 200, 400 300 T 800 300 T 1200 250" stroke="#1E3E6F" strokeWidth="1.5" fill="none" opacity="0.4" />
+                    <path d="M0 300 Q 200 200, 400 300 T 800 300 T 1200 250" stroke="#1A2630" strokeWidth="1.5" fill="none" opacity="0.4" />
                 </svg>
             </div>
 
             {/* Glowing Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#2D5A9E]/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
+            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#253746]/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
             <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none"></div>
 
             {/* Main Content Card */}
@@ -106,7 +106,7 @@ export const LoginForm: React.FC = () => {
                     <div className={`transition-all duration-500 ease-in-out ${view === 'login' ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 absolute inset-0 p-8 pointer-events-none'}`}>
                         {/* Login View */}
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-[#2D5A9E] rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-6">
+                            <div className="w-16 h-16 bg-[#253746] rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-6">
                                 <BarChart3 className="text-white w-8 h-8" />
                             </div>
                             <h1 className="text-2xl font-black text-white tracking-tight mb-2">{t('login.welcome')}</h1>
@@ -123,14 +123,14 @@ export const LoginForm: React.FC = () => {
 
                             <div className="space-y-2">
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#2D5A9E] transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#253746] transition-colors">
                                         <AtSign size={16} />
                                     </div>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#2D5A9E]/50 focus:border-[#2D5A9E] transition-all outline-none placeholder:text-gray-600"
+                                        className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
                                         placeholder={t('login.email')}
                                         required
                                     />
@@ -139,14 +139,14 @@ export const LoginForm: React.FC = () => {
 
                             <div className="space-y-2">
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#2D5A9E] transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#253746] transition-colors">
                                         <Lock size={16} />
                                     </div>
                                     <input
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#2D5A9E]/50 focus:border-[#2D5A9E] transition-all outline-none placeholder:text-gray-600"
+                                        className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
                                         placeholder={t('login.password')}
                                         required
                                     />
@@ -154,7 +154,7 @@ export const LoginForm: React.FC = () => {
                             </div>
 
                             <div className="flex justify-end">
-                                <button type="button" onClick={() => setView('forgot')} className="text-xs font-bold text-[#2D5A9E] hover:text-white transition-colors uppercase tracking-wider">
+                                <button type="button" onClick={() => setView('forgot')} className="text-xs font-bold text-[#253746] hover:text-white transition-colors uppercase tracking-wider">
                                     {t('login.forgot')}
                                 </button>
                             </div>
@@ -162,7 +162,7 @@ export const LoginForm: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-[#2D5A9E] hover:bg-[#1E3E6F] text-white py-4 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed group"
+                                className="w-full bg-[#253746] hover:bg-[#1A2630] text-white py-4 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
                                 {loading ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -183,7 +183,7 @@ export const LoginForm: React.FC = () => {
                                         setEmail('admin@moskalti.com');
                                         setPassword('admin123');
                                     }}
-                                    className="text-[#2D5A9E] font-bold hover:text-white transition-colors uppercase tracking-wider"
+                                    className="text-[#253746] font-bold hover:text-white transition-colors uppercase tracking-wider"
                                 >
                                     {t('login.autofill')}
                                 </button>
@@ -233,14 +233,14 @@ export const LoginForm: React.FC = () => {
                                 <form onSubmit={handleForgotSubmit} className="space-y-6">
                                     <div className="space-y-2">
                                         <div className="relative group">
-                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#2D5A9E] transition-colors">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#253746] transition-colors">
                                                 <AtSign size={16} />
                                             </div>
                                             <input
                                                 type="email"
                                                 value={resetEmail}
                                                 onChange={(e) => setResetEmail(e.target.value)}
-                                                className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#2D5A9E]/50 focus:border-[#2D5A9E] transition-all outline-none placeholder:text-gray-600"
+                                                className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
                                                 placeholder={t('login.email')}
                                                 required
                                             />
@@ -250,7 +250,7 @@ export const LoginForm: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={resetStatus === 'sending'}
-                                        className="w-full bg-[#2D5A9E] hover:bg-[#1E3E6F] text-white py-4 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full bg-[#253746] hover:bg-[#1A2630] text-white py-4 rounded-xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {resetStatus === 'sending' ? (
                                             <Loader2 className="w-5 h-5 animate-spin" />

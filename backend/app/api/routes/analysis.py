@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
 from app.api.deps import get_current_active_user
 from app.services.file_processing.excel_parser import ExcelParser
+from app.services.file_processing.pdf_parser import PDFParser
+from app.services.reports.pdf_generator import PDFReportGenerator
+from app.services.reports.excel_generator import ExcelReportGenerator
 from app.services.financial.calculator import FinancialCalculator
 from app.services.financial.credit_scorer import CreditScorer
 from app.services.financial.recommendation_engine import RecommendationEngine
@@ -32,22 +36,28 @@ async def upload_and_analyze(
     """
     
     # Validate file type
-    if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
+    allowed_extensions = ['.xlsx', '.xls', '.pdf']
+    if not any(file.filename.endswith(ext) for ext in allowed_extensions):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only Excel files (.xlsx, .xls) are supported"
+            detail="Only Excel (.xlsx, .xls) and PDF files are supported"
         )
     
-    # Save uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+    # Determine file type and save temporarily
+    file_ext = '.pdf' if file.filename.endswith('.pdf') else '.xlsx'
+    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
         contents = await file.read()
         tmp.write(contents)
         tmp_path = tmp.name
     
     try:
-        # Step 1: Parse Excel file
-        logger.info(f"Parsing Excel file: {file.filename}")
-        parser = ExcelParser(tmp_path)
+        # Step 1: Parse file (Excel or PDF)
+        logger.info(f"Parsing file: {file.filename}")
+        if file_ext == '.pdf':
+            parser = PDFParser(tmp_path)
+        else:
+            parser = ExcelParser(tmp_path)
+        
         extracted_data = parser.extract_all()
         
         company_info = extracted_data['company_info']
@@ -228,3 +238,141 @@ def list_analyses(
         })
     
     return {"analyses": results, "total": len(results)}
+
+@router.get("/{analysis_id}/export/pdf")
+async def export_pdf(
+    analysis_id: int,
+    language: str = "es",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    '''Export analysis as PDF report'''
+    
+    analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
+    
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+    
+    company = db.query(Company).filter(Company.id == analysis.company_id).first()
+    
+    # Prepare analysis data
+    analysis_data = {
+        'company_name': company.name if company else 'Unknown',
+        'total_credit_score': float(analysis.total_credit_score) if analysis.total_credit_score else 0,
+        'credit_category': analysis.credit_category,
+        'credit_history_score': float(analysis.credit_history_score) if analysis.credit_history_score else 0,
+        'solvency_score': float(analysis.solvency_score) if analysis.solvency_score else 0,
+        'profitability_score': float(analysis.profitability_score) if analysis.profitability_score else 0,
+        'current_ratio': float(analysis.current_ratio) if analysis.current_ratio else 0,
+        'debt_to_assets': float(analysis.debt_to_assets) if analysis.debt_to_assets else 0,
+        'roe': float(analysis.roe) if analysis.roe else 0,
+        'roa': float(analysis.roa) if analysis.roa else 0,
+        'profit_margin': float(analysis.profit_margin) if analysis.profit_margin else 0,
+        'interest_coverage': float(analysis.interest_coverage) if analysis.interest_coverage else 0,
+        'swot_analysis': analysis.swot_analysis,
+        'recommendation': analysis.recommendation.value if analysis.recommendation else 'PENDING',
+        'recommendation_justification': analysis.recommendation_justification,
+        'conditions': analysis.conditions
+    }
+    
+    # Generate PDF
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+        generator = PDFReportGenerator(language=language)
+        generator.generate(analysis_data, tmp.name)
+        
+        return FileResponse(
+            tmp.name,
+            media_type='application/pdf',
+            filename=f"credit_analysis_{company.name}_{analysis_id}.pdf"
+        )
+
+@router.get("/{analysis_id}/export/excel")
+async def export_excel(
+    analysis_id: int,
+    language: str = "es",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    '''Export analysis as Excel workbook'''
+    
+    analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
+    
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+    
+    company = db.query(Company).filter(Company.id == analysis.company_id).first()
+    
+    # Get financial statements
+    statements = db.query(FinancialStatement).filter(
+        FinancialStatement.company_id == analysis.company_id
+    ).all()
+    
+    # Prepare data
+    company_data = {
+        'name': company.name if company else 'Unknown',
+        'industry': company.industry if company else 'N/A',
+        'years_in_business': company.years_in_business if company else 0,
+        'analyzed_by': current_user.username
+    }
+    
+    analysis_data = {
+        'total_credit_score': float(analysis.total_credit_score) if analysis.total_credit_score else 0,
+        'credit_category': analysis.credit_category,
+        'credit_history_score': float(analysis.credit_history_score) if analysis.credit_history_score else 0,
+        'solvency_score': float(analysis.solvency_score) if analysis.solvency_score else 0,
+        'profitability_score': float(analysis.profitability_score) if analysis.profitability_score else 0,
+        'current_ratio': float(analysis.current_ratio) if analysis.current_ratio else 0,
+        'debt_to_assets': float(analysis.debt_to_assets) if analysis.debt_to_assets else 0,
+        'leverage_ratio': float(analysis.leverage_ratio) if analysis.leverage_ratio else 0,
+        'roe': float(analysis.roe) if analysis.roe else 0,
+        'roa': float(analysis.roa) if analysis.roa else 0,
+        'profit_margin': float(analysis.profit_margin) if analysis.profit_margin else 0,
+        'ebitda_margin': float(analysis.ebitda_margin) if analysis.ebitda_margin else 0,
+        'interest_coverage': float(analysis.interest_coverage) if analysis.interest_coverage else 0,
+        'asset_turnover': float(analysis.asset_turnover) if analysis.asset_turnover else 0,
+        'swot_analysis': analysis.swot_analysis,
+        'recommendation': analysis.recommendation.value if analysis.recommendation else 'PENDING',
+        'recommendation_justification': analysis.recommendation_justification,
+        'conditions': analysis.conditions
+    }
+    
+    financial_statements_data = [{
+        'year': stmt.year,
+        'current_assets': float(stmt.current_assets) if stmt.current_assets else 0,
+        'cash': float(stmt.cash) if stmt.cash else 0,
+        'accounts_receivable': float(stmt.accounts_receivable) if stmt.accounts_receivable else 0,
+        'inventory': float(stmt.inventory) if stmt.inventory else 0,
+        'fixed_assets': float(stmt.fixed_assets) if stmt.fixed_assets else 0,
+        'total_assets': float(stmt.total_assets) if stmt.total_assets else 0,
+        'current_liabilities': float(stmt.current_liabilities) if stmt.current_liabilities else 0,
+        'accounts_payable': float(stmt.accounts_payable) if stmt.accounts_payable else 0,
+        'long_term_debt': float(stmt.long_term_debt) if stmt.long_term_debt else 0,
+        'total_liabilities': float(stmt.total_liabilities) if stmt.total_liabilities else 0,
+        'shareholder_equity': float(stmt.shareholder_equity) if stmt.shareholder_equity else 0,
+        'revenue': float(stmt.revenue) if stmt.revenue else 0,
+        'cost_of_goods_sold': float(stmt.cost_of_goods_sold) if stmt.cost_of_goods_sold else 0,
+        'gross_profit': float(stmt.gross_profit) if stmt.gross_profit else 0,
+        'operating_expenses': float(stmt.operating_expenses) if stmt.operating_expenses else 0,
+        'operating_income': float(stmt.operating_income) if stmt.operating_income else 0,
+        'interest_expense': float(stmt.interest_expense) if stmt.interest_expense else 0,
+        'tax_expense': float(stmt.tax_expense) if stmt.tax_expense else 0,
+        'net_profit': float(stmt.net_profit) if stmt.net_profit else 0,
+        'ebitda': float(stmt.ebitda) if stmt.ebitda else 0
+    } for stmt in statements]
+    
+    # Generate Excel
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+        generator = ExcelReportGenerator(language=language)
+        generator.generate(analysis_data, company_data, financial_statements_data, tmp.name)
+        
+        return FileResponse(
+            tmp.name,
+            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            filename=f"credit_analysis_{company.name}_{analysis_id}.xlsx"
+        )

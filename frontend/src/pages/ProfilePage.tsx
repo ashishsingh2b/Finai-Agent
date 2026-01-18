@@ -70,12 +70,12 @@ export const ProfilePage: React.FC = () => {
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
                                 className={`w-full flex items-center gap-3 px-6 py-4 text-sm font-bold transition-all relative ${activeTab === item.id
-                                        ? 'bg-[#2D5A9E]/5 text-[#2D5A9E]'
+                                        ? 'bg-[#253746]/5 text-[#253746]'
                                         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                                     }`}
                             >
                                 {activeTab === item.id && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#2D5A9E]"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#253746]"></div>
                                 )}
                                 <item.icon size={18} />
                                 {item.label}
@@ -92,17 +92,17 @@ export const ProfilePage: React.FC = () => {
                                     <div className="relative group">
                                         <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                                             {user?.full_name ? (
-                                                <span className="text-3xl font-black text-[#2D5A9E]">{user.full_name.charAt(0)}</span>
+                                                <span className="text-3xl font-black text-[#253746]">{user.full_name.charAt(0)}</span>
                                             ) : (
                                                 <User className="w-10 h-10 text-gray-300" />
                                             )}
                                         </div>
-                                        <button className="absolute bottom-0 right-0 p-2 bg-[#2D5A9E] text-white rounded-full shadow-md hover:bg-blue-700 transition-colors">
+                                        <button className="absolute bottom-0 right-0 p-2 bg-[#253746] text-white rounded-full shadow-md hover:bg-blue-700 transition-colors">
                                             <Camera size={14} />
                                         </button>
                                     </div>
                                     <div className="flex gap-4">
-                                        <button className="px-5 py-2.5 bg-[#2D5A9E] text-white text-xs font-bold rounded-lg shadow-sm hover:bg-blue-700 transition-all">
+                                        <button className="px-5 py-2.5 bg-[#253746] text-white text-xs font-bold rounded-lg shadow-sm hover:bg-blue-700 transition-all">
                                             Upload New
                                         </button>
                                     </div>
@@ -115,7 +115,7 @@ export const ProfilePage: React.FC = () => {
                                         <input
                                             type="text"
                                             defaultValue={user?.full_name?.split(' ')[0]}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                             placeholder="First name"
                                         />
                                     </div>
@@ -124,7 +124,7 @@ export const ProfilePage: React.FC = () => {
                                         <input
                                             type="text"
                                             defaultValue={user?.full_name?.split(' ')[1] || ''}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                             placeholder="Last name"
                                         />
                                     </div>
@@ -134,7 +134,7 @@ export const ProfilePage: React.FC = () => {
                                         <input
                                             type="email"
                                             defaultValue={user?.email}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                             placeholder="examples@gmail.com"
                                         />
                                     </div>
@@ -148,7 +148,7 @@ export const ProfilePage: React.FC = () => {
                                             </div>
                                             <input
                                                 type="text"
-                                                className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                                className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                                 placeholder="0806 123 7890"
                                             />
                                         </div>
@@ -158,11 +158,11 @@ export const ProfilePage: React.FC = () => {
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Gender</label>
                                         <div className="grid grid-cols-2 gap-4">
                                             <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                <input type="radio" name="gender" className="w-4 h-4 text-[#2D5A9E] focus:ring-[#2D5A9E]" />
+                                                <input type="radio" name="gender" className="w-4 h-4 text-[#253746] focus:ring-[#253746]" />
                                                 <span className="text-sm font-bold text-gray-700">Male</span>
                                             </label>
                                             <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                <input type="radio" name="gender" className="w-4 h-4 text-[#2D5A9E] focus:ring-[#2D5A9E]" />
+                                                <input type="radio" name="gender" className="w-4 h-4 text-[#253746] focus:ring-[#253746]" />
                                                 <span className="text-sm font-bold text-gray-700">Female</span>
                                             </label>
                                         </div>
@@ -171,7 +171,7 @@ export const ProfilePage: React.FC = () => {
 
                                 {/* Action Buttons */}
                                 <div className="pt-4">
-                                    <button className="bg-[#2D5A9E] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg shadow-blue-900/20 hover:bg-[#1E3E6F] transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                                    <button className="bg-[#253746] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg shadow-blue-900/20 hover:bg-[#1A2630] transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                                         Save Changes
                                     </button>
                                 </div>
@@ -191,7 +191,7 @@ export const ProfilePage: React.FC = () => {
                                             type="password"
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                             placeholder="Enter new password"
                                         />
                                     </div>
@@ -202,7 +202,7 @@ export const ProfilePage: React.FC = () => {
                                             type="password"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2D5A9E]/20 focus:border-[#2D5A9E] transition-all"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#253746]/20 focus:border-[#253746] transition-all"
                                             placeholder="Confirm new password"
                                         />
                                     </div>
@@ -224,7 +224,7 @@ export const ProfilePage: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={passwordSaving}
-                                        className={`bg-[#2D5A9E] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98] ${passwordSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1E3E6F] hover:scale-[1.02]'}`}
+                                        className={`bg-[#253746] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98] ${passwordSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1A2630] hover:scale-[1.02]'}`}
                                     >
                                         {passwordSaving ? 'Saving...' : 'Update Password'}
                                     </button>

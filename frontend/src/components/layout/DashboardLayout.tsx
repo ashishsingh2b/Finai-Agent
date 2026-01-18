@@ -14,7 +14,8 @@ import {
     Users,
     ChevronLeft,
     Search,
-    Bell
+    Bell,
+    BookOpen
 } from 'lucide-react';
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -28,6 +29,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     const navItems = [
         { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard' },
         { icon: Upload, label: t('nav.upload'), path: '/dashboard/upload' },
+        { icon: BookOpen, label: t('nav.documentation'), path: '/dashboard/documentation' },
         { icon: FileText, label: t('nav.reports'), path: '/dashboard/reports' },
         { icon: User, label: t('nav.profile'), path: '/dashboard/profile' },
         ...(user?.role === 'admin' ? [{ icon: Users, label: t('nav.users'), path: '/dashboard/users' }] : []),
@@ -39,17 +41,17 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex font-sans selection:bg-[#2D5A9E]/10">
+        <div className="min-h-screen bg-[#F8FAFC] flex font-sans selection:bg-[#253746]/10">
             {/* Sidebar (Desktop) */}
             <aside
-                className={`hidden md:flex flex-col bg-[#2D5A9E] text-white transition-all duration-300 ease-in-out border-r border-white/10 ${isCollapsed ? 'w-20' : 'w-64'
+                className={`hidden md:flex flex-col bg-[#253746] text-white transition-all duration-300 ease-in-out border-r border-white/10 ${isCollapsed ? 'w-20' : 'w-64'
                     } fixed inset-y-0 left-0 z-50 shadow-2xl shadow-blue-900/50`}
             >
                 {/* Logo Section */}
-                <div className="h-24 flex items-center px-6 border-b border-white/10 bg-[#2D5A9E]">
+                <div className="h-24 flex items-center px-6 border-b border-white/10 bg-[#253746]">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/10">
-                            <BarChart3 className="text-[#2D5A9E] w-5 h-5" />
+                            <BarChart3 className="text-[#253746] w-5 h-5" />
                         </div>
                         {!isCollapsed && (
                             <div className="flex flex-col animate-in fade-in duration-300">
@@ -67,12 +69,12 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                             key={item.path}
                             onClick={() => navigate(item.path)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${location.pathname === item.path
-                                ? 'bg-white text-[#2D5A9E] shadow-lg shadow-black/10 font-black'
+                                ? 'bg-white text-[#253746] shadow-lg shadow-black/10 font-black'
                                 : 'text-blue-100 hover:bg-white/10 hover:text-white'
                                 }`}
                             title={isCollapsed ? item.label : ''}
                         >
-                            <item.icon size={20} className={`${location.pathname === item.path ? 'text-[#2D5A9E]' : 'text-blue-200 group-hover:text-white'}`} />
+                            <item.icon size={20} className={`${location.pathname === item.path ? 'text-[#253746]' : 'text-blue-200 group-hover:text-white'}`} />
                             {!isCollapsed && <span className={`text-sm tracking-wide ${location.pathname === item.path ? 'font-black' : 'font-bold'}`}>{item.label}</span>}
                         </button>
                     ))}
@@ -99,10 +101,10 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </aside>
 
             {/* Mobile Header */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#2D5A9E] z-[60] px-4 flex items-center justify-between border-b border-white/10 shadow-lg shadow-blue-900/20">
+            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#253746] z-[60] px-4 flex items-center justify-between border-b border-white/10 shadow-lg shadow-blue-900/20">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                        <BarChart3 className="text-[#2D5A9E] w-5 h-5" />
+                        <BarChart3 className="text-[#253746] w-5 h-5" />
                     </div>
                     <span className="text-white font-black text-lg tracking-tighter">MOSKALTI</span>
                 </div>
@@ -121,7 +123,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             {isMobileMenuOpen && (
                 <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]" onClick={() => setIsMobileMenuOpen(false)}>
                     <div
-                        className="absolute top-0 right-0 bottom-0 w-3/4 bg-[#2D5A9E] p-6 slide-in-from-right animate-in duration-300"
+                        className="absolute top-0 right-0 bottom-0 w-3/4 bg-[#253746] p-6 slide-in-from-right animate-in duration-300"
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-10">
@@ -139,11 +141,11 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                                         setIsMobileMenuOpen(false);
                                     }}
                                     className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-white font-bold transition-all ${location.pathname === item.path
-                                        ? 'bg-white text-[#2D5A9E] shadow-lg shadow-black/10'
+                                        ? 'bg-white text-[#253746] shadow-lg shadow-black/10'
                                         : 'bg-white/10 hover:bg-white/20'
                                         }`}
                                 >
-                                    <item.icon className={`w-6 h-6 ${location.pathname === item.path ? 'text-[#2D5A9E]' : 'text-white'}`} />
+                                    <item.icon className={`w-6 h-6 ${location.pathname === item.path ? 'text-[#253746]' : 'text-white'}`} />
                                     <span>{item.label}</span>
                                 </button>
                             ))}
@@ -167,7 +169,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                 {/* Topbar (Desktop) */}
                 <header className="hidden md:flex h-14 items-center justify-between px-10 bg-white/50 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
                     <div className="flex items-center gap-4 bg-gray-100/50 px-4 py-2.5 rounded-2xl border border-gray-200/50 w-96 group focus-within:bg-white focus-within:shadow-xl focus-within:shadow-blue-900/5 transition-all">
-                        <Search className="w-5 h-5 text-gray-400 group-focus-within:text-[#2D5A9E]" />
+                        <Search className="w-5 h-5 text-gray-400 group-focus-within:text-[#253746]" />
                         <input
                             type="text"
                             placeholder="Universal search..."
@@ -176,17 +178,17 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                     </div>
                     <div className="flex items-center gap-6">
                         <LanguageSelector className="mr-2" />
-                        <button className="relative p-2 text-gray-400 hover:text-[#2D5A9E] hover:bg-blue-50 rounded-xl transition-all">
+                        <button className="relative p-2 text-gray-400 hover:text-[#253746] hover:bg-blue-50 rounded-xl transition-all">
                             <Bell className="w-6 h-6" />
                             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
                         </button>
                         <div className="w-px h-8 bg-gray-200"></div>
                         <div className="flex items-center gap-3 group cursor-pointer">
                             <div className="text-right flex flex-col items-end">
-                                <span className="text-xs font-black text-gray-900 leading-none group-hover:text-[#2D5A9E] transition-colors">{user?.full_name}</span>
+                                <span className="text-xs font-black text-gray-900 leading-none group-hover:text-[#253746] transition-colors">{user?.full_name}</span>
                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{user?.role}</span>
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-gray-200 overflow-hidden group-hover:border-[#2D5A9E] transition-all">
+                            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-gray-200 overflow-hidden group-hover:border-[#253746] transition-all">
                                 <img src={`https://ui-avatars.com/api/?name=${user?.full_name}&background=2D5A9E&color=fff`} alt="Avatar" className="w-full h-full object-cover" />
                             </div>
                         </div>
