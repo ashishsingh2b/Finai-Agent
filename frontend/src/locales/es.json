@@ -1,0 +1,144 @@
+{
+    "landing": {
+        "title": "MOSKALTI",
+        "subtitle": "INTELIGENCIA FINANCIERA",
+        "enter": "Ingresar al Sistema",
+        "desc": "Motor neuronal de próxima generación para estratificación de riesgo crediticio en tiempo real y modelado financiero predictivo.",
+        "security": "Seguridad Institucional",
+        "uptime": "99.9% Disponibilidad",
+        "analytics": "Analítica en Tiempo Real"
+    },
+    "login": {
+        "welcome": "Bienvenido de Nuevo",
+        "subtitle": "Ingrese sus credenciales para acceder a la terminal.",
+        "email": "Correo Institucional",
+        "password": "Contraseña",
+        "forgot": "¿Olvidó su contraseña?",
+        "access": "Acceder al Sistema",
+        "demo": "Cuenta Demo",
+        "autofill": "Autocompletar Admin",
+        "secured": "Asegurado por Encriptación de 256-bit",
+        "back": "Volver al Inicio",
+        "reset": "Restablecer Contraseña",
+        "resetDesc": "Ingrese su correo para recibir instrucciones de recuperación.",
+        "sendLink": "Enviar Enlace de Recuperación",
+        "checkEmail": "Revise su correo",
+        "emailSent": "Hemos enviado instrucciones de restablecimiento a",
+        "backLogin": "Volver a Iniciar Sesión",
+        "invalidCredentials": "Credenciales inválidas o usuario inactivo."
+    },
+    "nav": {
+        "dashboard": "Panel Principal",
+        "analysis": "Crear Análisis",
+        "reports": "Reportes",
+        "profile": "Perfil",
+        "users": "Usuarios",
+        "upload": "Cargar Datos",
+        "logout": "Cerrar Sesión"
+    },
+    "common": {
+        "accessDenied": "Acceso Denegado"
+    },
+    "dash": {
+        "financials": "Indicadores Financieros",
+        "swot": "Análisis FODA",
+        "rec": "Recomendación Estratégica",
+        "recent": "Reportes de Análisis Recientes",
+        "viewReport": "Ver Reporte Completo",
+        "approve": "Aprobar Crédito",
+        "reject": "Rechazar",
+        "review": "Requiere Revisión",
+        "trend": "Tendencia de Liquidez (12M)",
+        "greeting": "Hola",
+        "welcome": "Aquí está su resumen de riesgo crediticio para hoy.",
+        "terminal": "Terminal de Inteligencia v2.1",
+        "create": "Crear Nuevo Análisis",
+        "total": "Total Análisis",
+        "avgRisk": "Riesgo Promedio",
+        "highRisk": "Alto Riesgo",
+        "uptime": "Disponibilidad",
+        "stable": "Estable",
+        "fetching": "Obteniendo datos neuronales...",
+        "noHistory": "No se encontró historial de análisis.",
+        "start": "Iniciar Análisis",
+        "entity": "Entidad",
+        "timeline": "Línea de Tiempo",
+        "score": "Puntaje",
+        "action": "Acción"
+    },
+    "fin": {
+        "liquidity": "Liquidez",
+        "currentRatio": "Razón Corriente",
+        "adequate": "Adecuado",
+        "low": "Bajo",
+        "roe": "ROE",
+        "returnEquity": "Retorno sobre Patrimonio",
+        "profitable": "Rentable",
+        "debtAssets": "Deuda / Activos",
+        "leverage": "Apalancamiento",
+        "moderate": "Moderado",
+        "high": "Alto",
+        "interestCov": "Cob. Intereses",
+        "solvency": "Solvencia",
+        "acceptable": "Aceptable"
+    },
+    "rec": {
+        "title": "Recomendación",
+        "conclusion": "Conclusión",
+        "justification": "Justificación",
+        "conditions": "Condiciones",
+        "approveCond": "Aprobar con Condiciones"
+    },
+    "users": {
+        "title": "Gestión de Usuarios",
+        "subtitle": "Administrar acceso y roles del sistema.",
+        "addUser": "Agregar Usuario",
+        "user": "Usuario",
+        "role": "Rol",
+        "status": "Estado",
+        "joined": "Unido",
+        "actions": "Acciones",
+        "update": "Actualizar Detalles",
+        "deactivate": "Desactivar Usuario",
+        "activate": "Activar Usuario",
+        "delete": "Eliminar Usuario",
+        "active": "Activo",
+        "inactive": "Inactivo"
+    },
+    "swot": {
+        "strengths": "Fortalezas",
+        "weaknesses": "Debilidades",
+        "opportunities": "Oportunidades",
+        "threats": "Amenazas"
+    },
+    "reports": {
+        "title": "Archivo Neuronal",
+        "mainTitle": "Reportes de Análisis",
+        "subtitle": "Administre y revise el historial de estratificación crediticia institucional.",
+        "export": "EXPORTAR DATASET",
+        "searchPlaceholder": "Buscar por nombre de empresa o ID...",
+        "filter": {
+            "allGrades": "Todos los Grados",
+            "date": "Filtrar por Fecha",
+            "grade": "Grado {grade}"
+        },
+        "col": {
+            "entity": "Entidad",
+            "health": "Índice de Salud",
+            "grade": "Ubicación de Grado",
+            "period": "Periodo de Análisis",
+            "actions": "Acciones"
+        },
+        "loading": "Consultando datasets neuronales...",
+        "noResults": {
+            "title": "No hay resultados que coincidan con sus filtros.",
+            "clear": "Limpiar Filtros"
+        },
+        "signalStrength": "Fuerza de Señal",
+        "showing": "Mostrando {{count}} de {{total}} entradas",
+        "pagination": {
+            "prev": "ANT",
+            "next": "SIG"
+        }
+    }
+}

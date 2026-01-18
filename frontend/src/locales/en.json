@@ -1,0 +1,144 @@
+{
+    "landing": {
+        "title": "MOSKALTI",
+        "subtitle": "FINANCIAL INTELLIGENCE",
+        "enter": "Enter System",
+        "desc": "Next-generation neural engine for real-time credit risk stratification and predictive financial modeling.",
+        "security": "Institutional Security",
+        "uptime": "99.9% Uptime",
+        "analytics": "Real-time Analytics"
+    },
+    "login": {
+        "welcome": "Welcome Back",
+        "subtitle": "Enter your credentials to access the terminal.",
+        "email": "Institutional Email",
+        "password": "Password",
+        "forgot": "Forgot Password?",
+        "access": "Access System",
+        "demo": "Demo Account",
+        "autofill": "Auto-Fill Admin",
+        "secured": "Secured by 256-bit Encryption",
+        "back": "Back to Home",
+        "reset": "Reset Password",
+        "resetDesc": "Enter your email to receive recovery instructions.",
+        "sendLink": "Send Reset Link",
+        "checkEmail": "Check your email",
+        "emailSent": "We've sent password reset instructions to",
+        "backLogin": "Back to Login",
+        "invalidCredentials": "Invalid credentials or user inactive."
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "analysis": "Create Analysis",
+        "reports": "Reports",
+        "profile": "Profile",
+        "users": "Users",
+        "upload": "Upload Data",
+        "logout": "Logout"
+    },
+    "common": {
+        "accessDenied": "Access Denied"
+    },
+    "dash": {
+        "financials": "Financial Indicators",
+        "swot": "SWOT Analysis",
+        "rec": "Strategic Recommendation",
+        "recent": "Recent Analysis Reports",
+        "viewReport": "View Full Report",
+        "approve": "Approve Credit",
+        "reject": "Reject",
+        "review": "Requires Review",
+        "trend": "Liquidity Trend (12M)",
+        "greeting": "Hello",
+        "welcome": "Here's your credit risk overview for today.",
+        "terminal": "Intelligence Terminal v2.1",
+        "create": "Create New Analysis",
+        "total": "Total Analyses",
+        "avgRisk": "Avg Risk Score",
+        "highRisk": "High Risk",
+        "uptime": "Uptime",
+        "stable": "Stable",
+        "fetching": "Fetching neural data...",
+        "noHistory": "No analysis history found.",
+        "start": "Start Analysis",
+        "entity": "Entity Name",
+        "timeline": "Timeline",
+        "score": "Score",
+        "action": "Action"
+    },
+    "fin": {
+        "liquidity": "Liquidity",
+        "currentRatio": "Current Ratio",
+        "adequate": "Adequate",
+        "low": "Low",
+        "roe": "ROE",
+        "returnEquity": "Return on Equity",
+        "profitable": "Profitable",
+        "debtAssets": "Debt / Assets",
+        "leverage": "Leverage",
+        "moderate": "Moderate",
+        "high": "High",
+        "interestCov": "Interest Coverage",
+        "solvency": "Solvency",
+        "acceptable": "Acceptable"
+    },
+    "rec": {
+        "title": "Recommendation",
+        "conclusion": "Conclusion",
+        "justification": "Justification",
+        "conditions": "Conditions",
+        "approveCond": "Approve with Conditions"
+    },
+    "users": {
+        "title": "User Management",
+        "subtitle": "Manage system access and roles.",
+        "addUser": "Add New User",
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "actions": "Actions",
+        "update": "Update Details",
+        "deactivate": "Deactivate User",
+        "activate": "Activate User",
+        "delete": "Delete User",
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "swot": {
+        "strengths": "Strengths",
+        "weaknesses": "Weaknesses",
+        "opportunities": "Opportunities",
+        "threats": "Threats"
+    },
+    "reports": {
+        "title": "Neural Archive",
+        "mainTitle": "Analysis Reports",
+        "subtitle": "Manage and review institutional credit stratification history.",
+        "export": "EXPORT DATASET",
+        "searchPlaceholder": "Search by company name or profile ID...",
+        "filter": {
+            "allGrades": "All Risk Grades",
+            "date": "Filter by Date",
+            "grade": "Grade {grade}"
+        },
+        "col": {
+            "entity": "Company Entity",
+            "health": "Health Index",
+            "grade": "Grade Placement",
+            "period": "Analysis Period",
+            "actions": "Actions"
+        },
+        "loading": "Querying neural datasets...",
+        "noResults": {
+            "title": "No results matching your current filters.",
+            "clear": "Clear All Filters"
+        },
+        "signalStrength": "Signal Strength",
+        "showing": "Showing {{count}} of {{total}} entries",
+        "pagination": {
+            "prev": "PREV",
+            "next": "NEXT"
+        }
+    }
+}

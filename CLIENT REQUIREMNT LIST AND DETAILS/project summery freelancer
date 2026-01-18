@@ -1,0 +1,27 @@
+Necesito desarrollar un agente de inteligencia artificial capaz de recibir directamente el PDF con los estados financieros de los últimos tres años y, sin intervención manual, generar de forma automática:
+
+• Un reporte detallado en PDF
+• Un resumen con gráficos claros y comparativos
+• Un informe interactivo en línea que pueda consultarse desde navegador
+• Un archivo Excel editable con todas las cifras, ratios y proyecciones
+
+El análisis debe abarcar riesgo crediticio, rentabilidad, razones financieras clave, una matriz FODA y, sobre todo, una recomendación final sobre si el crédito debe otorgarse o no.
+
+Flujo de trabajo esperado
+1. Subo el PDF en español o inglés.
+2. El agente extrae y normaliza la información (OCR cuando sea necesario).
+3. Calcula ratios, genera proyecciones y aplica modelos de scoring crediticio.
+4. Entrega los cuatro productos listados arriba, manteniendo el mismo criterio de presentación en cada caso.
+
+Aceptación
+– Exactitud de los datos extraídos ≥ 98 % respecto al PDF.
+– Coherencia entre cifras mostradas en PDF, gráficos, web e Excel.
+– Recomendación sustentada con argumentos cuantitativos y cualitativos.
+
+Si te apoyas en Python, LangChain, GPT-4, spaCy, pandas, Power BI o tecnologías equivalentes, mejor aún; lo importante es que el proceso sea reproducible y deje margen para ajustes de variables de riesgo. Estoy disponible para aclarar cualquier especificación adicional y probar iteraciones rápidas.
+
+
+
+
+I’m sharing with you the Excel file we currently use to perform our financial analyses. I’m sending it in Spanish for now, as I haven’t finished translating it into English yet, but I hope it will still be useful for your review and understanding of our process.
+

@@ -1,0 +1,674 @@
+====================================================================================================
+MOSKALTI CAPITAL - EXCEL TEMPLATE DEEP ANALYSIS
+====================================================================================================
+
+File: D:\FREELANCERS\PAOLAG\CLIENT REQUIREMNT LIST AND DETAILS\Ejemplo para hacer un analisis.xlsx
+Total Sheets: 7
+
+SHEET NAMES:
+----------------------------------------------------------------------------------------------------
+  1. Du Pont
+  2. Analiticas
+  3. BG
+  4. ER
+  5. RF
+  6. Modelo de Crédito
+  7. Matriz de Credito y Tasas
+
+====================================================================================================
+
+
+====================================================================================================
+SHEET 1: Du Pont
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A1:U58
+  - Max Row: 58
+  - Max Column: 21 (U)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 1: CUADRO DE MANDO DE DU PONT |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 3:  |  |  | Ventas |  |  |  |  |  |  |  |  |  | 
+Row 4:  |  |  | [FORMULA: =+ER!D10...] |  |  |  |  |  |  |  |  |  | 
+Row 8:  |  |  | Costo de Ventas |  |  |  |  |  |  |  |  |  | 
+Row 9:  |  |  | [FORMULA: =+ER!D11...] |  |  |  |  |  |  |  |  |  | 
+Row 10:  |  |  |  |  |  |  | Utilidad d. Impuestos |  |  |  |  |  | 
+Row 11:  |  |  |  |  |  |  | [FORMULA: =D4-D9-D14-D19-D24...] |  |  |  |  |  | 
+Row 12: Estado de Resultados |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 13: o |  |  | Gastos Operativos |  |  |  |  |  |  |  | Margen Neto |  | 
+Row 14: Estado de Ganancias |  |  | [FORMULA: =+ER!#REF!*-1...] |  |  |  |  |  |  |  | [FORMULA: =IFERROR(H11/H17,0)...] |  | 
+Row 15: y Pérdidas |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 16:  |  |  |  |  |  |  | Ventas |  |  |  |  |  | 
+Row 17:  |  |  |  |  |  |  | [FORMULA: =D4...] |  |  |  |  |  | 
+Row 18:  |  |  | Gastos por Intereses |  |  |  |  |  |  |  |  |  | 
+Row 19:  |  |  | [FORMULA: =+ER!D27*-1...] |  |  |  |  |  |  |  |  |  | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 21
+
+Sample Formulas (first 30):
+  1. Cell D4 (R4C4): =+ER!D10
+  2. Cell D9 (R9C4): =+ER!D11
+  3. Cell H11 (R11C8): =D4-D9-D14-D19-D24
+  4. Cell D14 (R14C4): =+ER!#REF!*-1
+  5. Cell L14 (R14C12): =IFERROR(H11/H17,0)
+  6. Cell H17 (R17C8): =D4
+  7. Cell D19 (R19C4): =+ER!D27*-1
+  8. Cell P24 (R24C16): =L14*L34
+  9. Cell H31 (R31C8): =D4
+  10. Cell L34 (R34C12): =IFERROR(H31/H37,0)
+  11. Cell D35 (R35C4): =+BG!D21
+  12. Cell H37 (R37C8): =D35+D40
+  13. Cell T39 (R39C20): =P24*P54
+  14. Cell D40 (R40C4): =+BG!D23
+  15. Cell D45 (R45C4): =+BG!D42
+  16. Cell H48 (R48C8): =D45+D50
+  17. Cell D50 (R50C4): =+BG!D51
+  18. Cell L51 (R51C12): =H48+H54
+  19. Cell H54 (R54C8): =+BG!D62
+  20. Cell P54 (R54C16): =IFERROR(L51/L57,0)
+  21. Cell L57 (R57C12): =H54
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 0
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'ACTIVO' found in 4 cells:
+  - L33: Rotación de Activos
+  - D34: Activo Corriente
+  - H36: Activos Totales
+  - D39: Activo Fijo Neto
+
+'PASIVO' found in 3 cells:
+  - D44: Pasivo a Corto Plazo
+  - H47: Pasivos Totales
+  - D49: Pasivo a Largo Plazo
+
+'CAPITAL' found in 3 cells:
+  - T38: Rendimto. Capital
+  - H53: Capital Contable
+  - L56: Capital Contable
+
+'VENTAS' found in 4 cells:
+  - D3: Ventas
+  - D8: Costo de Ventas
+  - H16: Ventas
+  - H30: Ventas
+
+'UTILIDAD' found in 1 cells:
+  - H10: Utilidad d. Impuestos
+
+'TOTAL' found in 2 cells:
+  - H36: Activos Totales
+  - H47: Pasivos Totales
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 2: Analiticas
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A2:G132
+  - Max Row: 132
+  - Max Column: 7 (G)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 2:  |  | 2021 | 2022 | 2023 |  | Observaciones
+Row 4: Clientes |  |  |  |  |  | 
+Row 7: Leonardo Services SA de CV |  |  |  |  |  | 
+Row 8: NUCITEC SA DE CV |  |  |  |  |  | 
+Row 9: Luis Fernando Maya Suarez |  |  |  |  |  | 
+Row 10: Servicios Terrestres Empresari |  |  |  |  |  | 
+Row 11: POS CLOUDS DE MEXICO SA DE CV |  |  |  |  |  | 
+Row 12: ELICAMEX |  |  |  |  |  | 
+Row 13: AUTOCOM NOVA SAPI SA DE CV |  |  |  |  |  | 
+Row 14: MEXARREND SAPI DE CV |  |  |  |  |  | 
+Row 15: ASCENTY MEXICO S DE RL DE CV |  |  |  |  |  | 
+Row 16: GERARDO CHAPARRO ARIAS |  |  |  |  |  | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 18
+
+Sample Formulas (first 30):
+  1. Cell C21 (R21C3): =SUM(C7:C20)
+  2. Cell D21 (R21C4): =SUM(D7:D20)
+  3. Cell E21 (R21C5): =SUM(E7:E20)
+  4. Cell C52 (R52C3): =SUM(C25:C50)
+  5. Cell D52 (R52C4): =SUM(D25:D50)
+  6. Cell E52 (R52C5): =SUM(E25:E50)
+  7. Cell C59 (R59C3): =SUM(C56:C58)
+  8. Cell D59 (R59C4): =SUM(D56:D58)
+  9. Cell E59 (R59C5): =SUM(E56:E58)
+  10. Cell C78 (R78C3): =SUM(C66:C76)
+  11. Cell D78 (R78C4): =SUM(D66:D76)
+  12. Cell E78 (R78C5): =SUM(E66:E76)
+  13. Cell C91 (R91C3): =SUM(C80:C89)
+  14. Cell D91 (R91C4): =SUM(D80:D89)
+  15. Cell E91 (R91C5): =SUM(E80:E89)
+  16. Cell C93 (R93C3): =+C78+C91
+  17. Cell D93 (R93C4): =+D78+D91
+  18. Cell E93 (R93C5): =+E78+E91
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 15
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'TOTAL' found in 4 cells:
+  - A21: Total
+  - A52: Total
+  - A59: Total
+  - A93: Total Lineas de Financiamiento
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 3: BG
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A5:K157
+  - Max Row: 157
+  - Max Column: 11 (K)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 5: Prospecto: TA SOLUCIONES  |  |  |  |  |  |  |  |  |  | 
+Row 6: Estado de Situacion Financiera |  |  |  |  |  |  |  |  |  | 
+Row 8: CONCEPTO | 2021 | 2022 | 2023 | 2024 | 2025 | 2026-01-01 00:00:00 |  | % 23-24 | %24-25 | %25-26
+Row 9: Activo |  |  |  |  |  |  |  |  |  | 
+Row 10: Activo circulante: |  |  |  |  |  |  |  |  |  | 
+Row 11: Efectivo, equivalentes de efec |  |  |  |  |  |  |  | [FORMULA: =+E11/D11-1...] | [FORMULA: =+F11/E11-1...] | [FORMULA: =+G11/F11-1...]
+Row 12: Clientes |  |  |  |  |  |  |  | [FORMULA: =+E12/D12-1...] | [FORMULA: =+F12/E12-1...] | [FORMULA: =+G12/F12-1...]
+Row 13: Inventario |  |  |  |  |  |  |  | [FORMULA: =+E13/D13-1...] | [FORMULA: =+F13/E13-1...] | [FORMULA: =+G13/F13-1...]
+Row 14: Proyectos en proceso |  |  |  |  |  |  |  | [FORMULA: =+E14/D14-1...] | [FORMULA: =+F14/E14-1...] | [FORMULA: =+G14/F14-1...]
+Row 15: Partes relacionadas |  |  |  |  |  |  |  | [FORMULA: =+E15/D15-1...] | [FORMULA: =+F15/E15-1...] | [FORMULA: =+G15/F15-1...]
+Row 16: Impuestos al valor agregado |  |  |  |  |  |  |  | [FORMULA: =+E16/D16-1...] | [FORMULA: =+F16/E16-1...] | [FORMULA: =+G16/F16-1...]
+Row 17: Pagos anticipados |  |  |  |  |  |  |  | [FORMULA: =+E17/D17-1...] | [FORMULA: =+F17/E17-1...] | [FORMULA: =+G17/F17-1...]
+Row 18: Impuestos por acreditar |  |  |  |  |  |  |  | [FORMULA: =+E18/D18-1...] | [FORMULA: =+F18/E18-1...] | [FORMULA: =+G18/F18-1...]
+Row 19: Otras cuentas por cobrar |  |  |  |  |  |  |  | [FORMULA: =+E19/D19-1...] | [FORMULA: =+F19/E19-1...] | [FORMULA: =+G19/F19-1...]
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 179
+
+Sample Formulas (first 30):
+  1. Cell I11 (R11C9): =+E11/D11-1
+  2. Cell J11 (R11C10): =+F11/E11-1
+  3. Cell K11 (R11C11): =+G11/F11-1
+  4. Cell I12 (R12C9): =+E12/D12-1
+  5. Cell J12 (R12C10): =+F12/E12-1
+  6. Cell K12 (R12C11): =+G12/F12-1
+  7. Cell I13 (R13C9): =+E13/D13-1
+  8. Cell J13 (R13C10): =+F13/E13-1
+  9. Cell K13 (R13C11): =+G13/F13-1
+  10. Cell I14 (R14C9): =+E14/D14-1
+  11. Cell J14 (R14C10): =+F14/E14-1
+  12. Cell K14 (R14C11): =+G14/F14-1
+  13. Cell I15 (R15C9): =+E15/D15-1
+  14. Cell J15 (R15C10): =+F15/E15-1
+  15. Cell K15 (R15C11): =+G15/F15-1
+  16. Cell I16 (R16C9): =+E16/D16-1
+  17. Cell J16 (R16C10): =+F16/E16-1
+  18. Cell K16 (R16C11): =+G16/F16-1
+  19. Cell I17 (R17C9): =+E17/D17-1
+  20. Cell J17 (R17C10): =+F17/E17-1
+  21. Cell K17 (R17C11): =+G17/F17-1
+  22. Cell I18 (R18C9): =+E18/D18-1
+  23. Cell J18 (R18C10): =+F18/E18-1
+  24. Cell K18 (R18C11): =+G18/F18-1
+  25. Cell I19 (R19C9): =+E19/D19-1
+  26. Cell J19 (R19C10): =+F19/E19-1
+  27. Cell K19 (R19C11): =+G19/F19-1
+  28. Cell B21 (R21C2): =SUM(B11:B20)
+  29. Cell C21 (R21C3): =SUM(C11:C20)
+  30. Cell D21 (R21C4): =SUM(D11:D20)
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 39
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'ACTIVO' found in 6 cells:
+  - A9: Activo
+  - A10: Activo circulante:
+  - A21: Total del activo circulante
+  - A25: Activo Diferido
+  - A30: Total Activo Diferido
+
+'PASIVO' found in 6 cells:
+  - A41: Otros pasivos a corto plazo
+  - A42: Total del pasivo circulante
+  - A46: Total del pasivo largo Plazo
+  - A52: Total otros pasivos
+  - A54: Total del pasivo
+
+'CAPITAL' found in 5 cells:
+  - A55: Capital contable:
+  - A56: Capital social
+  - A57: Aportaciones para futuros aumento a Capital
+  - A62: Total del capital contable
+  - A63: Total del pasivo y capital contable
+
+'TOTAL' found in 9 cells:
+  - A21: Total del activo circulante
+  - A30: Total Activo Diferido
+  - A31: Total del activo
+  - A42: Total del pasivo circulante
+  - A46: Total del pasivo largo Plazo
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 4: ER
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A5:T173
+  - Max Row: 173
+  - Max Column: 20 (T)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 5: Prospecto: TA SOLUCIONES  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 6: Estado de Resultados |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 8: CONCEPTO | 2021 | 2022 | 2023 | 2024 | 2025 | 2026-01-01 00:00:00 |  | % 23-24 | %24-25 | %25-26 |  |  | 
+Row 10: Ingresos |  |  |  |  |  |  |  | [FORMULA: =+E10/D10-1...] | [FORMULA: =+F10/E10-1...] | [FORMULA: =+G10/F10-1...] |  |  | 
+Row 12: Costo de Ventas |  | 0 | 0 | 0 | 0 | 0 |  | [FORMULA: =+E12/D12-1...] | [FORMULA: =+F12/E12-1...] | [FORMULA: =+G12/F12-1...] |  |  | 
+Row 14: Utilidad Bruta | [FORMULA: =+B10-B12...] | [FORMULA: =+C10-C12...] | [FORMULA: =+D10-D12...] | [FORMULA: =+E10-E12...] | [FORMULA: =+F10-F12...] | [FORMULA: =+G10-G12...] |  | [FORMULA: =+E14/D14-1...] | [FORMULA: =+F14/E14-1...] | [FORMULA: =+G14/F14-1...] |  |  | 
+Row 16: Gastos de operación | [FORMULA: =SUM(B18:B19)...] | [FORMULA: =SUM(C18:C19)...] | [FORMULA: =SUM(D18:D19)...] | [FORMULA: =SUM(E18:E19)...] | [FORMULA: =SUM(F18:F19)...] | [FORMULA: =SUM(G18:G19)...] |  | [FORMULA: =+E16/D16-1...] | [FORMULA: =+F16/E16-1...] | [FORMULA: =+G16/F16-1...] |  |  | 
+Row 18: Gastos de Operación |  |  |  |  |  |  |  | [FORMULA: =+E18/D18-1...] | [FORMULA: =+F18/E18-1...] | [FORMULA: =+G18/F18-1...] |  |  | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 81
+
+Sample Formulas (first 30):
+  1. Cell I10 (R10C9): =+E10/D10-1
+  2. Cell J10 (R10C10): =+F10/E10-1
+  3. Cell K10 (R10C11): =+G10/F10-1
+  4. Cell I12 (R12C9): =+E12/D12-1
+  5. Cell J12 (R12C10): =+F12/E12-1
+  6. Cell K12 (R12C11): =+G12/F12-1
+  7. Cell B14 (R14C2): =+B10-B12
+  8. Cell C14 (R14C3): =+C10-C12
+  9. Cell D14 (R14C4): =+D10-D12
+  10. Cell E14 (R14C5): =+E10-E12
+  11. Cell F14 (R14C6): =+F10-F12
+  12. Cell G14 (R14C7): =+G10-G12
+  13. Cell I14 (R14C9): =+E14/D14-1
+  14. Cell J14 (R14C10): =+F14/E14-1
+  15. Cell K14 (R14C11): =+G14/F14-1
+  16. Cell B16 (R16C2): =SUM(B18:B19)
+  17. Cell C16 (R16C3): =SUM(C18:C19)
+  18. Cell D16 (R16C4): =SUM(D18:D19)
+  19. Cell E16 (R16C5): =SUM(E18:E19)
+  20. Cell F16 (R16C6): =SUM(F18:F19)
+  21. Cell G16 (R16C7): =SUM(G18:G19)
+  22. Cell I16 (R16C9): =+E16/D16-1
+  23. Cell J16 (R16C10): =+F16/E16-1
+  24. Cell K16 (R16C11): =+G16/F16-1
+  25. Cell I18 (R18C9): =+E18/D18-1
+  26. Cell J18 (R18C10): =+F18/E18-1
+  27. Cell K18 (R18C11): =+G18/F18-1
+  28. Cell B21 (R21C2): =+B14-B16
+  29. Cell C21 (R21C3): =+C14-C16
+  30. Cell D21 (R21C4): =+D14-D16
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 6
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'VENTAS' found in 1 cells:
+  - A12: Costo de Ventas
+
+'UTILIDAD' found in 6 cells:
+  - A14: Utilidad Bruta
+  - A21: Utilidad antes de Productos Financieros
+  - A25: Utilidad cambiaria
+  - A28: Utilidad antes de otros ingresos/gastos
+  - A32: Utilidad antes de impuestos
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 5: RF
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A5:N41
+  - Max Row: 41
+  - Max Column: 14 (N)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 5: Prospecto: TA SOLUCIONES  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 6: Razones Financieras |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 8: CONCEPTO | 2021 | 2022 | 2023 | 2024 | 2025 | 2026-01-01 00:00:00 |  | Var%  21 vs 22 | Var%  22 vs 23 | Var%  23 vs 24 | Var%  24 vs 25 | Var%  25 vs 26 | 
+Row 10: Solvencia y Viabilidad |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 12: Activos Totales | [FORMULA: =+BG!B31...] | [FORMULA: =+BG!C31...] | [FORMULA: =+BG!D31...] | [FORMULA: =+BG!E31...] | [FORMULA: =+BG!F31...] | [FORMULA: =+BG!G31...] |  | [FORMULA: =(+C12/B12)-1...] | [FORMULA: =(+D12/C12)-1...] | [FORMULA: =(+E12/D12)-1...] | [FORMULA: =(+F12/E12)-1...] | [FORMULA: =(+G12/F12)-1...] | 
+Row 13: Deuda total / Activos Totales | [FORMULA: =SUM(BG!B43)/RF!B12...] | [FORMULA: =SUM(BG!C34+BG!C44)/RF!C12...] | [FORMULA: =SUM(BG!D34+BG!D44)/RF!D12...] | [FORMULA: =SUM(BG!E34+BG!E44)/RF!E12...] | [FORMULA: =SUM(BG!F34+BG!F44)/RF!F12...] | [FORMULA: =SUM(BG!G34+BG!G44)/RF!G12...] |  | [FORMULA: =(+C13/B13)-1...] | [FORMULA: =(+D13/C13)-1...] | [FORMULA: =(+E13/D13)-1...] | [FORMULA: =(+F13/E13)-1...] | [FORMULA: =(+G13/F13)-1...] | 
+Row 14: Apalancamiento | [FORMULA: =SUM(BG!B42+BG!B46)/BG!B62...] | [FORMULA: =SUM(BG!C42+BG!C46+BG!C52)/BG!...] | [FORMULA: =SUM(BG!D42+BG!D46+BG!D52)/BG!...] | [FORMULA: =SUM(BG!E42+BG!E46+BG!E52)/BG!...] | [FORMULA: =SUM(BG!F42+BG!F46+BG!F52)/BG!...] | [FORMULA: =SUM(BG!G42+BG!G46+BG!G52)/BG!...] |  | [FORMULA: =(+C14/B14)-1...] | [FORMULA: =(+D14/C14)-1...] | [FORMULA: =(+E14/D14)-1...] | [FORMULA: =(+F14/E14)-1...] | [FORMULA: =(+G14/F14)-1...] | 
+Row 15: Activos Fijos / Activos Totale | [FORMULA: =+BG!B23/BG!B31...] | [FORMULA: =+BG!C23/BG!C31...] | [FORMULA: =+BG!D23/BG!D31...] | [FORMULA: =+BG!E23/BG!E31...] | [FORMULA: =+BG!F23/BG!F31...] | [FORMULA: =+BG!G23/BG!G31...] |  | [FORMULA: =(+C15/B15)-1...] | [FORMULA: =(+D15/C15)-1...] | [FORMULA: =(+E15/D15)-1...] | [FORMULA: =(+F15/E15)-1...] | [FORMULA: =(+G15/F15)-1...] | 
+Row 17: Ciclo |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 19: Rotación de cuentas por cobrar | [FORMULA: =SUM(BG!B13/ER!B10)*360...] | [FORMULA: =SUM(BG!C12/ER!C10)*360...] | [FORMULA: =SUM(BG!D12/ER!D10)*360...] | [FORMULA: =SUM(BG!E12/ER!E10)*360...] | [FORMULA: =SUM(BG!F12/ER!F10)*360...] | [FORMULA: =SUM(BG!G12/ER!G10)*360...] |  | [FORMULA: =(+C19/B19)-1...] | [FORMULA: =(+D19/C19)-1...] | [FORMULA: =(+E19/D19)-1...] | [FORMULA: =(+F19/E19)-1...] | [FORMULA: =(+G19/F19)-1...] | 
+Row 20: Rotación de inventarios | [FORMULA: =(+BG!B15/ER!B12)*360...] | [FORMULA: =(+BG!C13/ER!C12)*360...] | [FORMULA: =(+BG!D13/ER!D12)*360...] | [FORMULA: =(+BG!E13/ER!E12)*360...] | [FORMULA: =(+BG!F13/ER!F12)*360...] | [FORMULA: =(+BG!G13/ER!G12)*360...] |  | [FORMULA: =(+C20/B20)-1...] | [FORMULA: =(+D20/C20)-1...] | [FORMULA: =(+E20/D20)-1...] | [FORMULA: =(+F20/E20)-1...] | [FORMULA: =(+G20/F20)-1...] | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 184
+
+Sample Formulas (first 30):
+  1. Cell B12 (R12C2): =+BG!B31
+  2. Cell C12 (R12C3): =+BG!C31
+  3. Cell D12 (R12C4): =+BG!D31
+  4. Cell E12 (R12C5): =+BG!E31
+  5. Cell F12 (R12C6): =+BG!F31
+  6. Cell G12 (R12C7): =+BG!G31
+  7. Cell I12 (R12C9): =(+C12/B12)-1
+  8. Cell J12 (R12C10): =(+D12/C12)-1
+  9. Cell K12 (R12C11): =(+E12/D12)-1
+  10. Cell L12 (R12C12): =(+F12/E12)-1
+  11. Cell M12 (R12C13): =(+G12/F12)-1
+  12. Cell B13 (R13C2): =SUM(BG!B43)/RF!B12
+  13. Cell C13 (R13C3): =SUM(BG!C34+BG!C44)/RF!C12
+  14. Cell D13 (R13C4): =SUM(BG!D34+BG!D44)/RF!D12
+  15. Cell E13 (R13C5): =SUM(BG!E34+BG!E44)/RF!E12
+  16. Cell F13 (R13C6): =SUM(BG!F34+BG!F44)/RF!F12
+  17. Cell G13 (R13C7): =SUM(BG!G34+BG!G44)/RF!G12
+  18. Cell I13 (R13C9): =(+C13/B13)-1
+  19. Cell J13 (R13C10): =(+D13/C13)-1
+  20. Cell K13 (R13C11): =(+E13/D13)-1
+  21. Cell L13 (R13C12): =(+F13/E13)-1
+  22. Cell M13 (R13C13): =(+G13/F13)-1
+  23. Cell B14 (R14C2): =SUM(BG!B42+BG!B46)/BG!B62
+  24. Cell C14 (R14C3): =SUM(BG!C42+BG!C46+BG!C52)/BG!C62
+  25. Cell D14 (R14C4): =SUM(BG!D42+BG!D46+BG!D52)/BG!D62
+  26. Cell E14 (R14C5): =SUM(BG!E42+BG!E46+BG!E52)/BG!E62
+  27. Cell F14 (R14C6): =SUM(BG!F42+BG!F46+BG!F52)/BG!F62
+  28. Cell G14 (R14C7): =SUM(BG!G42+BG!G46+BG!G52)/BG!G62
+  29. Cell I14 (R14C9): =(+C14/B14)-1
+  30. Cell J14 (R14C10): =(+D14/C14)-1
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 30
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 2
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'ACTIVO' found in 5 cells:
+  - A12: Activos Totales
+  - A13: Deuda total / Activos Totales
+  - A15: Activos Fijos / Activos Totales
+  - A26: Activo Circulante/Pasivo a Corto Plazo
+  - A27: Ventas / Activos Totales
+
+'PASIVO' found in 1 cells:
+  - A26: Activo Circulante/Pasivo a Corto Plazo
+
+'VENTAS' found in 2 cells:
+  - A27: Ventas / Activos Totales
+  - A28: Ventas Anuales
+
+'UTILIDAD' found in 3 cells:
+  - A29: Utilidad del Ejercicio
+  - A31: Margen Utilidad
+  - A37: Margen de utilidad/Prestamo
+
+'TOTAL' found in 4 cells:
+  - A12: Activos Totales
+  - A13: Deuda total / Activos Totales
+  - A15: Activos Fijos / Activos Totales
+  - A27: Ventas / Activos Totales
+
+'ROE' found in 1 cells:
+  - A34: ROE
+
+'ROA' found in 1 cells:
+  - A33: ROA
+
+'SOLVENCIA' found in 1 cells:
+  - A10: Solvencia y Viabilidad
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 6: Modelo de Crédito
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A1:AS79
+  - Max Row: 79
+  - Max Column: 45 (AS)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 1:  | Modelo de Crédito: TA SOLUCION |  |  |  |  |  |  |  |  |  |  |  | 
+Row 2:  | Calificacion de Credito |  |  |  |  |  |  |  |  |  |  |  | 
+Row 3:  | 90-100 |  |  |  |  |  |  |  |  |  |  |  | 
+Row 4:  | 80-90 |  |  |  |  |  |  |  |  |  |  |  | 
+Row 5:  | 70-80 |  |  |  |  |  |  |  |  |  |  |  | 
+Row 6:  | 60-70 |  |  |  |  |  |  |  |  |  |  |  | 
+Row 7:  | 50-60 |  |  |  |  |  |  |  |  |  |  |  | 
+Row 9:  | Historial Crediticio y de Admi |  |  |  |  |  |  |  |  |  |  |  | 
+Row 10: Peso Específico | Factor  | Resultado  | 1 | 2 | 3 | 4 | 5 |  |  |  |  |  | 
+Row 11: 0.2 | Historial Buro de Crédito | [FORMULA: =+D12...] | Sin cartera vencida ni mora en | Sin cartera vencida ni mora en | Ha tenido un atraso máximo de  | Ha tenido un máximo de 2 atras | Ha tenido atrasos recurrentes  |  |  |  |  |  | 
+Row 12:  |  |  | [FORMULA: =$A$11*1...] | [FORMULA: =$A$11*0.75...] | [FORMULA: =$A$11*0.5...] | [FORMULA: =$A$11*0.25...] | 0 |  |  |  |  |  | 
+Row 13: 0.1 | Historial Buro de Crédito Soci | [FORMULA: =+D14...] | Sin cartera vencida ni mora en | Sin cartera vencida ni mora en | Ha tenido un atraso máximo de  | Ha tenido un máximo de dos atr | Ha tenido atrasos recurrentes  |  |  |  |  |  | 
+Row 14:  |  |  | [FORMULA: =$A$13*1...] | [FORMULA: =$A$13*0.75...] | [FORMULA: =$A$13*0.5...] | [FORMULA: =$A$13*0.25...] | 0 |  |  |  |  |  | 
+Row 15:  | Historial con Moskalti | [FORMULA: =+H16...] | Previa relacion crediticia, si | Previa relacion crediticia, al | Previa relacion crediticia, al | Previa relacion crediticia, va | Previa relacion crediticia, ma |  |  |  |  |  | 
+Row 16:  |  |  | [FORMULA: =$A$15*1...] | [FORMULA: =$A$15*0.75...] | [FORMULA: =$A$15*0.5...] | [FORMULA: =$A$15*0.25...] | 0 |  |  |  |  |  | 
+Row 17: 0.05 | Calidad de la Informacion | [FORMULA: =+E18...] | La informacion es confiable, c | La informacion es confiable, c | La informacion es buena, confi | La informacion es adecuada y c | La informacion es inadecuada  |  |  |  |  |  | 
+Row 18:  |  |  | [FORMULA: =$A$17*1...] | [FORMULA: =$A$17*0.75...] | [FORMULA: =$A$17*0.5...] | [FORMULA: =$A$17*0.25...] | 0 |  |  |  |  |  | 
+Row 19: 0.05 | Calidad de Administración | [FORMULA: =+E20...] | Socios o administradores con m | Socios o administradores con m | Socios o administradores con e | Socios o administradores con b | Socios o administradores sin e |  |  |  |  |  | 
+Row 20:  |  |  | [FORMULA: =$A$19*1...] | [FORMULA: =$A$19*0.75...] | [FORMULA: =$A$19*0.5...] | [FORMULA: =$A$19*0.25...] | 0 |  |  |  |  |  | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 147
+
+Sample Formulas (first 30):
+  1. Cell C11 (R11C3): =+D12
+  2. Cell D12 (R12C4): =$A$11*1
+  3. Cell E12 (R12C5): =$A$11*0.75
+  4. Cell F12 (R12C6): =$A$11*0.5
+  5. Cell G12 (R12C7): =$A$11*0.25
+  6. Cell C13 (R13C3): =+D14
+  7. Cell D14 (R14C4): =$A$13*1
+  8. Cell E14 (R14C5): =$A$13*0.75
+  9. Cell F14 (R14C6): =$A$13*0.5
+  10. Cell G14 (R14C7): =$A$13*0.25
+  11. Cell C15 (R15C3): =+H16
+  12. Cell D16 (R16C4): =$A$15*1
+  13. Cell E16 (R16C5): =$A$15*0.75
+  14. Cell F16 (R16C6): =$A$15*0.5
+  15. Cell G16 (R16C7): =$A$15*0.25
+  16. Cell C17 (R17C3): =+E18
+  17. Cell D18 (R18C4): =$A$17*1
+  18. Cell E18 (R18C5): =$A$17*0.75
+  19. Cell F18 (R18C6): =$A$17*0.5
+  20. Cell G18 (R18C7): =$A$17*0.25
+  21. Cell C19 (R19C3): =+E20
+  22. Cell D20 (R20C4): =$A$19*1
+  23. Cell E20 (R20C5): =$A$19*0.75
+  24. Cell F20 (R20C6): =$A$19*0.5
+  25. Cell G20 (R20C7): =$A$19*0.25
+  26. Cell C25 (R25C3): =+G26
+  27. Cell D26 (R26C4): =$A$25*1
+  28. Cell E26 (R26C5): =$A$25*0.75
+  29. Cell F26 (R26C6): =$A$25*0.5
+  30. Cell G26 (R26C7): =$A$25*0.25
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 2
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+'ACTIVO' found in 6 cells:
+  - B25: Activos Totales 
+  - B27: Deuda Total / Activos Totales
+  - B31: Activos Fijos / Activos Totales
+  - B47: Activo  Circulante / Pasivo Corto Plazo
+  - B51: Ventas / Activos Totales
+
+'PASIVO' found in 2 cells:
+  - B47: Activo  Circulante / Pasivo Corto Plazo
+  - C79: Activo  Circulante / Pasivo Corto Plazo
+
+'VENTAS' found in 2 cells:
+  - B51: Ventas / Activos Totales
+  - B53: Tendencia en Ventas vs Periodo Anterior
+
+'UTILIDAD' found in 3 cells:
+  - B49: Cobertura Utilidad a Monto Solicitado
+  - B55: Tendencia Utilidad vs Periodo Anterior
+  - B63: Margen Utilidad
+
+'TOTAL' found in 4 cells:
+  - B25: Activos Totales 
+  - B27: Deuda Total / Activos Totales
+  - B31: Activos Fijos / Activos Totales
+  - B51: Ventas / Activos Totales
+
+'ROE' found in 1 cells:
+  - B67: ROE
+
+'ROA' found in 1 cells:
+  - B69: ROA
+
+'SOLVENCIA' found in 1 cells:
+  - B23: Solvencia y Viabilidad 30%
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+SHEET 7: Matriz de Credito y Tasas
+====================================================================================================
+
+Sheet Information:
+  - Dimensions: A1:Z46
+  - Max Row: 46
+  - Max Column: 26 (Z)
+
+--- DATA PREVIEW (First 20 rows) ---
+----------------------------------------------------------------------------------------------------
+Row 1: Matriz de Crédito y Garantías |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 3:  |  | Garantía |  |  |  |  |  |  | 1 | 2 | 3 | 4 | 5
+Row 4:  |  | 1 | 2 | 3 | 4 | 5 |  | A | [FORMULA: =C21...] | [FORMULA: =D21...] | [FORMULA: =E21...] | [FORMULA: =F21...] | [FORMULA: =G21...]
+Row 5: Credito | A | A1 | A2 | A3 | A4 | A5 |  | B | [FORMULA: =C22...] | [FORMULA: =D22...] | [FORMULA: =E22...] | [FORMULA: =F22...] | [FORMULA: =G22...]
+Row 6:  | B | B1 | B2 | B3 | B4 | B5 |  | C | [FORMULA: =C23...] | [FORMULA: =D23...] | [FORMULA: =E23...] | [FORMULA: =F23...] | [FORMULA: =G23...]
+Row 7:  | C | C1 | C2 | C3 | C4 | C5 |  | D | [FORMULA: =C24...] | [FORMULA: =D24...] | [FORMULA: =E24...] | [FORMULA: =F24...] | [FORMULA: =G24...]
+Row 8:  | D | D1 | D2 | D3 | D4 | D5 |  | E | [FORMULA: =C25...] | [FORMULA: =D25...] | [FORMULA: =E25...] | [FORMULA: =F25...] | [FORMULA: =G25...]
+Row 9:  | E | E1 | E2 | E3 | E4 | E5 |  |  |  |  |  |  | 
+Row 11:  |  | Sobretasas Indicativas |  |  |  |  |  |  |  |  |  |  | 
+Row 12:  | TIIE + | 1 | 2 | 3 | 4 | 5 |  |  |  |  |  |  | 
+Row 13:  | A | 1000 | 1200 | 1600 | 2200 | 3000 |  |  |  |  |  |  | 
+Row 14:  | B | 1250 | 1450 | 1850 | 2450 | 3250 |  |  |  |  |  |  | 
+Row 15:  | C | 1750 | 1950 | 2350 | 2950 | 3750 |  |  |  |  |  |  | 
+Row 16:  | D | 2500 | 2700 | 3100 | 3700 | 4500 |  |  |  |  |  |  | 
+Row 17:  | E | 3500 | 3700 | 4100 | 4700 | 5500 |  |  |  |  |  |  | 
+Row 19:  |  | Ejemplo Tasas Indicativas (% A |  |  |  |  |  |  |  |  |  |  | 
+Row 20: TIIE  | [FORMULA: =7.2886*100...] | 1 | 2 | 3 | 4 | 5 |  |  |  |  |  |  | 
+
+
+--- FORMULAS ANALYSIS ---
+----------------------------------------------------------------------------------------------------
+Total Formula Cells: 102
+
+Sample Formulas (first 30):
+  1. Cell J4 (R4C10): =C21
+  2. Cell K4 (R4C11): =D21
+  3. Cell L4 (R4C12): =E21
+  4. Cell M4 (R4C13): =F21
+  5. Cell N4 (R4C14): =G21
+  6. Cell J5 (R5C10): =C22
+  7. Cell K5 (R5C11): =D22
+  8. Cell L5 (R5C12): =E22
+  9. Cell M5 (R5C13): =F22
+  10. Cell N5 (R5C14): =G22
+  11. Cell J6 (R6C10): =C23
+  12. Cell K6 (R6C11): =D23
+  13. Cell L6 (R6C12): =E23
+  14. Cell M6 (R6C13): =F23
+  15. Cell N6 (R6C14): =G23
+  16. Cell J7 (R7C10): =C24
+  17. Cell K7 (R7C11): =D24
+  18. Cell L7 (R7C12): =E24
+  19. Cell M7 (R7C13): =F24
+  20. Cell N7 (R7C14): =G24
+  21. Cell J8 (R8C10): =C25
+  22. Cell K8 (R8C11): =D25
+  23. Cell L8 (R8C12): =E25
+  24. Cell M8 (R8C13): =F25
+  25. Cell N8 (R8C14): =G25
+  26. Cell B20 (R20C2): =7.2886*100
+  27. Cell C21 (R21C3): =($B$20+C13)/100
+  28. Cell D21 (R21C4): =($B$20+D13)/100
+  29. Cell E21 (R21C5): =($B$20+E13)/100
+  30. Cell F21 (R21C6): =($B$20+F13)/100
+
+--- FORMULA PATTERNS ---
+  - SUM formulas: 0
+  - IF formulas: 0
+  - VLOOKUP formulas: 0
+  - AVERAGE formulas: 0
+
+
+--- KEY TEXT PATTERNS ---
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+ANALYSIS COMPLETE
+====================================================================================================
