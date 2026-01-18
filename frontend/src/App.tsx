@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { UploadPage } from './pages/UploadPage';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { UserManagementPage } from './pages/UserManagementPage';
+import { DocumentationPage } from './pages/DocumentationPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 import { useEffect } from 'react';
@@ -38,6 +39,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <UploadPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/documentation"
+                    element={
+                        <ProtectedRoute>
+                            <DocumentationPage />
                         </ProtectedRoute>
                     }
                 />

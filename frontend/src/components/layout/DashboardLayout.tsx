@@ -14,7 +14,8 @@ import {
     Users,
     ChevronLeft,
     Search,
-    Bell
+    Bell,
+    BookOpen
 } from 'lucide-react';
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -28,6 +29,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     const navItems = [
         { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard' },
         { icon: Upload, label: t('nav.upload'), path: '/dashboard/upload' },
+        { icon: BookOpen, label: t('nav.documentation'), path: '/dashboard/documentation' },
         { icon: FileText, label: t('nav.reports'), path: '/dashboard/reports' },
         { icon: User, label: t('nav.profile'), path: '/dashboard/profile' },
         ...(user?.role === 'admin' ? [{ icon: Users, label: t('nav.users'), path: '/dashboard/users' }] : []),
