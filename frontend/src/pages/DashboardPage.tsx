@@ -57,12 +57,12 @@ export const DashboardPage: React.FC = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
                 <div className="animate-in fade-in slide-in-from-left duration-700">
-                    <div className="flex items-center gap-2 text-[#2D5A9E] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                    <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                         <Activity size={14} />
                         {t('dash.terminal')}
                     </div>
                     <h1 className="text-[#1A1A1A] text-2xl font-black tracking-tight leading-none mb-2">
-                        {t('dash.greeting')}, <span className="text-[#2D5A9E]">{user?.full_name?.split(' ')[0]}</span>.
+                        {t('dash.greeting')}, <span className="text-[#253746]">{user?.full_name?.split(' ')[0]}</span>.
                     </h1>
                     <p className="text-gray-500 font-medium text-xs">{t('dash.welcome')}</p>
                 </div>
@@ -70,7 +70,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex gap-3">
                     <button
                         onClick={() => navigate('/dashboard/upload')}
-                        className="bg-[#2D5A9E] text-white px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#1E3E6F] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-blue-900/20 group"
+                        className="bg-[#253746] text-white px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#1A2630] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-blue-900/20 group"
                     >
                         <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-300" />
                         {t('dash.create')}
@@ -88,7 +88,7 @@ export const DashboardPage: React.FC = () => {
                 ].map((stat, i) => (
                     <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group">
                         <div className="flex justify-between items-start mb-2">
-                            <div className={`w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#2D5A9E]/10 group-hover:text-[#2D5A9E] transition-all`}>
+                            <div className={`w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#253746]/10 group-hover:text-[#253746] transition-all`}>
                                 <stat.icon className="w-3.5 h-3.5" />
                             </div>
                             <div className={`flex items-center gap-1 text-[9px] font-black ${stat.up ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -107,14 +107,14 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-[#1A1A1A] text-base font-black tracking-tight flex items-center gap-3">
                         {t('dash.recent')}
-                        <span className="bg-[#2D5A9E]/10 text-[#2D5A9E] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
+                        <span className="bg-[#253746]/10 text-[#253746] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
                     </h2>
                 </div>
 
                 <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
                     {loading ? (
                         <div className="h-[500px] flex flex-col items-center justify-center gap-4">
-                            <div className="w-10 h-10 border-4 border-[#2D5A9E]/20 border-t-[#2D5A9E] rounded-full animate-spin"></div>
+                            <div className="w-10 h-10 border-4 border-[#253746]/20 border-t-[#253746] rounded-full animate-spin"></div>
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('dash.fetching')}</span>
                         </div>
                     ) : analyses.length === 0 ? (
@@ -123,7 +123,7 @@ export const DashboardPage: React.FC = () => {
                             <p className="text-gray-500 font-medium text-xs">{t('dash.noHistory')}</p>
                             <button
                                 onClick={() => navigate('/dashboard/upload')}
-                                className="text-[#2D5A9E] font-black text-[9px] uppercase tracking-widest py-2 px-4 bg-[#2D5A9E]/5 rounded-xl hover:bg-[#2D5A9E]/10"
+                                className="text-[#253746] font-black text-[9px] uppercase tracking-widest py-2 px-4 bg-[#253746]/5 rounded-xl hover:bg-[#253746]/10"
                             >
                                 {t('dash.start')}
                             </button>
@@ -148,10 +148,10 @@ export const DashboardPage: React.FC = () => {
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-black text-[#2D5A9E] text-xs group-hover:bg-white group-hover:shadow-sm transition-all">
+                                                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center font-black text-[#253746] text-xs group-hover:bg-white group-hover:shadow-sm transition-all">
                                                         {analysis.company_name.charAt(0)}
                                                     </div>
-                                                    <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#2D5A9E] transition-colors">{analysis.company_name}</div>
+                                                    <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#253746] transition-colors">{analysis.company_name}</div>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4">
@@ -163,7 +163,7 @@ export const DashboardPage: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td className="px-4 py-4 text-right">
-                                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#2D5A9E] inline-block" />
+                                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#253746] inline-block" />
                                             </td>
                                         </tr>
                                     ))}

@@ -94,20 +94,20 @@ export const SplitFileUpload: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}>
 
-                <h2 className="text-[#2D5A9E] font-black text-xl mb-2 tracking-tight">Upload Files</h2>
+                <h2 className="text-[#253746] font-black text-xl mb-2 tracking-tight">Upload Files</h2>
                 <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">Upload documents you want to share with your team</p>
 
                 <div
                     className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer group 
-                    ${isDragging ? 'border-[#2D5A9E] bg-[#2D5A9E]/5' : 'border-gray-200 hover:border-[#2D5A9E] hover:bg-gray-50'}`}
+                    ${isDragging ? 'border-[#253746] bg-[#253746]/5' : 'border-gray-200 hover:border-[#253746] hover:bg-gray-50'}`}
                     onClick={() => document.getElementById('split-file-input')?.click()}
                 >
-                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-gray-400 group-hover:scale-110 transition-transform group-hover:text-[#2D5A9E]">
+                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-gray-400 group-hover:scale-110 transition-transform group-hover:text-[#253746]">
                         <CloudIcon size={32} />
                     </div>
-                    <p className="text-[#2D5A9E] font-black text-sm mb-2">Drag and drop files here</p>
+                    <p className="text-[#253746] font-black text-sm mb-2">Drag and drop files here</p>
                     <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">- OR -</p>
-                    <button className="bg-[#2D5A9E] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#1E3E6F] transition-colors shadow-lg shadow-blue-900/20">
+                    <button className="bg-[#253746] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#1A2630] transition-colors shadow-lg shadow-blue-900/20">
                         Browse Files
                     </button>
                     <input
@@ -135,7 +135,7 @@ export const SplitFileUpload: React.FC = () => {
                             </button>
 
                             <div className="flex items-center gap-4 mb-3">
-                                <div className="w-10 h-10 bg-[#2D5A9E]/10 rounded-lg flex items-center justify-center text-[#2D5A9E]">
+                                <div className="w-10 h-10 bg-[#253746]/10 rounded-lg flex items-center justify-center text-[#253746]">
                                     <FileSpreadsheet size={20} />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -150,11 +150,11 @@ export const SplitFileUpload: React.FC = () => {
                             {uploading ? (
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                        <span className="text-[#2D5A9E]">Uploading...</span>
+                                        <span className="text-[#253746]">Uploading...</span>
                                         <span className="text-gray-400">{progress}%</span>
                                     </div>
                                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-[#2D5A9E] transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                                        <div className="h-full bg-[#253746] transition-all duration-300" style={{ width: `${progress}%` }}></div>
                                     </div>
                                 </div>
                             ) : (
@@ -165,7 +165,7 @@ export const SplitFileUpload: React.FC = () => {
                                     </div>
                                     <button
                                         onClick={handleUpload}
-                                        className="text-[10px] font-black text-[#2D5A9E] uppercase tracking-widest hover:underline"
+                                        className="text-[10px] font-black text-[#253746] uppercase tracking-widest hover:underline"
                                     >
                                         Start Analysis
                                     </button>

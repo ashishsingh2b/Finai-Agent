@@ -72,7 +72,7 @@ export const FileUpload: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto p-12">
             <div className="flex items-start justify-between mb-10">
                 <div>
-                    <div className="flex items-center gap-2 text-[#2D5A9E] font-black text-[10px] uppercase tracking-[0.2em] mb-3">
+                    <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-3">
                         <CloudIcon size={14} />
                         Data Ingestion Terminal
                     </div>
@@ -90,15 +90,15 @@ export const FileUpload: React.FC = () => {
                 onDrop={handleDrop}
                 onClick={() => document.getElementById('file-input')?.click()}
                 className={`group relative border-2 border-dashed rounded-[2.5rem] p-16 text-center transition-all duration-500 cursor-pointer overflow-hidden ${isDragging
-                    ? 'border-[#2D5A9E] bg-[#2D5A9E]/5 shadow-2xl shadow-blue-900/10'
-                    : 'border-gray-200 bg-white hover:border-[#2D5A9E] hover:bg-gray-50/50 hover:shadow-xl hover:shadow-gray-200/50'
+                    ? 'border-[#253746] bg-[#253746]/5 shadow-2xl shadow-blue-900/10'
+                    : 'border-gray-200 bg-white hover:border-[#253746] hover:bg-gray-50/50 hover:shadow-xl hover:shadow-gray-200/50'
                     }`}
             >
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#2D5A9E]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#253746]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 transition-all duration-300 ${file ? 'bg-emerald-50 text-emerald-500 scale-110' : 'bg-[#F1F5F9] text-[#2D5A9E] group-hover:scale-110 group-hover:shadow-lg'
+                    <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 transition-all duration-300 ${file ? 'bg-emerald-50 text-emerald-500 scale-110' : 'bg-[#F1F5F9] text-[#253746] group-hover:scale-110 group-hover:shadow-lg'
                         }`}>
                         {file ? <FileSpreadsheet className="w-8 h-8" /> : <Upload className="w-8 h-8 transition-transform group-hover:translate-y-[-4px]" />}
                     </div>
@@ -109,7 +109,7 @@ export const FileUpload: React.FC = () => {
                                 <span className="text-xl font-black text-[#1A1A1A] tracking-tight">{file.name}</span>
                                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">Ready for transition</span>
                             </div>
-                            <div className="flex items-center justify-center gap-2 text-[#2D5A9E] font-black text-[10px] uppercase tracking-widest">
+                            <div className="flex items-center justify-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-widest">
                                 <CheckCircle size={14} />
                                 Excel Structure Validated
                             </div>
@@ -151,7 +151,7 @@ export const FileUpload: React.FC = () => {
                 disabled={!file || uploading}
                 className={`mt-10 w-full rounded-2xl py-6 font-black text-sm tracking-widest uppercase flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] ${!file || uploading
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#1A1A1A] text-white hover:bg-[#1E3E6F] shadow-2xl shadow-gray-900/20 hover:scale-[1.01]'
+                    : 'bg-[#1A1A1A] text-white hover:bg-[#1A2630] shadow-2xl shadow-gray-900/20 hover:scale-[1.01]'
                     }`}
             >
                 {uploading ? (

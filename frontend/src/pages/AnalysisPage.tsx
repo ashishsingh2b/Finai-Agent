@@ -71,7 +71,7 @@ export const AnalysisPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#F0F2F5] font-sans text-gray-900 overflow-x-hidden">
             {/* Header */}
-            <header className="bg-[#2D5A9E] px-6 py-3 flex items-center justify-between text-white shadow-lg relative z-20">
+            <header className="bg-[#253746] px-6 py-3 flex items-center justify-between text-white shadow-lg relative z-20">
                 <div className="flex items-center gap-8">
                     <button onClick={() => navigate('/dashboard')} className="hover:opacity-80 transition-opacity flex items-center gap-2">
                         <ArrowLeft size={20} strokeWidth={3} />
@@ -86,9 +86,9 @@ export const AnalysisPage: React.FC = () => {
                 <div className="flex items-center gap-4">
                     <button className="relative p-1.5 hover:bg-white/10 rounded-lg transition-all">
                         <Mail size={18} className="opacity-90" />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#2D5A9E]"></span>
+                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#253746]"></span>
                     </button>
-                    <button className="w-8 h-8 rounded-lg bg-white text-[#2D5A9E] flex items-center justify-center hover:scale-105 transition-all shadow-md">
+                    <button className="w-8 h-8 rounded-lg bg-white text-[#253746] flex items-center justify-center hover:scale-105 transition-all shadow-md">
                         <UserIcon size={16} strokeWidth={3} />
                     </button>
                 </div>
@@ -99,7 +99,7 @@ export const AnalysisPage: React.FC = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div className="text-[12px] font-black text-gray-700 uppercase tracking-widest">Loading analysis...</div>
                         <div className="mt-4 h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full w-1/3 bg-[#2D5A9E] rounded-full animate-pulse" />
+                            <div className="h-full w-1/3 bg-[#253746] rounded-full animate-pulse" />
                         </div>
                     </div>
                 ) : error ? (
@@ -109,7 +109,7 @@ export const AnalysisPage: React.FC = () => {
                         <div className="mt-4 flex gap-3">
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="px-4 py-2 rounded-lg bg-[#2D5A9E] text-white text-[11px] font-black uppercase tracking-wider hover:opacity-90"
+                                className="px-4 py-2 rounded-lg bg-[#253746] text-white text-[11px] font-black uppercase tracking-wider hover:opacity-90"
                             >
                                 Back to dashboard
                             </button>
@@ -135,32 +135,32 @@ export const AnalysisPage: React.FC = () => {
                         {/* Sidebar */}
                         <div className="col-span-12 lg:col-span-2 space-y-[5px]">
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="bg-[#2D5A9E] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
+                                <div className="bg-[#253746] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
                                 <div className="p-3 space-y-1">
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#2D5A9E] whitespace-nowrap">Industry:</div>
+                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Industry:</div>
                                         <div className="text-[10px] font-bold text-gray-700">Technology</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#2D5A9E] whitespace-nowrap">Years in Business:</div>
+                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Years in Business:</div>
                                         <div className="text-[10px] font-bold text-gray-700">8 years</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex flex-col py-1">
-                                        <div className="text-[10px] font-black text-[#2D5A9E] whitespace-nowrap">Top Clients:</div>
+                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Top Clients:</div>
                                         <div className="text-[10px] font-bold text-gray-700 leading-tight">ABC Corp, InovaTech</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#2D5A9E] whitespace-nowrap">Fiscal Status:</div>
+                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Fiscal Status:</div>
                                         <div className="text-[10px] font-bold text-gray-700">Compliant</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="bg-[#2D5A9E] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">Documents</div>
+                                <div className="bg-[#253746] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">Documents</div>
                                 <div className="p-1.5 space-y-0">
                                     {[
                                         { icon: FileText, label: 'Tax Certificate' },
@@ -171,8 +171,8 @@ export const AnalysisPage: React.FC = () => {
                                     ].map((doc, i) => (
                                         <React.Fragment key={i}>
                                             <div className="flex items-center gap-2.5 group cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-all">
-                                                <doc.icon size={13} className="text-[#2D5A9E] group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-                                                <span className="text-[10px] font-black text-[#2D5A9E]/80 group-hover:text-[#2D5A9E] transition-colors">{doc.label}</span>
+                                                <doc.icon size={13} className="text-[#253746] group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+                                                <span className="text-[10px] font-black text-[#253746]/80 group-hover:text-[#253746] transition-colors">{doc.label}</span>
                                             </div>
                                             {i < 4 && <div className="h-px bg-gray-100/60 mx-2"></div>}
                                         </React.Fragment>

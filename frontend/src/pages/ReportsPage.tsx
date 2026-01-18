@@ -75,7 +75,7 @@ export const ReportsPage: React.FC = () => {
                 {/* Header Area */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
-                        <div className="flex items-center gap-2 text-[#2D5A9E] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                        <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                             <FileText size={14} />
                             {t('reports.title')}
                         </div>
@@ -83,7 +83,7 @@ export const ReportsPage: React.FC = () => {
                         <p className="text-gray-500 font-medium text-xs">{t('reports.subtitle')}</p>
                     </div>
 
-                    <button className="bg-[#2D5A9E] text-white px-5 py-3 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-[#1E3E6F] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 group">
+                    <button className="bg-[#253746] text-white px-5 py-3 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-[#1A2630] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 group">
                         <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
                         {t('reports.export')}
                     </button>
@@ -92,20 +92,20 @@ export const ReportsPage: React.FC = () => {
                 {/* Filters & Search Bar */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-6">
                     <div className="lg:col-span-2 relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2D5A9E] transition-colors" size={16} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder={t('reports.searchPlaceholder')}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#2D5A9E] outline-none font-bold text-xs text-[#1A1A1A] transition-all placeholder:text-gray-300"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#253746] outline-none font-bold text-xs text-[#1A1A1A] transition-all placeholder:text-gray-300"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
                     <div className="relative group">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2D5A9E] transition-colors" size={16} />
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
                         <select
-                            className="w-full pl-11 pr-8 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#2D5A9E] outline-none font-black text-[10px] uppercase tracking-widest text-gray-500 appearance-none cursor-pointer transition-all"
+                            className="w-full pl-11 pr-8 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#253746] outline-none font-black text-[10px] uppercase tracking-widest text-gray-500 appearance-none cursor-pointer transition-all"
                             value={filterCategory}
                             onChange={(e) => setFilterCategory(e.target.value)}
                         >
@@ -117,7 +117,7 @@ export const ReportsPage: React.FC = () => {
                     </div>
 
                     <div className="relative group">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2D5A9E] transition-colors" size={16} />
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
                         <button className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm text-left font-black text-[10px] uppercase tracking-widest text-gray-500 group-hover:bg-gray-50 transition-all">
                             {t('reports.filter.date')}
                         </button>
@@ -147,8 +147,8 @@ export const ReportsPage: React.FC = () => {
                                     <tr>
                                         <td colSpan={5} className="px-8 py-24 text-center">
                                             <div className="flex flex-col items-center gap-3">
-                                                <div className="w-10 h-10 border-4 border-[#2D5A9E]/20 border-t-[#2D5A9E] rounded-full animate-spin"></div>
-                                                <span className="text-[10px] font-black text-[#2D5A9E] uppercase tracking-widest">{t('reports.loading')}</span>
+                                                <div className="w-10 h-10 border-4 border-[#253746]/20 border-t-[#253746] rounded-full animate-spin"></div>
+                                                <span className="text-[10px] font-black text-[#253746] uppercase tracking-widest">{t('reports.loading')}</span>
                                             </div>
                                         </td>
                                     </tr>
@@ -162,7 +162,7 @@ export const ReportsPage: React.FC = () => {
                                                 <p className="text-gray-400 font-bold text-sm">{t('reports.noResults.title')}</p>
                                                 <button
                                                     onClick={() => { setSearchTerm(''); setFilterCategory('All'); }}
-                                                    className="text-[#2D5A9E] text-[10px] font-black uppercase tracking-widest hover:underline"
+                                                    className="text-[#253746] text-[10px] font-black uppercase tracking-widest hover:underline"
                                                 >
                                                     {t('reports.noResults.clear')}
                                                 </button>
@@ -178,11 +178,11 @@ export const ReportsPage: React.FC = () => {
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#2D5A9E] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
+                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#253746] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
                                                         {analysis.company_name.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#2D5A9E] transition-colors">{analysis.company_name}</div>
+                                                        <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#253746] transition-colors">{analysis.company_name}</div>
                                                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">ID: {analysis.id.toString().padStart(6, '0')}</div>
                                                     </div>
                                                 </div>
@@ -191,11 +191,11 @@ export const ReportsPage: React.FC = () => {
                                                 <div className="flex flex-col gap-1 w-32">
                                                     <div className="flex justify-between items-end">
                                                         <span className="text-[9px] font-black text-[#1A1A1A] uppercase">{t('reports.signalStrength')}</span>
-                                                        <span className="text-[10px] font-black text-[#2D5A9E]">{analysis.credit_score.toFixed(0)}%</span>
+                                                        <span className="text-[10px] font-black text-[#253746]">{analysis.credit_score.toFixed(0)}%</span>
                                                     </div>
                                                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-gradient-to-r from-[#2D5A9E] to-blue-400 rounded-full transition-all duration-1000"
+                                                            className="h-full bg-gradient-to-r from-[#253746] to-blue-400 rounded-full transition-all duration-1000"
                                                             style={{ width: `${analysis.credit_score}%` }}
                                                         ></div>
                                                     </div>
@@ -216,10 +216,10 @@ export const ReportsPage: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
-                                                    <button className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-[#2D5A9E] hover:border-[#2D5A9E] hover:shadow-md transition-all">
+                                                    <button className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-[#253746] hover:border-[#253746] hover:shadow-md transition-all">
                                                         <MoreHorizontal size={14} />
                                                     </button>
-                                                    <button className="p-2 bg-[#1A1A1A] rounded-lg text-white hover:bg-[#2D5A9E] shadow-md transition-all">
+                                                    <button className="p-2 bg-[#1A1A1A] rounded-lg text-white hover:bg-[#253746] shadow-md transition-all">
                                                         <ChevronRight size={14} />
                                                     </button>
                                                 </div>

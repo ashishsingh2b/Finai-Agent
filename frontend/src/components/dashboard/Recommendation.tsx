@@ -21,7 +21,7 @@ export const Recommendation: React.FC<RecommendationProps> = ({
 
     return (
         <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-full flex flex-col transform hover:-translate-y-0.5 transition-all duration-300">
-            <div className="bg-[#2D5A9E] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider text-left">
+            <div className="bg-[#253746] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider text-left">
                 Evaluation & Recommendation
             </div>
             <div className="p-5 space-y-5 flex-1 text-left">
@@ -40,11 +40,11 @@ export const Recommendation: React.FC<RecommendationProps> = ({
                 <div className="grid grid-cols-2 gap-6 pt-3 border-t-2 border-gray-100">
                     {/* Justification */}
                     <div className="space-y-3">
-                        <div className="text-[10px] font-black text-[#2D5A9E] uppercase tracking-widest mb-2">Justification:</div>
+                        <div className="text-[10px] font-black text-[#253746] uppercase tracking-widest mb-2">Justification:</div>
                         <ul className="space-y-2">
                             {(justificationPoints.length > 0 ? justificationPoints : ['Adequate liquidity', 'Moderate debt']).map((point, i) => (
                                 <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
-                                    <span className="mt-1.5 w-1.5 h-1.5 bg-[#2D5A9E] rounded-full flex-shrink-0"></span>
+                                    <span className="mt-1.5 w-1.5 h-1.5 bg-[#253746] rounded-full flex-shrink-0"></span>
                                     {point}
                                 </li>
                             ))}
@@ -53,7 +53,7 @@ export const Recommendation: React.FC<RecommendationProps> = ({
 
                     {/* Conditions */}
                     <div className="space-y-3">
-                        <div className="text-[10px] font-black text-[#2D5A9E] uppercase tracking-widest mb-2">Conditions:</div>
+                        <div className="text-[10px] font-black text-[#253746] uppercase tracking-widest mb-2">Conditions:</div>
                         <ul className="space-y-2">
                             {(conditionPoints.length > 0 ? conditionPoints : ['18 months term', 'Collateral']).map((point, i) => (
                                 <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
