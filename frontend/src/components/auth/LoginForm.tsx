@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '../common/LanguageSelector';
+import { authAPI } from '../../services/api';
 import {
-    ShieldCheck,
     AtSign,
     Lock,
     ArrowRight,
@@ -13,7 +13,10 @@ import {
     Loader2,
     X,
     ArrowLeft,
-    Mail
+    Mail,
+    Eye,
+    EyeOff,
+    AlertCircle
 } from 'lucide-react';
 
 export const LoginForm: React.FC = () => {
@@ -23,6 +26,7 @@ export const LoginForm: React.FC = () => {
     // Login State
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -50,10 +54,14 @@ export const LoginForm: React.FC = () => {
     const handleForgotSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResetStatus('sending');
-        // Mock API call
-        setTimeout(() => {
+
+        try {
+            await authAPI.forgotPassword(resetEmail);
             setResetStatus('sent');
-        }, 1500);
+        } catch (err: any) {
+            console.error('Password reset error:', err);
+            setResetStatus('sent'); // Still show success to avoid revealing if email exists
+        }
     };
 
     return (
@@ -115,8 +123,8 @@ export const LoginForm: React.FC = () => {
 
                         <form onSubmit={handleLoginSubmit} className="space-y-6">
                             {error && (
-                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-xs font-bold">
-                                    <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-xs font-bold animate-in slide-in-from-top-2 duration-300">
+                                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                     {error}
                                 </div>
                             )}
@@ -143,19 +151,40 @@ export const LoginForm: React.FC = () => {
                                         <Lock size={16} />
                                     </div>
                                     <input
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
+                                        className="w-full pl-11 pr-12 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
                                         placeholder={t('login.password')}
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
                                 </div>
                             </div>
 
                             <div className="flex justify-end">
-                                <button type="button" onClick={() => setView('forgot')} className="text-xs font-bold text-[#253746] hover:text-white transition-colors uppercase tracking-wider">
-                                    {t('login.forgot')}
+                                <button
+                                    type="button"
+                                    onClick={() => setView('forgot')}
+                                    className="group relative text-xs font-semibold text-[#253746] hover:text-white transition-all duration-300 uppercase tracking-wider px-2 py-1"
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <span className="relative z-10">{t('login.forgot')}</span>
+                                    {/* Animated underline */}
+                                    <span
+                                        className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#253746] group-hover:w-full transition-all duration-300"
+                                    ></span>
                                 </button>
                             </div>
 

@@ -14,7 +14,9 @@ import {
     FileSpreadsheet,
     FileSearch,
     AlertCircle,
-    Mail
+    Mail,
+    Download,
+    FilePieChart
 } from 'lucide-react';
 
 export const AnalysisPage: React.FC = () => {
@@ -83,7 +85,23 @@ export const AnalysisPage: React.FC = () => {
                     File: <span className="text-white">{data?.company_name || 'Loading...'}</span>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-2 mr-2">
+                        <button
+                            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/analysis/${id}/export/pdf`, '_blank')}
+                            className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+                        >
+                            <FilePieChart size={14} />
+                            PDF Report
+                        </button>
+                        <button
+                            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/analysis/${id}/export/excel`, '_blank')}
+                            className="bg-[#5aac44] hover:bg-[#4a8d38] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-green-900/20"
+                        >
+                            <Download size={14} />
+                            Excel Data
+                        </button>
+                    </div>
                     <button className="relative p-1.5 hover:bg-white/10 rounded-lg transition-all">
                         <Mail size={18} className="opacity-90" />
                         <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#253746]"></span>
@@ -103,27 +121,25 @@ export const AnalysisPage: React.FC = () => {
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="text-[12px] font-black text-red-600 uppercase tracking-widest">Unable to load analysis</div>
-                        <div className="mt-2 text-[12px] font-bold text-gray-700">{error}</div>
-                        <div className="mt-4 flex gap-3">
+                    <div className="bg-red-50/50 border border-red-200 rounded-2xl p-8 max-w-2xl mx-auto text-center animate-in zoom-in duration-300">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertCircle size={32} className="text-red-500" />
+                        </div>
+                        <h2 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">Analysis Error</h2>
+                        <p className="text-sm font-bold text-red-600/80 mb-8">{error}</p>
+                        <div className="flex items-center justify-center gap-4">
                             <button
                                 onClick={() => navigate('/dashboard')}
-                                className="px-4 py-2 rounded-lg bg-[#253746] text-white text-[11px] font-black uppercase tracking-wider hover:opacity-90"
+                                className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-colors"
                             >
-                                Back to dashboard
+                                Dashboard
                             </button>
-                            {id && (
-                                <button
-                                    onClick={() => {
-                                        const parsedId = Number.parseInt(id, 10);
-                                        if (!Number.isNaN(parsedId)) fetchAnalysis(parsedId);
-                                    }}
-                                    className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-800 text-[11px] font-black uppercase tracking-wider hover:bg-gray-50"
-                                >
-                                    Retry
-                                </button>
-                            )}
+                            <button
+                                onClick={() => id && fetchAnalysis(Number.parseInt(id))}
+                                className="px-6 py-3 rounded-xl bg-[#253746] text-white text-xs font-black uppercase tracking-widest hover:bg-[#1A2630] transition-all shadow-lg shadow-blue-900/20"
+                            >
+                                Retry Analysis
+                            </button>
                         </div>
                     </div>
                 ) : !data ? (
@@ -139,22 +155,22 @@ export const AnalysisPage: React.FC = () => {
                                 <div className="p-3 space-y-1">
                                     <div className="flex justify-between items-center group/row py-1">
                                         <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Industry:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">Technology</div>
+                                        <div className="text-[10px] font-bold text-gray-700">{data.company_industry || 'N/A'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
                                         <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Years in Business:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">8 years</div>
+                                        <div className="text-[10px] font-bold text-gray-700">{data.years_in_business ? `${data.years_in_business} years` : 'N/A'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex flex-col py-1">
                                         <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Top Clients:</div>
-                                        <div className="text-[10px] font-bold text-gray-700 leading-tight">ABC Corp, InovaTech</div>
+                                        <div className="text-[10px] font-bold text-gray-700 leading-tight">{data.top_clients || 'See Billing Report'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
                                         <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Fiscal Status:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">Compliant</div>
+                                        <div className="text-[10px] font-bold text-gray-700">{data.fiscal_status || 'Compliant'}</div>
                                     </div>
                                 </div>
                             </div>
@@ -187,11 +203,22 @@ export const AnalysisPage: React.FC = () => {
                             <div className="bg-white/50 border-b border-gray-200 py-1.5 flex items-center justify-start gap-6 px-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] font-bold text-gray-700">Credit Risk:</span>
-                                    <div className="flex items-center bg-[#FFD54F] rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm">
+                                    <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'EXCELLENT' ? 'bg-emerald-500' :
+                                        data.credit_category === 'GOOD' ? 'bg-blue-500' :
+                                            data.credit_category === 'MEDIUM' ? 'bg-[#FFD54F]' :
+                                                'bg-red-500'
+                                        }`}>
                                         <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
+                                            <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] ${data.credit_category === 'EXCELLENT' ? 'bg-emerald-400' :
+                                                data.credit_category === 'GOOD' ? 'bg-blue-400' :
+                                                    data.credit_category === 'MEDIUM' ? 'bg-[#FFD54F]' :
+                                                        'bg-red-400'
+                                                }`}></div>
                                         </div>
-                                        <span className="text-[10px] font-black text-gray-900 leading-none">MEDIUM</span>
+                                        <span className={`text-[10px] font-black leading-none ${['EXCELLENT', 'GOOD', 'POOR'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'
+                                            }`}>
+                                            {data.credit_category}
+                                        </span>
                                     </div>
                                 </div>
 

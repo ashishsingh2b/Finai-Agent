@@ -45,6 +45,8 @@ export const authAPI = {
 
     me: () => api.get('/auth/me'),
     updateProfile: (data: { full_name?: string; password?: string; email?: string; role?: string }) => api.put('/auth/me', data),
+    forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+    resetPassword: (data: { token: string; new_password: string }) => api.post('/auth/reset-password', data),
 };
 
 // Analysis APIs

@@ -32,19 +32,19 @@ async def upload_and_analyze(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Upload Excel financial statement and perform complete credit analysis
+    Upload Excel/PDF financial statement and perform complete credit analysis
     """
     
     # Validate file type
     allowed_extensions = ['.xlsx', '.xls', '.pdf']
-    if not any(file.filename.endswith(ext) for ext in allowed_extensions):
+    if not any(file.filename.lower().endswith(ext) for ext in allowed_extensions):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only Excel (.xlsx, .xls) and PDF files are supported"
         )
     
     # Determine file type and save temporarily
-    file_ext = '.pdf' if file.filename.endswith('.pdf') else '.xlsx'
+    file_ext = '.pdf' if file.filename.lower().endswith('.pdf') else '.xlsx'
     with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
         contents = await file.read()
         tmp.write(contents)
@@ -65,19 +65,34 @@ async def upload_and_analyze(
         income_statement = extracted_data['income_statement']
         validation_errors = extracted_data['validation_errors']
         
-        # Check for validation errors
-        if validation_errors:
-            logger.warning(f"Validation errors found: {validation_errors}")
-            # Continue anyway but log warnings
-        
+        # Check if any data was extracted
+        if not balance_sheet or not income_statement:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Could not extract financial data from the provided file. Please ensure it follows the required format."
+            )
+            
         # Get latest year data
-        latest_year = max(balance_sheet.keys())
+        years = list(balance_sheet.keys())
+        if not years:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="No financial years found in the document. Please provide a standard balance sheet."
+            )
+            
+        latest_year = max(years)
         latest_balance = balance_sheet[latest_year]
-        latest_income = income_statement[latest_year]
+        latest_income = income_statement.get(latest_year)
+        
+        if not latest_income:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Income statement data missing for year {latest_year}."
+            )
         
         # Step 2: Create company record
         company = Company(
-            name=company_info['name'],
+            name=company_info.get('name', 'Unknown Company'),
             industry=company_info.get('industry'),
             years_in_business=company_info.get('years_in_business'),
             created_by=current_user.id
@@ -87,11 +102,14 @@ async def upload_and_analyze(
         
         # Step 3: Save financial statements
         for year in balance_sheet.keys():
+            bs_data = balance_sheet[year]
+            is_data = income_statement.get(year, {})
+            
             financial_stmt = FinancialStatement(
                 company_id=company.id,
                 year=year,
-                **balance_sheet[year],
-                **income_statement[year]
+                **bs_data,
+                **is_data
             )
             db.add(financial_stmt)
         
@@ -106,8 +124,8 @@ async def upload_and_analyze(
         logger.info("Calculating credit score")
         credit_score = CreditScorer.calculate_full_score(
             ratios,
-            bureau_score=75,  # Default - would come from Bureau de Crédito API
-            revenue_growth=0,  # Calculate from multi-year data
+            bureau_score=75,
+            revenue_growth=0,
             profit_growth=0
         )
         
@@ -118,7 +136,7 @@ async def upload_and_analyze(
         
         # Step 7: Generate Recommendation
         logger.info("Generating recommendation")
-        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income['net_profit'] / 1000000)  # Default loan 1M
+        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income.get('net_profit', 0) / 1000000)
         recommendation = RecommendationEngine.generate_recommendation(
             credit_score['total_score'],
             credit_score['category'],
@@ -128,9 +146,9 @@ async def upload_and_analyze(
         )
         
         # Step 8: Save analysis result
+        # ... logic continued ...
         analysis = AnalysisResult(
             company_id=company.id,
-            # Ratios
             current_ratio=ratios.get('current_ratio'),
             debt_to_assets=ratios.get('debt_to_assets'),
             leverage_ratio=ratios.get('leverage_ratio'),
@@ -144,18 +162,15 @@ async def upload_and_analyze(
             dio=ratios.get('dio'),
             dpo=ratios.get('dpo'),
             cash_conversion_cycle=ratios.get('cash_conversion_cycle'),
-            # Credit score
             credit_history_score=credit_score['breakdown']['credit_history'],
             solvency_score=credit_score['breakdown']['solvency'],
             profitability_score=credit_score['breakdown']['profitability'],
             total_credit_score=credit_score['total_score'],
             credit_category=credit_score['category'],
-            # SWOT & Recommendation
             swot_analysis=swot,
             recommendation=recommendation['decision'],
             recommendation_justification=recommendation['justification'],
             conditions=recommendation.get('conditions'),
-            # Metadata
             language=language,
             analyzed_by=current_user.id
         )
@@ -163,8 +178,6 @@ async def upload_and_analyze(
         db.add(analysis)
         db.commit()
         db.refresh(analysis)
-        
-        logger.info(f"Analysis complete for company: {company.name} (ID: {company.id})")
         
         return {
             "message": "Analysis completed successfully",
@@ -175,17 +188,17 @@ async def upload_and_analyze(
             "credit_category": credit_score['category'],
             "recommendation": recommendation['decision']
         }
-    
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         logger.error(f"Analysis failed: {str(e)}", exc_info=True)
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Analysis failed: {str(e)}"
+            detail=f"An unexpected error occurred during analysis: {str(e)}"
         )
-    
     finally:
-        # Clean up temporary file
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
@@ -196,21 +209,15 @@ def get_analysis(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get analysis results by ID"""
-    
     analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
-    
     if not analysis:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis not found"
-        )
-    
-    # Get company name
+        raise HTTPException(status_code=404, detail="Analysis not found")
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
-    
     return {
         **analysis.__dict__,
         "company_name": company.name if company else "Unknown",
+        "company_industry": company.industry if company else "N/A",
+        "years_in_business": company.years_in_business if company else 0,
         "justification": analysis.recommendation_justification
     }
 
@@ -222,9 +229,7 @@ def list_analyses(
     current_user: User = Depends(get_current_active_user)
 ):
     """List all analyses"""
-    
-    analyses = db.query(AnalysisResult).offset(skip).limit(limit).all()
-    
+    analyses = db.query(AnalysisResult).order_by(AnalysisResult.created_at.desc()).offset(skip).limit(limit).all()
     results = []
     for analysis in analyses:
         company = db.query(Company).filter(Company.id == analysis.company_id).first()
@@ -236,7 +241,6 @@ def list_analyses(
             "recommendation": analysis.recommendation.value if analysis.recommendation else None,
             "created_at": analysis.created_at
         })
-    
     return {"analyses": results, "total": len(results)}
 
 @router.get("/{analysis_id}/export/pdf")
@@ -246,19 +250,11 @@ async def export_pdf(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    '''Export analysis as PDF report'''
-    
     analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
-    
     if not analysis:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="Analysis not found")
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
     
-    # Prepare analysis data
     analysis_data = {
         'company_name': company.name if company else 'Unknown',
         'total_credit_score': float(analysis.total_credit_score) if analysis.total_credit_score else 0,
@@ -278,16 +274,10 @@ async def export_pdf(
         'conditions': analysis.conditions
     }
     
-    # Generate PDF
     with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
         generator = PDFReportGenerator(language=language)
         generator.generate(analysis_data, tmp.name)
-        
-        return FileResponse(
-            tmp.name,
-            media_type='application/pdf',
-            filename=f"credit_analysis_{company.name}_{analysis_id}.pdf"
-        )
+        return FileResponse(tmp.name, media_type='application/pdf', filename=f"credit_analysis_{company.name}_{analysis_id}.pdf")
 
 @router.get("/{analysis_id}/export/excel")
 async def export_excel(
@@ -296,24 +286,12 @@ async def export_excel(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    '''Export analysis as Excel workbook'''
-    
     analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
-    
     if not analysis:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="Analysis not found")
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
+    statements = db.query(FinancialStatement).filter(FinancialStatement.company_id == analysis.company_id).all()
     
-    # Get financial statements
-    statements = db.query(FinancialStatement).filter(
-        FinancialStatement.company_id == analysis.company_id
-    ).all()
-    
-    # Prepare data
     company_data = {
         'name': company.name if company else 'Unknown',
         'industry': company.industry if company else 'N/A',
@@ -366,13 +344,7 @@ async def export_excel(
         'ebitda': float(stmt.ebitda) if stmt.ebitda else 0
     } for stmt in statements]
     
-    # Generate Excel
     with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
         generator = ExcelReportGenerator(language=language)
         generator.generate(analysis_data, company_data, financial_statements_data, tmp.name)
-        
-        return FileResponse(
-            tmp.name,
-            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            filename=f"credit_analysis_{company.name}_{analysis_id}.xlsx"
-        )
+        return FileResponse(tmp.name, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename=f"credit_analysis_{company.name}_{analysis_id}.xlsx")

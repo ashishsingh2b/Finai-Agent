@@ -4,6 +4,7 @@ import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
 
 import { LoginForm } from './components/auth/LoginForm';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { UploadPage } from './pages/UploadPage';
 import { AnalysisPage } from './pages/AnalysisPage';
@@ -83,6 +84,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>

@@ -228,5 +228,18 @@
         "needHelpDesc": "Can't find what you're looking for? Our support team is ready to assist you.",
         "contactSupport": "Contact Support",
         "visitWebsite": "Visit Website"
+    },
+    "resetPassword": {
+        "title": "Reset Terminal Access",
+        "subtitle": "Establish a new secure password for your institutional account.",
+        "newPassword": "New Secure Password",
+        "confirmPassword": "Confirm New Password",
+        "submit": "DETERMINE NEW PASSWORD",
+        "successTitle": "Access Restored",
+        "successSubtitle": "Your credentials have been updated successfully. Redirecting to terminal...",
+        "backToLogin": "PROCEED TO LOGIN",
+        "invalidToken": "The security token is invalid or has expired.",
+        "passwordsDoNotMatch": "The passwords provided do not match our security requirements.",
+        "resetFailed": "Critical Error: Failed to update credentials. Please contact systems administrator."
     }
 }

@@ -94,3 +94,112 @@ def update_user_me(
     db.refresh(current_user)
     
     return current_user
+
+# Password Reset
+from app.services.email_service import EmailService
+from pydantic import BaseModel, EmailStr
+import secrets
+from datetime import datetime, timedelta as td
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Store reset tokens temporarily (in production, use Redis or database)
+reset_tokens = {}
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    '''Request password reset email'''
+    logger.info(f"Password reset requested for: {request.email}")
+    
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        # Don't reveal if email exists
+        logger.warning(f"Password reset requested for non-existent email: {request.email}")
+        return {"message": "If the email exists, a reset link has been sent"}
+    
+    # Generate reset token
+    reset_token = secrets.token_urlsafe(32)
+    reset_tokens[reset_token] = {
+        'email': request.email,
+        'expires': datetime.now() + td(hours=1)
+    }
+    
+    logger.info(f"Generated reset token for: {request.email}")
+    
+    # Send email
+    try:
+        email_service = EmailService()
+        reset_url = "http://localhost:5173/reset-password"  # Frontend URL
+        
+        success = email_service.send_password_reset_email(
+            to_email=request.email,
+            reset_token=reset_token,
+            reset_url=reset_url
+        )
+        
+        if success:
+            logger.info(f"Password reset email sent successfully to: {request.email}")
+            return {"message": "If the email exists, a reset link has been sent"}
+        else:
+            logger.error(f"Failed to send password reset email to: {request.email}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send email. Please try again later."
+            )
+    except Exception as e:
+        logger.error(f"Error sending password reset email: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to send email: {str(e)}"
+        )
+
+@router.post("/reset-password")
+def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
+    '''Reset password with token'''
+    logger.info(f"Password reset attempt with token")
+    
+    if request.token not in reset_tokens:
+        logger.warning("Invalid or expired reset token used")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    token_data = reset_tokens[request.token]
+    
+    # Check expiration
+    if datetime.now() > token_data['expires']:
+        del reset_tokens[request.token]
+        logger.warning(f"Expired reset token used for: {token_data['email']}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset token has expired"
+        )
+    
+    # Update password
+    user = db.query(User).filter(User.email == token_data['email']).first()
+    if not user:
+        logger.error(f"User not found for email: {token_data['email']}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    user.hashed_password = get_password_hash(request.new_password)
+    db.add(user)
+    db.commit()
+    
+    # Remove used token
+    del reset_tokens[request.token]
+    
+    logger.info(f"Password reset successful for: {token_data['email']}")
+    return {"message": "Password reset successful"}

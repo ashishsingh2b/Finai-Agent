@@ -12,7 +12,6 @@ import {
     ArrowDownRight,
     ShieldAlert,
     BarChart3,
-    Calendar,
     ChevronRight,
     Search,
     Activity
@@ -25,6 +24,7 @@ export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const [analyses, setAnalyses] = useState<AnalysisListItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchAnalyses();
@@ -32,10 +32,12 @@ export const DashboardPage: React.FC = () => {
 
     const fetchAnalyses = async () => {
         try {
+            setError(null);
             const response = await analysisAPI.listAnalyses();
             setAnalyses(response.data.analyses || []);
         } catch (error) {
             console.error('Failed to fetch analyses:', error);
+            setError('System could not retrieve historical data. Please check connection and refresh.');
         } finally {
             setLoading(false);
         }
@@ -110,6 +112,21 @@ export const DashboardPage: React.FC = () => {
                         <span className="bg-[#253746]/10 text-[#253746] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
                     </h2>
                 </div>
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center justify-between gap-3 text-xs font-bold animate-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center gap-3">
+                            <ShieldAlert className="w-4 h-4" />
+                            {error}
+                        </div>
+                        <button
+                            onClick={fetchAnalyses}
+                            className="bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded-lg transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
 
                 <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
                     {loading ? (

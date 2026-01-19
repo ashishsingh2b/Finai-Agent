@@ -228,5 +228,18 @@
         "needHelpDesc": "¿No encuentra lo que busca? Nuestro equipo de soporte está listo para ayudarle.",
         "contactSupport": "Contactar Soporte",
         "visitWebsite": "Visitar Sitio Web"
+    },
+    "resetPassword": {
+        "title": "Restablecer Acceso",
+        "subtitle": "Establezca una nueva contraseña segura para su cuenta institucional.",
+        "newPassword": "Nueva Contraseña Segura",
+        "confirmPassword": "Confirmar Nueva Contraseña",
+        "submit": "DETERMINAR NUEVA CONTRASEÑA",
+        "successTitle": "Acceso Restaurado",
+        "successSubtitle": "Sus credenciales han sido actualizadas con éxito. Redirigiendo a la terminal...",
+        "backToLogin": "PROCEDER AL INICIO",
+        "invalidToken": "El token de seguridad es inválido o ha expirado.",
+        "passwordsDoNotMatch": "Las contraseñas proporcionadas no coinciden con nuestros requisitos de seguridad.",
+        "resetFailed": "Error Crítico: No se pudieron actualizar las credenciales. Contacte al administrador del sistema."
     }
 }

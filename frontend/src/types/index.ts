@@ -61,6 +61,10 @@ export interface AnalysisData {
     ebitda_margin?: number;
     leverage_ratio?: number;
     interest_coverage?: number;
+    company_industry?: string;
+    years_in_business?: number;
+    top_clients?: string;
+    fiscal_status?: string;
     created_at?: string;
 }
 

@@ -3,11 +3,8 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     CloudIcon,
-    Upload,
     FileSpreadsheet,
-    X,
     CheckCircle,
-    Loader2,
     AlertCircle,
     FileText,
     Trash2
@@ -53,12 +50,15 @@ export const SplitFileUpload: React.FC = () => {
     };
 
     const validateAndSetFile = (f: File) => {
-        if (f && (f.name.endsWith('.xlsx') || f.name.endsWith('.xls'))) {
+        const allowed = ['.xlsx', '.xls', '.pdf'];
+        const isAllowed = allowed.some(ext => f.name.toLowerCase().endsWith(ext));
+
+        if (f && isAllowed) {
             setFile(f);
             setError('');
             setProgress(0);
         } else {
-            setError('Invalid format. Please use .xlsx or .xls');
+            setError('Invalid format. Please use .xlsx, .xls or .pdf');
         }
     };
 
@@ -112,7 +112,7 @@ export const SplitFileUpload: React.FC = () => {
                     </button>
                     <input
                         type="file"
-                        accept=".xlsx,.xls"
+                        accept=".xlsx,.xls,.pdf"
                         onChange={handleFileChange}
                         className="hidden"
                         id="split-file-input"
