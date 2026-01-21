@@ -52,7 +52,7 @@ export const DocumentationPage: React.FC = () => {
             <div className="max-w-7xl mx-auto p-6">
                 {/* Header */}
                 <div className="mb-8 animate-in fade-in slide-in-from-left duration-700">
-                    <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                    <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                         <BookOpen size={14} />
                         {t('docs.title')}
                     </div>
@@ -76,8 +76,8 @@ export const DocumentationPage: React.FC = () => {
                                         key={section.id}
                                         onClick={() => setActiveSection(section.id)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${activeSection === section.id
-                                                ? 'bg-[#253746] text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-[#253746]'
+                                            ? 'bg-[#11303B] text-white shadow-md'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-[#11303B]'
                                             }`}
                                     >
                                         <section.icon size={14} />
@@ -94,7 +94,7 @@ export const DocumentationPage: React.FC = () => {
                             {/* Getting Started */}
                             {activeSection === 'getting-started' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <Zap size={20} />
                                         {t('docs.gettingStarted')}
                                     </h2>
@@ -112,9 +112,9 @@ export const DocumentationPage: React.FC = () => {
                                         </div>
 
                                         <h3 className="text-base font-black text-[#1A1A1A] mt-6 mb-3">{t('docs.gsStep2Title')}</h3>
-                                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                                        <div className="bg-[#76d2b1]/10 rounded-lg p-4 border border-[#76d2b1]/30">
                                             <div className="flex items-start gap-3">
-                                                <Shield className="w-5 h-5 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Shield className="w-5 h-5 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <p className="text-sm text-gray-700">{t('docs.gsStep2Desc')}</p>
                                             </div>
                                         </div>
@@ -143,7 +143,7 @@ export const DocumentationPage: React.FC = () => {
                             {/* Upload Guide */}
                             {activeSection === 'upload' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <Upload size={20} />
                                         {t('docs.uploadGuide')}
                                     </h2>
@@ -170,11 +170,11 @@ export const DocumentationPage: React.FC = () => {
                                             </ol>
                                         </div>
 
-                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                                        <div className="bg-[#ef6b6b]/10 border border-[#ef6b6b]/30 rounded-lg p-4 mt-4">
                                             <div className="flex items-start gap-3">
-                                                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                                <AlertCircle className="w-5 h-5 text-[#ef6b6b] flex-shrink-0 mt-0.5" />
                                                 <div>
-                                                    <p className="text-xs font-black text-amber-900 mb-1">{t('docs.uploadImportant')}</p>
+                                                    <p className="text-xs font-black text-[#ef6b6b] mb-1">{t('docs.uploadImportant')}</p>
                                                     <p className="text-xs text-gray-700">{t('docs.uploadImportantDesc')}</p>
                                                 </div>
                                             </div>
@@ -186,7 +186,7 @@ export const DocumentationPage: React.FC = () => {
                             {/* Analysis Guide */}
                             {activeSection === 'analysis' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <BarChart3 size={20} />
                                         {t('docs.analysisGuide')}
                                     </h2>
@@ -198,19 +198,19 @@ export const DocumentationPage: React.FC = () => {
 
                                         <div className="space-y-3">
                                             <div className="border border-gray-200 rounded-lg p-4">
-                                                <h4 className="text-sm font-black text-[#253746] mb-2">{t('docs.analysisComp1')}</h4>
+                                                <h4 className="text-sm font-black text-[#11303B] mb-2">{t('docs.analysisComp1')}</h4>
                                                 <p className="text-xs text-gray-600">{t('docs.analysisComp1Desc')}</p>
                                             </div>
                                             <div className="border border-gray-200 rounded-lg p-4">
-                                                <h4 className="text-sm font-black text-[#253746] mb-2">{t('docs.analysisComp2')}</h4>
+                                                <h4 className="text-sm font-black text-[#11303B] mb-2">{t('docs.analysisComp2')}</h4>
                                                 <p className="text-xs text-gray-600">{t('docs.analysisComp2Desc')}</p>
                                             </div>
                                             <div className="border border-gray-200 rounded-lg p-4">
-                                                <h4 className="text-sm font-black text-[#253746] mb-2">{t('docs.analysisComp3')}</h4>
+                                                <h4 className="text-sm font-black text-[#11303B] mb-2">{t('docs.analysisComp3')}</h4>
                                                 <p className="text-xs text-gray-600">{t('docs.analysisComp3Desc')}</p>
                                             </div>
                                             <div className="border border-gray-200 rounded-lg p-4">
-                                                <h4 className="text-sm font-black text-[#253746] mb-2">{t('docs.analysisComp4')}</h4>
+                                                <h4 className="text-sm font-black text-[#11303B] mb-2">{t('docs.analysisComp4')}</h4>
                                                 <p className="text-xs text-gray-600">{t('docs.analysisComp4Desc')}</p>
                                             </div>
                                         </div>
@@ -245,7 +245,7 @@ export const DocumentationPage: React.FC = () => {
                             {/* Reports Guide */}
                             {activeSection === 'reports' && (
                                 <div className="space-y-6 animate-in fade-in-slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <FileText size={20} />
                                         {t('docs.reportsGuide')}
                                     </h2>
@@ -257,21 +257,21 @@ export const DocumentationPage: React.FC = () => {
 
                                         <div className="space-y-3">
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Eye className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Eye className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.reportsView')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.reportsViewDesc')}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Search className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Search className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.reportsSearch')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.reportsSearchDesc')}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Download className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Download className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.reportsExport')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.reportsExportDesc')}</p>
@@ -285,14 +285,14 @@ export const DocumentationPage: React.FC = () => {
                             {/* User Management Guide */}
                             {activeSection === 'users' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <Users size={20} />
                                         {t('docs.userManagement')}
                                     </h2>
 
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div className="bg-[#76d2b1]/10 border border-[#76d2b1]/30 rounded-lg p-4">
                                         <div className="flex items-start gap-3">
-                                            <Shield className="w-5 h-5 text-[#253746] flex-shrink-0 mt-0.5" />
+                                            <Shield className="w-5 h-5 text-[#11303B] flex-shrink-0 mt-0.5" />
                                             <p className="text-xs text-gray-700">{t('docs.usersAdminOnly')}</p>
                                         </div>
                                     </div>
@@ -302,21 +302,21 @@ export const DocumentationPage: React.FC = () => {
 
                                         <div className="space-y-3">
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Users className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Users className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.usersCreate')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.usersCreateDesc')}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Edit className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Edit className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.usersEdit')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.usersEditDesc')}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <Settings className="w-4 h-4 text-[#253746] flex-shrink-0 mt-0.5" />
+                                                <Settings className="w-4 h-4 text-[#11303B] flex-shrink-0 mt-0.5" />
                                                 <div>
                                                     <p className="text-xs font-black text-[#1A1A1A]">{t('docs.usersToggle')}</p>
                                                     <p className="text-xs text-gray-600 mt-0.5">{t('docs.usersToggleDesc')}</p>
@@ -337,7 +337,7 @@ export const DocumentationPage: React.FC = () => {
                             {/* FAQ */}
                             {activeSection === 'faq' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
-                                    <h2 className="text-xl font-black text-[#253746] flex items-center gap-2">
+                                    <h2 className="text-xl font-black text-[#11303B] flex items-center gap-2">
                                         <HelpCircle size={20} />
                                         {t('docs.faq')}
                                     </h2>
@@ -353,7 +353,7 @@ export const DocumentationPage: React.FC = () => {
                                                 >
                                                     <span className="text-xs font-black text-[#1A1A1A] text-left">{faq.q}</span>
                                                     {expandedFaq === index ? (
-                                                        <ChevronDown className="w-4 h-4 text-[#253746] flex-shrink-0" />
+                                                        <ChevronDown className="w-4 h-4 text-[#11303B] flex-shrink-0" />
                                                     ) : (
                                                         <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                     )}
@@ -367,13 +367,13 @@ export const DocumentationPage: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    <div className="bg-[#253746] rounded-lg p-6 mt-8">
+                                    <div className="bg-[#11303B] rounded-lg p-6 mt-8">
                                         <h3 className="text-white font-black text-sm mb-2">{t('docs.needHelp')}</h3>
                                         <p className="text-gray-300 text-xs mb-4">{t('docs.needHelpDesc')}</p>
                                         <div className="flex gap-3">
                                             <a
                                                 href="mailto:support@moskalti.com"
-                                                className="px-4 py-2 bg-white text-[#253746] rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors"
+                                                className="px-4 py-2 bg-white text-[#11303B] rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors"
                                             >
                                                 {t('docs.contactSupport')}
                                             </a>
@@ -381,7 +381,7 @@ export const DocumentationPage: React.FC = () => {
                                                 href="https://moskalti.com"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="px-4 py-2 bg-[#1A2630] text-white rounded-lg text-xs font-bold hover:bg-opacity-80 transition-colors flex items-center gap-2"
+                                                className="px-4 py-2 bg-[#0a1e25] text-white rounded-lg text-xs font-bold hover:bg-opacity-80 transition-colors flex items-center gap-2"
                                             >
                                                 <Globe size={14} />
                                                 {t('docs.visitWebsite')}

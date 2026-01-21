@@ -59,28 +59,17 @@ export const ResetPasswordPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-            {/* Background elements */}
-            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#253746" strokeWidth="0.5" opacity="0.3" />
-                        </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
-            </div>
-
+        <div className="min-h-screen bg-[#11303B] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-white/20">
+            {/* Minimal Language Selector - Top Right */}
             <div className="absolute top-6 right-6 z-50">
                 <LanguageSelector />
             </div>
 
             <div className="relative z-10 w-full max-width-md">
-                <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl max-w-md mx-auto">
+                <div className="bg-[#11303B] border border-white/10 rounded-3xl p-8 shadow-2xl max-w-md mx-auto relative overflow-hidden">
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 bg-[#253746]/20 rounded-2xl flex items-center justify-center mb-6 border border-[#253746]/30">
-                            <ShieldCheck size={32} className="text-[#253746]" />
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                            <ShieldCheck size={32} className="text-[#11303B]" />
                         </div>
                         <h1 className="text-2xl font-bold text-white tracking-tight uppercase">
                             {status === 'success' ? t('resetPassword.successTitle') : t('resetPassword.title')}
@@ -99,7 +88,7 @@ export const ResetPasswordPage: React.FC = () => {
                             </div>
                             <button
                                 onClick={() => navigate('/login')}
-                                className="w-full py-4 bg-[#253746] hover:bg-[#253746]/80 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 group"
+                                className="w-full py-4 bg-[#11303B] hover:bg-[#0a1e25] text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 group"
                             >
                                 {t('resetPassword.backToLogin')}
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -119,14 +108,14 @@ export const ResetPasswordPage: React.FC = () => {
                                     {t('resetPassword.newPassword')}
                                 </label>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#253746] transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-white transition-colors">
                                         <Lock size={16} />
                                     </div>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-11 pr-12 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
+                                        className="w-full pl-11 pr-12 py-3 bg-[#0a1e25] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#0d232b] focus:ring-2 focus:ring-white/20 focus:border-white/50 transition-all outline-none placeholder:text-white/40"
                                         placeholder="••••••••"
                                         required
                                         minLength={8}
@@ -146,14 +135,14 @@ export const ResetPasswordPage: React.FC = () => {
                                     {t('resetPassword.confirmPassword')}
                                 </label>
                                 <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-[#253746] transition-colors">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-white transition-colors">
                                         <Lock size={16} />
                                     </div>
                                     <input
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full pl-11 pr-12 py-3 bg-[#1A1A1A] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#1A1A1A] focus:ring-2 focus:ring-[#253746]/50 focus:border-[#253746] transition-all outline-none placeholder:text-gray-600"
+                                        className="w-full pl-11 pr-12 py-3 bg-[#0a1e25] border border-white/10 rounded-xl text-sm font-medium text-white focus:bg-[#0d232b] focus:ring-2 focus:ring-white/20 focus:border-white/50 transition-all outline-none placeholder:text-white/40"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -170,16 +159,20 @@ export const ResetPasswordPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading || !token}
-                                className="w-full py-4 bg-[#253746] hover:bg-[#253746]/80 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all shadow-lg shadow-[#253746]/20 flex items-center justify-center gap-2 group mt-8"
+                                className="w-full relative py-4 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden mt-8"
                             >
-                                {loading ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        {t('resetPassword.submit')}
-                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
+                                <div className="absolute inset-0 w-full h-full bg-white hover:bg-white/90 transition-all"></div>
+                                <div className="absolute inset-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                                <div className="relative flex items-center gap-2 text-[#11303B]">
+                                    {loading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            {t('resetPassword.submit')}
+                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
+                                </div>
                             </button>
                         </form>
                     )}

@@ -5,11 +5,11 @@ import {
     Search,
     Filter,
     Download,
-    ChevronRight,
     Calendar,
     ArrowUpDown,
     FileText,
-    MoreHorizontal
+    FileDown,
+    Eye
 } from 'lucide-react';
 import { analysisAPI } from '../services/api';
 import { AnalysisListItem } from '../types';
@@ -24,10 +24,34 @@ export const ReportsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
+    const [activeDownloadId, setActiveDownloadId] = useState<number | null>(null);
 
     useEffect(() => {
+        const handleClickOutside = () => setActiveDownloadId(null);
+        window.addEventListener('click', handleClickOutside);
         fetchAnalyses();
+        return () => window.removeEventListener('click', handleClickOutside);
     }, []);
+
+    const handleDownload = async (id: number, type: 'pdf' | 'excel', companyName: string) => {
+        try {
+            const response = type === 'pdf'
+                ? await analysisAPI.downloadPDF(id)
+                : await analysisAPI.downloadExcel(id);
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `credit_analysis_${companyName.replace(/\s+/g, '_')}_${id}.${type === 'pdf' ? 'pdf' : 'xlsx'}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(`Failed to download ${type}:`, error);
+            alert(`Failed to download ${type.toUpperCase()}. Please try again.`);
+        }
+    };
 
     useEffect(() => {
         let results = analyses;
@@ -75,7 +99,7 @@ export const ReportsPage: React.FC = () => {
                 {/* Header Area */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
-                        <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                        <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                             <FileText size={14} />
                             {t('reports.title')}
                         </div>
@@ -83,7 +107,7 @@ export const ReportsPage: React.FC = () => {
                         <p className="text-gray-500 font-medium text-xs">{t('reports.subtitle')}</p>
                     </div>
 
-                    <button className="bg-[#253746] text-white px-5 py-3 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-[#1A2630] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-900/20 group">
+                    <button className="bg-[#6ECEB2] text-[#11303B] px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group">
                         <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
                         {t('reports.export')}
                     </button>
@@ -92,20 +116,20 @@ export const ReportsPage: React.FC = () => {
                 {/* Filters & Search Bar */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-6">
                     <div className="lg:col-span-2 relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#11303B] transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder={t('reports.searchPlaceholder')}
-                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#253746] outline-none font-bold text-xs text-[#1A1A1A] transition-all placeholder:text-gray-300"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#11303B] outline-none font-bold text-xs text-[#1A1A1A] transition-all placeholder:text-gray-300"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
                     <div className="relative group">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#11303B] transition-colors" size={16} />
                         <select
-                            className="w-full pl-11 pr-8 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#253746] outline-none font-black text-[10px] uppercase tracking-widest text-gray-500 appearance-none cursor-pointer transition-all"
+                            className="w-full pl-11 pr-8 py-3 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-900/5 focus:border-[#11303B] outline-none font-black text-[10px] uppercase tracking-widest text-gray-500 appearance-none cursor-pointer transition-all"
                             value={filterCategory}
                             onChange={(e) => setFilterCategory(e.target.value)}
                         >
@@ -130,31 +154,33 @@ export const ReportsPage: React.FC = () => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
-                                    <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">
                                         <div className="flex items-center gap-2">
-                                            {t('reports.col.entity')}
+                                            Company Entity
                                             <ArrowUpDown size={10} />
                                         </div>
                                     </th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">{t('reports.col.health')}</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] text-center">{t('reports.col.grade')}</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">{t('reports.col.period')}</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] text-right">{t('reports.col.actions')}</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Health Index</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center">Grade Placement</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Application Status</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Payment Behavior</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Analysis Period</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={5} className="px-8 py-24 text-center">
+                                        <td colSpan={7} className="px-8 py-24 text-center">
                                             <div className="flex flex-col items-center gap-3">
-                                                <div className="w-10 h-10 border-4 border-[#253746]/20 border-t-[#253746] rounded-full animate-spin"></div>
-                                                <span className="text-[10px] font-black text-[#253746] uppercase tracking-widest">{t('reports.loading')}</span>
+                                                <div className="w-10 h-10 border-4 border-[#11303B]/20 border-t-[#11303B] rounded-full animate-spin"></div>
+                                                <span className="text-[10px] font-black text-[#11303B] uppercase tracking-widest">{t('reports.loading')}</span>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : filteredAnalyses.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-8 py-24 text-center">
+                                        <td colSpan={7} className="px-8 py-24 text-center">
                                             <div className="flex flex-col items-center gap-3 opacity-30">
                                                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                                                     <Search size={24} className="text-gray-400" />
@@ -162,7 +188,7 @@ export const ReportsPage: React.FC = () => {
                                                 <p className="text-gray-400 font-bold text-sm">{t('reports.noResults.title')}</p>
                                                 <button
                                                     onClick={() => { setSearchTerm(''); setFilterCategory('All'); }}
-                                                    className="text-[#253746] text-[10px] font-black uppercase tracking-widest hover:underline"
+                                                    className="text-[#11303B] text-[10px] font-black uppercase tracking-widest hover:underline"
                                                 >
                                                     {t('reports.noResults.clear')}
                                                 </button>
@@ -173,54 +199,157 @@ export const ReportsPage: React.FC = () => {
                                     filteredAnalyses.map((analysis) => (
                                         <tr
                                             key={analysis.id}
-                                            onClick={() => navigate(`/analysis/${analysis.id}`)}
-                                            className="hover:bg-gray-50/50 transition-all cursor-pointer group"
+                                            className="hover:bg-gray-50/50 transition-all group border-b border-gray-50 last:border-0"
                                         >
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#253746] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
+                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#11303B] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
                                                         {analysis.company_name.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#253746] transition-colors">{analysis.company_name}</div>
+                                                        <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#11303B] transition-colors">{analysis.company_name}</div>
                                                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">ID: {analysis.id.toString().padStart(6, '0')}</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex flex-col gap-1 w-32">
                                                     <div className="flex justify-between items-end">
-                                                        <span className="text-[9px] font-black text-[#1A1A1A] uppercase">{t('reports.signalStrength')}</span>
-                                                        <span className="text-[10px] font-black text-[#253746]">{analysis.credit_score.toFixed(0)}%</span>
+                                                        <span className="text-[9px] font-black text-[#1A1A1A] uppercase">Health Index</span>
+                                                        <span className="text-[10px] font-black text-[#11303B]">{analysis.credit_score.toFixed(0)}%</span>
                                                     </div>
                                                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-gradient-to-r from-[#253746] to-blue-400 rounded-full transition-all duration-1000"
+                                                            className="h-full bg-gradient-to-r from-[#11303B] to-[#76d2b1] rounded-full transition-all duration-1000"
                                                             style={{ width: `${analysis.credit_score}%` }}
                                                         ></div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex justify-center">
                                                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-all ${getCategoryStyles(analysis.category)} shadow-sm`}>
                                                         GRADE {analysis.category}
                                                     </span>
                                                 </div>
                                             </td>
+                                            {/* Status Column */}
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 text-gray-500">
-                                                    <Calendar size={12} className="text-gray-300" />
-                                                    <span className="text-[11px] font-bold">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                <select
+                                                    defaultValue={analysis.application_status}
+                                                    onChange={async (e) => {
+                                                        const newStatus = e.target.value;
+                                                        try {
+                                                            await analysisAPI.updateAnalysisStatus(analysis.id, {
+                                                                application_status: newStatus,
+                                                                payment_behavior: newStatus !== 'APPROVED' ? 'NA' : analysis.payment_behavior
+                                                            });
+                                                            fetchAnalyses(); // Refresh data
+                                                        } catch (error) {
+                                                            console.error('Failed to update status:', error);
+                                                        }
+                                                    }}
+                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider cursor-pointer shadow-sm outline-none transition-all ${analysis.application_status === 'APPROVED' ? 'bg-[#5aac44] text-white border-[#5aac44]' :
+                                                        analysis.application_status === 'REJECTED' ? 'bg-[#ef4444] text-white border-[#ef4444]' :
+                                                            'bg-[#fbbf24] text-white border-[#fbbf24]'
+                                                        }`}
+                                                >
+                                                    <option value="UNDER_REVIEW" className="bg-white text-gray-800">{t('status.UNDER_REVIEW')}</option>
+                                                    <option value="APPROVED" className="bg-white text-gray-800">{t('status.APPROVED')}</option>
+                                                    <option value="REJECTED" className="bg-white text-gray-800">{t('status.REJECTED')}</option>
+                                                </select>
+                                            </td>
+                                            {/* Behavior Column */}
+                                            <td className="px-6 py-4">
+                                                <select
+                                                    disabled={analysis.application_status !== 'APPROVED'}
+                                                    value={analysis.payment_behavior}
+                                                    onChange={async (e) => {
+                                                        try {
+                                                            await analysisAPI.updateAnalysisStatus(analysis.id, { payment_behavior: e.target.value });
+                                                            fetchAnalyses();
+                                                        } catch (error) {
+                                                            console.error('Failed to update behavior:', error);
+                                                        }
+                                                    }}
+                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider shadow-sm outline-none transition-all appearance-none cursor-pointer ${analysis.application_status !== 'APPROVED'
+                                                        ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
+                                                        : 'bg-white text-[#11303B] border-[#11303B]/20 hover:border-[#11303B] hover:shadow-md'
+                                                        }`}
+                                                >
+                                                    <option value="NA">{t('behavior.NA')}</option>
+                                                    <option value="ON_TIME">{t('behavior.ON_TIME')}</option>
+                                                    <option value="DELINQUENT">{t('behavior.DELINQUENT')}</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-[#11303B]">
+                                                    <Calendar size={12} className="text-[#11303B]/60" />
+                                                    <span className="text-[11px] font-black">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
-                                                    <button className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-[#253746] hover:border-[#253746] hover:shadow-md transition-all">
-                                                        <MoreHorizontal size={14} />
+                                                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                    {/* Consolidated Download Button */}
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveDownloadId(activeDownloadId === analysis.id ? null : analysis.id);
+                                                            }}
+                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all border shadow-sm hover:shadow-md group/dl ${activeDownloadId === analysis.id
+                                                                ? 'bg-[#253746] text-white border-[#253746]'
+                                                                : 'bg-[#11303B] text-white border-[#11303B] hover:bg-[#253746] hover:border-[#253746]'
+                                                                }`}
+                                                            title={t('common.download_report')}
+                                                        >
+                                                            <FileDown size={12} strokeWidth={3} className="text-white transition-colors" />
+                                                            <span className="text-[9px] font-black uppercase tracking-widest">{t('common.download_report')}</span>
+                                                        </button>
+
+                                                        {activeDownloadId === analysis.id && (
+                                                            <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in zoom-in-95 duration-200">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDownload(analysis.id, 'pdf', analysis.company_name);
+                                                                        setActiveDownloadId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                                >
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef6b6b]" />
+                                                                    {t('common.pdf_version')}
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDownload(analysis.id, 'excel', analysis.company_name);
+                                                                        setActiveDownloadId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#5aac44] hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                                >
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#5aac44]" />
+                                                                    {t('common.excel_version')}
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => navigate(`/analysis/${analysis.id}`)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-white bg-[#11303B] border border-[#11303B] hover:bg-[#253746] hover:border-[#253746] hover:shadow-md rounded-lg transition-all"
+                                                    >
+                                                        <Eye size={12} strokeWidth={3} className="text-white" />
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">Report</span>
                                                     </button>
-                                                    <button className="p-2 bg-[#1A1A1A] rounded-lg text-white hover:bg-[#253746] shadow-md transition-all">
-                                                        <ChevronRight size={14} />
+
+                                                    <button
+                                                        onClick={() => navigate('/dashboard/upload')}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-white bg-[#11303B] border border-[#11303B] hover:bg-[#253746] hover:border-[#253746] hover:shadow-md rounded-lg transition-all"
+                                                        title="Update / Edit"
+                                                    >
+                                                        <FileText size={12} strokeWidth={3} className="text-white" />
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">Edit</span>
                                                     </button>
                                                 </div>
                                             </td>
@@ -245,6 +374,6 @@ export const ReportsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 };

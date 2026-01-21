@@ -11,23 +11,29 @@ import {
     FileText,
     ArrowLeft,
     User as UserIcon,
-    FileSpreadsheet,
-    FileSearch,
     AlertCircle,
     Mail,
-    Download,
-    FilePieChart
+    FilePieChart,
+    RefreshCcw,
+    FileSpreadsheet,
+    FileSearch
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const AnalysisPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [data, setData] = useState<AnalysisData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
     useEffect(() => {
+        const handleClickOutside = () => setIsDownloadOpen(false);
+        window.addEventListener('click', handleClickOutside);
+
         if (!id) {
             setError('Missing analysis id.');
             setLoading(false);
@@ -42,6 +48,8 @@ export const AnalysisPage: React.FC = () => {
         }
 
         fetchAnalysis(parsedId);
+
+        return () => window.removeEventListener('click', handleClickOutside);
     }, [id]);
 
     const fetchAnalysis = async (analysisId: number) => {
@@ -70,36 +78,91 @@ export const AnalysisPage: React.FC = () => {
         threats: []
     };
 
+    const handleDownload = async (type: 'pdf' | 'excel') => {
+        if (!id || !data) return;
+        try {
+            const parsedId = Number.parseInt(id, 10);
+            const response = type === 'pdf'
+                ? await analysisAPI.downloadPDF(parsedId)
+                : await analysisAPI.downloadExcel(parsedId);
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `credit_analysis_${data.company_name.replace(/\s+/g, '_')}_${id}.${type === 'pdf' ? 'pdf' : 'xlsx'}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(`Failed to download ${type}:`, error);
+            alert(`Failed to download ${type.toUpperCase()}. Please try again.`);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#F0F2F5] font-sans text-gray-900 overflow-x-hidden">
             {/* Header */}
-            <header className="bg-[#253746] px-6 py-3 flex items-center justify-between text-white shadow-lg relative z-20">
-                <div className="flex items-center gap-8">
+            <header className="bg-[#11303B] px-6 py-2 flex items-center justify-between text-white shadow-lg relative z-20">
+                <div className="flex items-center gap-6">
                     <button onClick={() => navigate('/dashboard')} className="hover:opacity-80 transition-opacity flex items-center gap-2">
-                        <ArrowLeft size={20} strokeWidth={3} />
+                        <ArrowLeft size={18} strokeWidth={3} />
                     </button>
-                    <h1 className="text-xl font-black tracking-tight uppercase">Business Credit Analysis</h1>
+                    <div className="flex items-center justify-center w-24 h-8">
+                        <img src="/logo.avif" alt="Moskalti Capital" className="w-full h-full object-contain drop-shadow-md" />
+                    </div>
                 </div>
 
-                <div className="text-xs font-bold opacity-90 absolute left-1/2 -translate-x-1/2 bg-white/10 px-4 py-1.5 rounded-full border border-white/20">
-                    File: <span className="text-white">{data?.company_name || 'Loading...'}</span>
+                <div className="flex-1 flex justify-center px-4">
+                    <div className="text-[10px] font-black opacity-90 bg-white/10 px-4 py-1 rounded-full border border-white/10 max-w-md truncate">
+                        FILE: <span className="text-white">{data?.company_name || 'LOADING...'}</span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:flex items-center gap-2 mr-2">
+                        {/* Consolidated Download Button */}
+                        <div className="relative">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsDownloadOpen(!isDownloadOpen);
+                                }}
+                                className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg ${isDownloadOpen
+                                    ? 'bg-white text-[#11303B] border-white'
+                                    : 'bg-white/10 hover:bg-white/20 border-white/10 text-white'
+                                    }`}
+                            >
+                                <FilePieChart size={14} />
+                                {t('common.download_report')}
+                            </button>
+
+                            {isDownloadOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in zoom-in-95 duration-200">
+                                    <button
+                                        onClick={() => handleDownload('pdf')}
+                                        className="w-full text-left px-4 py-2.5 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                    >
+                                        <div className="w-2 h-2 rounded-full bg-[#ef6b6b]" />
+                                        {t('common.pdf_version')}
+                                    </button>
+                                    <button
+                                        onClick={() => handleDownload('excel')}
+                                        className="w-full text-left px-4 py-2.5 text-[10px] font-black text-[#5aac44] hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                    >
+                                        <div className="w-2 h-2 rounded-full bg-[#5aac44]" />
+                                        {t('common.excel_version')}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         <button
-                            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/analysis/${id}/export/pdf`, '_blank')}
-                            className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+                            onClick={() => navigate('/dashboard/upload')}
+                            className="bg-[#6ECEB2] hover:bg-[#5bc1a6] px-3 py-1.5 rounded-lg text-[#11303B] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-[#6ECEB2]/20"
                         >
-                            <FilePieChart size={14} />
-                            PDF Report
-                        </button>
-                        <button
-                            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/analysis/${id}/export/excel`, '_blank')}
-                            className="bg-[#5aac44] hover:bg-[#4a8d38] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-green-900/20"
-                        >
-                            <Download size={14} />
-                            Excel Data
+                            <RefreshCcw size={14} />
+                            Update Documents
                         </button>
                     </div>
                     <button className="relative p-1.5 hover:bg-white/10 rounded-lg transition-all">
@@ -136,7 +199,7 @@ export const AnalysisPage: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => id && fetchAnalysis(Number.parseInt(id))}
-                                className="px-6 py-3 rounded-xl bg-[#253746] text-white text-xs font-black uppercase tracking-widest hover:bg-[#1A2630] transition-all shadow-lg shadow-blue-900/20"
+                                className="px-6 py-3 rounded-xl bg-[#11303B] text-white text-xs font-black uppercase tracking-widest hover:bg-[#0a1e25] transition-all shadow-lg shadow-blue-900/20"
                             >
                                 Retry Analysis
                             </button>
@@ -149,34 +212,42 @@ export const AnalysisPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-12 gap-4 items-start">
                         {/* Sidebar */}
-                        <div className="col-span-12 lg:col-span-2 space-y-[5px]">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="bg-[#253746] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
+                        <div className="col-span-12 lg:col-span-2 space-y-[10px]">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
+                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
                                 <div className="p-3 space-y-1">
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Industry:</div>
+                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Industry:</div>
                                         <div className="text-[10px] font-bold text-gray-700">{data.company_industry || 'N/A'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Years in Business:</div>
+                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Years in Business:</div>
                                         <div className="text-[10px] font-bold text-gray-700">{data.years_in_business ? `${data.years_in_business} years` : 'N/A'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex flex-col py-1">
-                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Top Clients:</div>
+                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Top Clients:</div>
                                         <div className="text-[10px] font-bold text-gray-700 leading-tight">{data.top_clients || 'See Billing Report'}</div>
                                     </div>
                                     <div className="h-px bg-gray-100/60"></div>
                                     <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#253746] whitespace-nowrap">Fiscal Status:</div>
+                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Fiscal Status:</div>
                                         <div className="text-[10px] font-bold text-gray-700">{data.fiscal_status || 'Compliant'}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="bg-[#253746] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">Documents</div>
+                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
+                                    Documents
+                                    <button
+                                        onClick={() => navigate('/dashboard/upload')}
+                                        className="text-[8px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded transition-colors"
+                                    >
+                                        Correction
+                                    </button>
+                                </div>
                                 <div className="p-1.5 space-y-0">
                                     {[
                                         { icon: FileText, label: 'Tax Certificate' },
@@ -187,12 +258,21 @@ export const AnalysisPage: React.FC = () => {
                                     ].map((doc, i) => (
                                         <React.Fragment key={i}>
                                             <div className="flex items-center gap-2.5 group cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-all">
-                                                <doc.icon size={13} className="text-[#253746] group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-                                                <span className="text-[10px] font-black text-[#253746]/80 group-hover:text-[#253746] transition-colors">{doc.label}</span>
+                                                <doc.icon size={13} className="text-[#11303B] group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+                                                <span className="text-[10px] font-black text-[#11303B]/80 group-hover:text-[#11303B] transition-colors">{doc.label}</span>
                                             </div>
                                             {i < 4 && <div className="h-px bg-gray-100/60 mx-2"></div>}
                                         </React.Fragment>
                                     ))}
+                                </div>
+                                <div className="p-3 pt-0">
+                                    <button
+                                        onClick={() => navigate('/dashboard/upload')}
+                                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-[#ef6b6b]/5 hover:bg-[#ef6b6b]/10 text-[#ef6b6b] rounded-xl border border-[#ef6b6b]/10 text-[8px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        <RefreshCcw size={10} />
+                                        Re-upload Files
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -203,21 +283,20 @@ export const AnalysisPage: React.FC = () => {
                             <div className="bg-white/50 border-b border-gray-200 py-1.5 flex items-center justify-start gap-6 px-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] font-bold text-gray-700">Credit Risk:</span>
-                                    <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'EXCELLENT' ? 'bg-emerald-500' :
-                                        data.credit_category === 'GOOD' ? 'bg-blue-500' :
-                                            data.credit_category === 'MEDIUM' ? 'bg-[#FFD54F]' :
+                                    <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'A' ? 'bg-emerald-500' :
+                                        data.credit_category === 'B' ? 'bg-blue-500' :
+                                            data.credit_category === 'C' ? 'bg-amber-500' :
                                                 'bg-red-500'
                                         }`}>
                                         <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                            <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] ${data.credit_category === 'EXCELLENT' ? 'bg-emerald-400' :
-                                                data.credit_category === 'GOOD' ? 'bg-blue-400' :
-                                                    data.credit_category === 'MEDIUM' ? 'bg-[#FFD54F]' :
+                                            <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] ${data.credit_category === 'A' ? 'bg-emerald-400' :
+                                                data.credit_category === 'B' ? 'bg-blue-400' :
+                                                    data.credit_category === 'C' ? 'bg-amber-400' :
                                                         'bg-red-400'
-                                                }`}></div>
+                                                }`} />
                                         </div>
-                                        <span className={`text-[10px] font-black leading-none ${['EXCELLENT', 'GOOD', 'POOR'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'
-                                            }`}>
-                                            {data.credit_category}
+                                        <span className={`text-[10px] font-black leading-none ${['A', 'B', 'D', 'E'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'}`}>
+                                            CATEGORY {data.credit_category}
                                         </span>
                                     </div>
                                 </div>

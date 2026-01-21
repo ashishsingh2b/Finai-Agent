@@ -43,11 +43,11 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
                             <div className="text-3xl font-black text-gray-900 tracking-tight mb-5 group-hover:scale-105 transition-transform leading-none">
                                 {ind.value}
                             </div>
-                            <div className={`w-full max-w-[110px] text-center text-[10px] font-black text-white px-3 py-2 rounded-md shadow-md uppercase tracking-wider ${ind.status === t('fin.adequate') ? 'bg-[#2E7D32]' :
-                                ind.status === t('fin.profitable') ? 'bg-[#EF6C00]' :
-                                    ind.status === t('fin.moderate') ? 'bg-[#2E7D32]' :
-                                        ind.status === t('fin.acceptable') ? 'bg-[#2E7D32]' :
-                                            'bg-red-600'
+                            <div className={`w-full max-w-[110px] text-center text-[10px] font-black px-3 py-2 rounded-md shadow-md uppercase tracking-wider ${ind.status === t('fin.adequate') ? 'bg-[#6ECEB2] text-[#11303B]' :
+                                ind.status === t('fin.profitable') ? 'bg-[#EF6C00] text-white' :
+                                    ind.status === t('fin.moderate') ? 'bg-[#6ECEB2] text-[#11303B]' :
+                                        ind.status === t('fin.acceptable') ? 'bg-[#6ECEB2] text-[#11303B]' :
+                                            'bg-red-600 text-white'
                                 }`}>
                                 {ind.status}
                             </div>

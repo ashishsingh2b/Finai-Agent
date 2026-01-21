@@ -38,7 +38,10 @@
         "logout": "Cerrar Sesión"
     },
     "common": {
-        "accessDenied": "Acceso Denegado"
+        "accessDenied": "Acceso Denegado",
+        "download_report": "Descargar Reporte",
+        "pdf_version": "Versión PDF",
+        "excel_version": "Versión Excel"
     },
     "dash": {
         "financials": "Indicadores Financieros",
@@ -65,7 +68,19 @@
         "entity": "Entidad",
         "timeline": "Línea de Tiempo",
         "score": "Puntaje",
-        "action": "Acción"
+        "action": "Acción",
+        "status": "Estado de Solicitud",
+        "behavior": "Comportamiento de Pago"
+    },
+    "status": {
+        "UNDER_REVIEW": "REVISIÓN",
+        "APPROVED": "AUTORIZADO",
+        "REJECTED": "RECHAZADO"
+    },
+    "behavior": {
+        "ON_TIME": "Pagando puntualmente",
+        "DELINQUENT": "Morosidad",
+        "NA": "N/A"
     },
     "fin": {
         "liquidity": "Liquidez",

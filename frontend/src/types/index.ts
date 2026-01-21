@@ -66,6 +66,8 @@ export interface AnalysisData {
     top_clients?: string;
     fiscal_status?: string;
     created_at?: string;
+    application_status: 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
+    payment_behavior: 'ON_TIME' | 'DELINQUENT' | 'NA';
 }
 
 export interface AnalysisListItem {
@@ -75,6 +77,9 @@ export interface AnalysisListItem {
     category: string;
     recommendation: string;
     created_at: string;
+    application_status: 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
+    payment_behavior: 'ON_TIME' | 'DELINQUENT' | 'NA';
+    credit_amount?: number;
 }
 
 export interface FinancialIndicatorsProps {

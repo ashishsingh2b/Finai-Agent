@@ -35,77 +35,93 @@ class ExcelParser:
             logger.error(f"Failed to extract company info: {e}")
             return {'name': 'Unknown Company', 'industry': '', 'years_in_business': None}
     
-    def extract_balance_sheet(self, sheet_name='BG', years_columns=None):
-        """
-        Extract balance sheet data from BG sheet
-        Matches structure: Columns B-G for years 2021-2026
-        Rows based on Excel template analysis
-        """
-        if years_columns is None:
-            years_columns = {'B': 2021, 'C': 2022, 'D': 2023, 'E': 2024, 'F': 2025, 'G': 2026}
-        
+    def _find_years_columns(self, ws):
+        """Find columns that correspond to years (20XX)"""
+        years_cols = {}
+        # Search first 10 rows for years
+        for row in range(1, 11):
+            for col in range(1, 15): # A to N
+                val = ws.cell(row=row, column=col).value
+                if val and isinstance(val, (int, float)) and 2000 <= int(val) <= 2100:
+                    years_cols[openpyxl.utils.get_column_letter(col)] = int(val)
+        return years_cols
+
+    def _find_row_by_keywords(self, ws, keywords: List[str]):
+        """Find a row number that contains any of the keywords in column A"""
+        for row in range(1, 100):
+            cell_val = str(ws[f'A{row}'].value or "").lower()
+            if any(k.lower() in cell_val for k in keywords):
+                return row
+        return None
+
+    def extract_balance_sheet(self, sheet_name='BG'):
+        """Extract balance sheet data dynamically"""
         try:
             ws = self.workbook[sheet_name]
+            years_cols = self._find_years_columns(ws)
+            if not years_cols:
+                years_cols = {'B': 2021, 'C': 2022, 'D': 2023, 'E': 2024, 'F': 2025, 'G': 2026}
+            
             balance_sheet_data = {}
             
-            # Cell mappings based on EXCEL_TEMPLATE_COMPLETE_ANALYSIS.md
-            cell_mappings = {
-                'cash': 11,  # Row 11: Efectivo
-                'accounts_receivable': 12,  # Row 12: Clientes
-                'inventory': 13,  # Row 13: Inventario
-                'current_assets': 21,  # Row 21: Total activo circulante
-                'fixed_assets': 23,  # Row 23: Activo Fijo
-                'total_assets': 31,  # Row 31: Total del activo
-                'accounts_payable': 33,  # Row 33: Proveedores (approximate)
-                'current_liabilities': 42,  # Row 42: Total pasivo circulante
-                'long_term_liabilities': 46,  # Row 46: Total pasivo largo plazo
-                'total_liabilities': 54,  # Row 54: Total del pasivo
-                'shareholder_equity': 62,  # Row 62: Total capital contable
+            # Map fields to keyword lists
+            keyword_mappings = {
+                'cash': ['efectivo', 'caja', 'disponibilidades', 'efectivo y equivalentes'],
+                'accounts_receivable': ['clientes', 'cuentas por cobrar'],
+                'inventory': ['inventarios', 'mercancías'],
+                'current_assets': ['total activo circulante', 'total activo corriente', 'suma activo circulante'],
+                'fixed_assets': ['activo fijo', 'propiedades planta'],
+                'total_assets': ['total del activo', 'suma del activo', 'activo total'],
+                'current_liabilities': ['total pasivo circulante', 'pasivo a corto plazo', 'suma pasivo circulante'],
+                'total_liabilities': ['total del pasivo', 'suma del pasivo', 'pasivo total'],
+                'shareholder_equity': ['total capital contable', 'patrimonio neto', 'capital social'],
             }
             
-            for year_col, year in years_columns.items():
+            row_mappings = {}
+            for field, ks in keyword_mappings.items():
+                row = self._find_row_by_keywords(ws, ks)
+                if row: row_mappings[field] = row
+
+            for year_col, year in years_cols.items():
                 year_data = {}
-                for field, row in cell_mappings.items():
+                for field, row in row_mappings.items():
                     cell_value = ws[f'{year_col}{row}'].value
-                    year_data[field] = float(cell_value) if cell_value else 0.0
-                
-                logger.info(f"Extracted {year} balance sheet: Assets={year_data.get('total_assets')}, Equity={year_data.get('shareholder_equity')}")
+                    year_data[field] = float(cell_value) if cell_value and isinstance(cell_value, (int, float)) else 0.0
                 balance_sheet_data[year] = year_data
             
             return balance_sheet_data
         except Exception as e:
             logger.error(f"Failed to extract balance sheet: {e}")
             return {}
-    
-    def extract_income_statement(self, sheet_name='ER', years_columns=None):
-        """
-        Extract income statement data from ER sheet
-        """
-        if years_columns is None:
-            years_columns = {'B': 2021, 'C': 2022, 'D': 2023, 'E': 2024, 'F': 2025, 'G': 2026}
-        
+
+    def extract_income_statement(self, sheet_name='ER'):
+        """Extract income statement data dynamically"""
         try:
             ws = self.workbook[sheet_name]
+            years_cols = self._find_years_columns(ws)
+            if not years_cols:
+                years_cols = {'B': 2021, 'C': 2022, 'D': 2023, 'E': 2024, 'F': 2025, 'G': 2026}
+            
             income_statement_data = {}
             
-            # Cell mappings based on Excel template analysis
-            cell_mappings = {
-                'revenue': 10,  # Row 10: Ingresos
-                'cost_of_goods_sold': 12,  # Row 12: Costo de Ventas
-                'gross_profit': 14,  # Row 14: Utilidad Bruta
-                'operating_expenses': 16,  # Row 16: Gastos de operación
-                'ebitda': 21,  # Row 21: EBITDA
-                'interest_expense': 27,  # Row 27: Gastos financieros (approximate)
-                'net_profit': 36,  # Row 36: Utilidad Neta (adjust based on actual template)
+            keyword_mappings = {
+                'revenue': ['ingresos', 'ventas netas'],
+                'cost_of_goods_sold': ['costo de ventas'],
+                'gross_profit': ['utilidad bruta'],
+                'ebitda': ['ebitda', 'uafida'],
+                'net_profit': ['utilidad neta', 'resultado neto'],
             }
             
-            for year_col, year in years_columns.items():
+            row_mappings = {}
+            for field, ks in keyword_mappings.items():
+                row = self._find_row_by_keywords(ws, ks)
+                if row: row_mappings[field] = row
+
+            for year_col, year in years_cols.items():
                 year_data = {}
-                for field, row in cell_mappings.items():
+                for field, row in row_mappings.items():
                     cell_value = ws[f'{year_col}{row}'].value
-                    year_data[field] = float(cell_value) if cell_value else 0.0
-                
-                logger.info(f"Extracted {year} income: Revenue={year_data.get('revenue')}, Net Profit={year_data.get('net_profit')}")
+                    year_data[field] = float(cell_value) if cell_value and isinstance(cell_value, (int, float)) else 0.0
                 income_statement_data[year] = year_data
             
             return income_statement_data

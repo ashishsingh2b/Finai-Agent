@@ -96,7 +96,9 @@ class PDFParser:
         info = {
             'name': 'Unknown Company',
             'industry': None,
-            'years_in_business': None
+            'years_in_business': None,
+            'top_clients': None,
+            'fiscal_status': 'En Cumplimiento'
         }
         
         # Try to find company name (usually at top of document)
@@ -116,6 +118,11 @@ class PDFParser:
             if len(unique_years) >= 2:
                 info['years_in_business'] = unique_years[-1] - unique_years[0] + 1
         
+        # Look for clients
+        match = re.search(r'(?:principales clientes|clientes clave).*?:(.*?)(?:\n|$)', self.text_content, re.IGNORECASE)
+        if match:
+            info['top_clients'] = match.group(1).strip()
+            
         return info
     
     def _extract_balance_sheet(self) -> Dict[int, Dict]:
@@ -192,20 +199,83 @@ class PDFParser:
     
     def _extract_from_tables(self, year: int, statement_type: str) -> Dict:
         """Extract financial data from detected tables"""
-        # This is a complex function that would parse table structures
-        # For  now, returns empty structure (implement based on actual PDF format)
+        # Search for columns matching the year and rows matching financial terms
+        # This is a basic implementation of table row/column matching
+        data = {}
         
-        logger.warning(f"Table extraction for {year} {statement_type} not yet implemented")
-        return {}
-    
+        target_keywords = {
+            'balance': {
+                'total_assets': ['total activo', 'total de activos', 'suma del activo', 'suma de activos'],
+                'current_assets': ['activo circulante', 'activo corriente'],
+                'cash': ['efectivo', 'caja y bancos', 'disponibilidades', 'efectivo y equivalentes'],
+                'current_liabilities': ['pasivo circulante', 'pasivo corriente', 'pasivo a corto plazo'],
+                'total_liabilities': ['total pasivo', 'total de pasivos', 'suma del pasivo', 'pasivo total'],
+                'shareholder_equity': ['capital contable', 'patrimonio', 'capital social', 'total capital'],
+            },
+            'income': {
+                'revenue': ['ingresos', 'ventas netas', 'ingresos por ventas', 'ventas totales'],
+                'gross_profit': ['utilidad bruta', 'margen bruto', 'beneficio bruto'],
+                'ebitda': ['ebitda', 'uafida', 'utilidad de operación'],
+                'net_profit': ['utilidad neta', 'resultado del ejercicio', 'utilidad del ejercicio', 'ejercicio neto']
+            }
+        }
+        
+        keywords = target_keywords.get(statement_type, {})
+        found_data = {}
+        
+        for table in self.tables:
+            # Look for year in headers
+            year_col = -1
+            for row in table:
+                for idx, cell in enumerate(row):
+                    if str(year) in str(cell or ""):
+                        year_col = idx
+                        break
+                if year_col != -1: break
+            
+            if year_col == -1: continue
+            
+            # Find rows
+            for row in table:
+                row_text = str(row[0] or "").lower()
+                for field, markers in keywords.items():
+                    if any(m in row_text for m in markers):
+                        try:
+                            # Clean number
+                            val_str = str(row[year_col] or "0").replace(',', '').replace('$', '').strip()
+                            # Handle parenthesis (negative)
+                            if '(' in val_str: val_str = '-' + val_str.replace('(', '').replace(')', '')
+                            found_data[field] = float(val_str)
+                        except:
+                            continue
+                            
+        return found_data
+
     def _extract_from_text_patterns(self, year: int, statement_type: str) -> Dict:
         """Extract data using regex patterns (fallback method)"""
-        # Pattern matching implementation
-        # This would search for keywords like "Total Assets", "Revenue", etc.
-        # followed by numbers near the year
+        found_data = {}
         
-        logger.warning(f"Text pattern extraction for {year} {statement_type} not fully implemented")
-        return {}
+        patterns = {
+            'revenue': [r'ingresos.*?(\d[\d,.]*)', r'ventas.*?(\d[\d,.]*)'],
+            'total_assets': [r'total activo.*?(\d[\d,.]*)', r'total de activos.*?(\d[\d,.]*)'],
+            'net_profit': [r'utilidad neta.*?(\d[\d,.]*)', r'resultado del ejercicio.*?(\d[\d,.]*)']
+        }
+        
+        # Search in text segment near where year appears
+        year_pos = self.text_content.find(str(year))
+        if year_pos != -1:
+            snippet = self.text_content[max(0, year_pos-1000):year_pos+2000]
+            for field, regex_list in patterns.items():
+                for regex in regex_list:
+                    match = re.search(regex, snippet, re.IGNORECASE)
+                    if match:
+                        try:
+                            val = float(match.group(1).replace(',', ''))
+                            found_data[field] = val
+                            break
+                        except: continue
+        
+        return found_data
     
     def _validate_extraction(self) -> List[str]:
         """Validate extracted data and return list of issues"""

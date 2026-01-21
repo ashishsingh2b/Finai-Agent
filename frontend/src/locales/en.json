@@ -38,7 +38,10 @@
         "logout": "Logout"
     },
     "common": {
-        "accessDenied": "Access Denied"
+        "accessDenied": "Access Denied",
+        "download_report": "Download Report",
+        "pdf_version": "PDF Version",
+        "excel_version": "Excel Version"
     },
     "dash": {
         "financials": "Financial Indicators",
@@ -65,7 +68,19 @@
         "entity": "Entity Name",
         "timeline": "Timeline",
         "score": "Score",
-        "action": "Action"
+        "action": "Action",
+        "status": "Application Status",
+        "behavior": "Payment Behavior"
+    },
+    "status": {
+        "UNDER_REVIEW": "Under Review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+    },
+    "behavior": {
+        "ON_TIME": "On-time Payments",
+        "DELINQUENT": "Payment Delinquencies",
+        "NA": "N/A"
     },
     "fin": {
         "liquidity": "Liquidity",

@@ -46,6 +46,9 @@ class AnalysisResponse(BaseModel):
     justification: Optional[List[str]] = None
     conditions: Optional[List[str]] = None
     
+    application_status: str
+    payment_behavior: str
+    
     # Financial ratios
     current_ratio: Optional[float] = None
     roe: Optional[float] = None
@@ -53,5 +56,15 @@ class AnalysisResponse(BaseModel):
     debt_to_assets: Optional[float] = None
     profit_margin: Optional[float] = None
     
+    # Company detail fallbacks/merges
+    company_industry: Optional[str] = None
+    years_in_business: Optional[int] = None
+    top_clients: Optional[str] = None
+    fiscal_status: Optional[str] = None
+    
     class Config:
         from_attributes = True
+
+class AnalysisUpdateStatus(BaseModel):
+    application_status: Optional[str] = None
+    payment_behavior: Optional[str] = None

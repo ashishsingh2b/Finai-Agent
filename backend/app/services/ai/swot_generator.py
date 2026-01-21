@@ -1,6 +1,6 @@
 from typing import Dict
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 import os
 import json
 from dotenv import load_dotenv
@@ -11,16 +11,21 @@ class SWOTGenerator:
     """Generate SWOT analysis using GPT-4"""
     
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key or api_key == "your-openai-api-key-here":
-            # Fallback to rule-based SWOT if no API key
+        try:
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key or api_key == "your-openai-api-key-here":
+                # Fallback to rule-based SWOT if no API key
+                self.llm = None
+            else:
+                self.llm = ChatOpenAI(
+                    model="gpt-4",
+                    temperature=0.7,
+                    openai_api_key=api_key
+                )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to initialize ChatOpenAI: {e}")
             self.llm = None
-        else:
-            self.llm = ChatOpenAI(
-                model="gpt-4",
-                temperature=0.7,
-                api_key=api_key
-            )
     
     def generate_swot(self, company_data: dict, ratios: dict, language='es') -> dict:
         """Generate SWOT analysis"""

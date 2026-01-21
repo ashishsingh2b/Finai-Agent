@@ -11,14 +11,16 @@ from app.services.financial.calculator import FinancialCalculator
 from app.services.financial.credit_scorer import CreditScorer
 from app.services.financial.recommendation_engine import RecommendationEngine
 from app.services.ai.swot_generator import SWOTGenerator
+from app.services.file_processing.file_merger import FileMerger
 from app.models.user import User
 from app.models.company import Company
 from app.models.financial_statement import FinancialStatement
-from app.models.analysis import AnalysisResult
-from app.schemas.analysis import AnalysisResponse
+from app.models.analysis import AnalysisResult, ApplicationStatus, PaymentBehavior
+from app.schemas.analysis import AnalysisResponse, AnalysisUpdateStatus
 import tempfile
 import os
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -202,6 +204,118 @@ async def upload_and_analyze(
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
+@router.post("/upload-split", status_code=status.HTTP_201_CREATED)
+async def upload_split_files(
+    files: List[UploadFile] = File(...),
+    language: str = "es",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Upload multiple financial files (e.g. Balance Sheet and Income Statement separately)
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+        
+    temp_paths = []
+    try:
+        # Save all files temporarily
+        for file in files:
+            ext = os.path.splitext(file.filename)[1].lower()
+            with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+                contents = await file.read()
+                tmp.write(contents)
+                temp_paths.append(tmp.name)
+        
+        # Merge data
+        logger.info(f"Merging {len(temp_paths)} files for {current_user.email}")
+        extracted_data = FileMerger.merge_files(temp_paths)
+        
+        # Following logic is identical to single upload - we should ideally refactor
+        # but for now we'll duplicate or call a shared helper if we had one.
+        # To keep it simple and 100% ready, I'll implement the analysis flow here too
+        
+        company_info = extracted_data['company_info']
+        balance_sheet = extracted_data['balance_sheet']
+        income_statement = extracted_data['income_statement']
+        
+        if not balance_sheet or not income_statement:
+            raise HTTPException(
+                status_code=422,
+                detail="Could not extract complete financial data from the combined files."
+            )
+            
+        years = list(balance_sheet.keys())
+        latest_year = max(years)
+        latest_balance = balance_sheet[latest_year]
+        latest_income = income_statement.get(latest_year)
+        
+        if not latest_income:
+            raise HTTPException(status_code=422, detail=f"Income statement missing for {latest_year}")
+            
+        # Create company
+        company = Company(
+            name=company_info.get('name', 'Unknown Company'),
+            industry=company_info.get('industry'),
+            years_in_business=company_info.get('years_in_business'),
+            created_by=current_user.id
+        )
+        db.add(company)
+        db.flush()
+        
+        # Save statements
+        for year in balance_sheet.keys():
+            stmt = FinancialStatement(
+                company_id=company.id,
+                year=year,
+                **balance_sheet[year],
+                **income_statement.get(year, {})
+            )
+            db.add(stmt)
+            
+        # Ratios, Scorer, SWOT, Recommendation (Reuse existing logic)
+        ratios = FinancialCalculator.calculate_all_ratios(latest_balance, latest_income)
+        credit_score = CreditScorer.calculate_full_score(ratios)
+        swot = SWOTGenerator().generate_swot(company_info, ratios, language)
+        recommendation = RecommendationEngine.generate_recommendation(
+            credit_score['total_score'], credit_score['category'], 
+            ratios.get('profit_to_loan_ratio', 1.0), ratios, language
+        )
+        
+        # Save Analysis
+        analysis = AnalysisResult(
+            company_id=company.id,
+            total_credit_score=credit_score['total_score'],
+            credit_category=credit_score['category'],
+            swot_analysis=swot,
+            recommendation=recommendation['decision'],
+            recommendation_justification=recommendation['justification'],
+            current_ratio=ratios.get('current_ratio'),
+            roe=ratios.get('roe'),
+            roa=ratios.get('roa'),
+            debt_to_assets=ratios.get('debt_to_assets'),
+            profit_margin=ratios.get('profit_margin'),
+            language=language,
+            analyzed_by=current_user.id
+        )
+        db.add(analysis)
+        db.commit()
+        db.refresh(analysis)
+        
+        return {
+            "analysis_id": analysis.id,
+            "company_name": company.name,
+            "message": "Split analysis complete"
+        }
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Split upload failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        for p in temp_paths:
+            if os.path.exists(p): os.unlink(p)
+
 @router.get("/{analysis_id}", response_model=AnalysisResponse)
 def get_analysis(
     analysis_id: int,
@@ -239,9 +353,47 @@ def list_analyses(
             "credit_score": float(analysis.total_credit_score) if analysis.total_credit_score else 0,
             "category": analysis.credit_category,
             "recommendation": analysis.recommendation.value if analysis.recommendation else None,
-            "created_at": analysis.created_at
+            "created_at": analysis.created_at,
+            "application_status": analysis.application_status.value if analysis.application_status else "UNDER_REVIEW",
+            "payment_behavior": analysis.payment_behavior.value if analysis.payment_behavior else "NA"
         })
     return {"analyses": results, "total": len(results)}
+
+@router.patch("/{analysis_id}/status", response_model=AnalysisResponse)
+def update_analysis_status(
+    analysis_id: int,
+    status_update: AnalysisUpdateStatus,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update analysis application status and payment behavior"""
+    analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    if status_update.application_status:
+        try:
+            analysis.application_status = ApplicationStatus(status_update.application_status)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid application status: {status_update.application_status}")
+            
+    if status_update.payment_behavior:
+        try:
+            analysis.payment_behavior = PaymentBehavior(status_update.payment_behavior)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid payment behavior: {status_update.payment_behavior}")
+            
+    db.commit()
+    db.refresh(analysis)
+    
+    company = db.query(Company).filter(Company.id == analysis.company_id).first()
+    return {
+        **analysis.__dict__,
+        "company_name": company.name if company else "Unknown",
+        "company_industry": company.industry if company else "N/A",
+        "years_in_business": company.years_in_business if company else 0,
+        "justification": analysis.recommendation_justification
+    }
 
 @router.get("/{analysis_id}/export/pdf")
 async def export_pdf(

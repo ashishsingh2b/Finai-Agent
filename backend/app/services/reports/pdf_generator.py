@@ -104,9 +104,15 @@ class PDFReportGenerator:
         doc.build(story)
         
     def _build_header(self, data: Dict) -> list:
-        """Build report header"""
+        """Build report header with logo if available"""
         elements = []
         
+        # Logo integration
+        logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'logo.png')
+        if os.path.exists(logo_path):
+            elements.append(Image(logo_path, width=1.5*inch, height=0.5*inch))
+            elements.append(Spacer(1, 0.2*inch))
+            
         # Title
         title_text = "REPORTE DE ANÁLISIS CREDITICIO" if self.language == 'es' else "CREDIT ANALYSIS REPORT"
         elements.append(Paragraph(title_text, self.styles['CustomTitle']))

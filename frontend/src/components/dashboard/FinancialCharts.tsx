@@ -51,11 +51,11 @@ export const FinancialCharts: React.FC<ChartProps> = () => {
                                 tickFormatter={(val) => `${val}%`}
                             />
                             <Tooltip />
-                            <Bar dataKey="revenue" fill="#253746" barSize={20} />
+                            <Bar dataKey="revenue" fill="#11303B" barSize={20} />
                             <Line
                                 type="monotone"
                                 dataKey="profit1"
-                                stroke="#ED7D31"
+                                stroke="#6ECEB2"
                                 strokeWidth={2}
                                 dot={{ r: full ? 4 : 2, fill: '#ED7D31', stroke: '#ED7D31' }}
                             />
@@ -84,7 +84,7 @@ export const FinancialCharts: React.FC<ChartProps> = () => {
                                 strokeWidth={2}
                             >
                                 {samplePieData.map((_, index) => (
-                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#C00000' : '#253746'} style={{ outline: 'none' }} />
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#ef6b6b' : '#11303B'} style={{ outline: 'none' }} />
                                 ))}
                             </Pie>
                             <Tooltip />
@@ -119,7 +119,7 @@ export const FinancialCharts: React.FC<ChartProps> = () => {
                 }
             `}} />
 
-            <div className="bg-[#253746] text-white px-5 py-3 font-bold text-sm tracking-wide flex justify-between items-center">
+            <div className="bg-[#11303B] text-white px-5 py-3 font-bold text-sm tracking-wide flex justify-between items-center">
                 <span>Financial Charts</span>
             </div>
 
@@ -134,7 +134,7 @@ export const FinancialCharts: React.FC<ChartProps> = () => {
             {isFullScreen && (
                 <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-300">
-                        <div className="bg-[#253746] text-white px-6 py-4 font-bold text-lg flex justify-between items-center shadow-md">
+                        <div className="bg-[#11303B] text-white px-6 py-4 font-bold text-lg flex justify-between items-center shadow-md">
                             <span>Analysis Report - Financial Charts</span>
                             <button
                                 onClick={() => setIsFullScreen(false)}

@@ -14,6 +14,16 @@ class RecommendationType(str, enum.Enum):
     APPROVE_WITH_CONDITIONS = "APPROVE_WITH_CONDITIONS"
     REJECT = "REJECT"
 
+class ApplicationStatus(str, enum.Enum):
+    UNDER_REVIEW = "UNDER_REVIEW"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+class PaymentBehavior(str, enum.Enum):
+    ON_TIME = "ON_TIME"
+    DELINQUENT = "DELINQUENT"
+    NA = "NA"
+
 class AnalysisResult(Base):
     __tablename__ = "analysis_results"
     
@@ -60,6 +70,10 @@ class AnalysisResult(Base):
     recommendation = Column(SQLEnum(RecommendationType))
     recommendation_justification = Column(JSON)  # Array of reasons
     conditions = Column(JSON)  # Array of conditions if CONDITIONAL
+    
+    # Manual Status Tracking
+    application_status = Column(SQLEnum(ApplicationStatus), default=ApplicationStatus.UNDER_REVIEW)
+    payment_behavior = Column(SQLEnum(PaymentBehavior), default=PaymentBehavior.NA)
     
     # Interest Rate
     applicable_interest_rate = Column(Numeric(5, 4))

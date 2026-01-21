@@ -58,11 +58,27 @@ export const analysisAPI = {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
     },
+    uploadSplitFiles: (files: File[], language: string = 'es') => {
+        const formData = new FormData();
+        files.forEach(file => formData.append('files', file));
+        return api.post(`/analysis/upload-split?language=${language}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
 
     getAnalysis: (id: number) => api.get(`/analysis/${id}`),
 
+    downloadPDF: (id: number, language: string = 'es') =>
+        api.get(`/analysis/${id}/export/pdf?language=${language}`, { responseType: 'blob' }),
+
+    downloadExcel: (id: number, language: string = 'es') =>
+        api.get(`/analysis/${id}/export/excel?language=${language}`, { responseType: 'blob' }),
+
     listAnalyses: (skip: number = 0, limit: number = 20) =>
         api.get(`/analysis/?skip=${skip}&limit=${limit}`),
+
+    updateAnalysisStatus: (id: number, data: { application_status?: string, payment_behavior?: string }) =>
+        api.patch(`/analysis/${id}/status`, data),
 };
 
 // User Management APIs
@@ -75,6 +91,9 @@ export const userAPI = {
 
     updateStatus: (userId: number, isActive: boolean) =>
         api.put(`/users/${userId}/status?is_active=${isActive}`),
+
+    updateUser: (userId: number, userData: any) =>
+        api.put(`/users/${userId}`, userData),
 
     deleteUser: (userId: number) =>
         api.delete(`/users/${userId}`),

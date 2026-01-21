@@ -12,21 +12,21 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300">
-            <div className="bg-[#253746] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider">
+            <div className="bg-[#11303B] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider">
                 SWOT Analysis
             </div>
             <div className="p-5 grid grid-cols-2 gap-4">
                 {/* Strengths */}
                 <div className="space-y-2">
-                    <div className="bg-[#E8F5E9] px-3 py-1.5 flex items-center gap-2 border-l-3 border-[#2E7D32] rounded-sm">
-                        <CheckCircle2 size={13} className="text-[#2E7D32]" strokeWidth={3} />
-                        <span className="text-[10px] font-black uppercase text-[#2E7D32] tracking-wider">{t('swot.strengths')}</span>
+                    <div className="bg-[#6ECEB2]/10 px-3 py-1.5 flex items-center gap-2 border-l-3 border-[#6ECEB2] rounded-sm">
+                        <CheckCircle2 size={13} className="text-[#6ECEB2]" strokeWidth={3} />
+                        <span className="text-[10px] font-black uppercase text-[#6ECEB2] tracking-wider">{t('swot.strengths')}</span>
                     </div>
                     {s.length > 0 ? (
                         <ul className="pl-5 space-y-1">
                             {s.slice(0, 3).map((item, i) => (
                                 <li key={i} className="text-[10px] text-gray-700 font-bold flex items-start gap-2 leading-relaxed">
-                                    <span className="w-1.5 h-1.5 bg-[#2E7D32] rounded-full flex-shrink-0 mt-1"></span>
+                                    <span className="w-1.5 h-1.5 bg-[#6ECEB2] rounded-full flex-shrink-0 mt-1"></span>
                                     {item}
                                 </li>
                             ))}
