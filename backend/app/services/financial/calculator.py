@@ -19,11 +19,11 @@ class FinancialCalculator:
         return round(total_liabilities / total_assets, 4)
     
     @staticmethod
-    def calculate_leverage(total_liabilities: float, equity: float) -> float:
-        """Apalancamiento"""
-        if equity == 0:
+    def calculate_leverage(total_liabilities: float, total_assets: float) -> float:
+        """Deuda Total / Activos Totales (Client Request)"""
+        if total_assets == 0:
             return 0.0
-        return round(total_liabilities / equity, 4)
+        return round(total_liabilities / total_assets, 4)
     
     @staticmethod
     def calculate_fixed_asset_ratio(fixed_assets: float, total_assets: float) -> float:
@@ -115,6 +115,20 @@ class FinancialCalculator:
         return round(avg_profit / loan_amount, 4)
     
     @staticmethod
+    def calculate_sales_trend(current_sales: float, previous_sales: float) -> float:
+        """(Ventas Actuales - Ventas Anteriores) / Ventas Anteriores * 100"""
+        if previous_sales == 0:
+            return 0.0
+        return round(((current_sales - previous_sales) / previous_sales) * 100, 2)
+
+    @staticmethod
+    def calculate_net_income_coverage(net_profit: float, requested_amount: float) -> float:
+        """Utilidad Neta / Monto Solicitado"""
+        if requested_amount == 0:
+            return 0.0
+        return round(net_profit / requested_amount, 4)
+    
+    @staticmethod
     def calculate_all_ratios(balance_sheet: Dict, income_statement: Dict, loan_amount: float = None) -> Dict:
         """Calculate all ratios at once"""
         
@@ -155,6 +169,7 @@ class FinancialCalculator:
             'roe': FinancialCalculator.calculate_roe(net_profit, equity),
             'asset_turnover': FinancialCalculator.calculate_asset_turnover(revenue, total_assets),
             'interest_coverage': FinancialCalculator.calculate_interest_coverage(ebitda, interest_expense),
+            'leverage_ratio': FinancialCalculator.calculate_leverage(total_liabilities, total_assets),
         }
         
         # Calculate cash conversion cycle

@@ -29,6 +29,9 @@ router = APIRouter(prefix="/analysis", tags=["Credit Analysis"])
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload_and_analyze(
     file: UploadFile = File(...),
+    loan_amount: float = 0,
+    loan_term: int = 12,
+    credit_type: str = "NEW",
     language: str = "es",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -136,9 +139,23 @@ async def upload_and_analyze(
         swot_gen = SWOTGenerator()
         swot = swot_gen.generate_swot(company_info, ratios, language)
         
-        # Step 7: Generate Recommendation
+        # Step 7: Calculate Multi-Year Metrics
+        logger.info("Calculating multi-year metrics")
+        sales_trend = 0.0
+        sorted_years = sorted(income_statement.keys())
+        if len(sorted_years) >= 2:
+            current_rev = income_statement[sorted_years[-1]].get('revenue', 0)
+            prev_rev = income_statement[sorted_years[-2]].get('revenue', 0)
+            sales_trend = FinancialCalculator.calculate_sales_trend(current_rev, prev_rev)
+        
+        net_income_coverage = FinancialCalculator.calculate_net_income_coverage(
+            latest_income.get('net_profit', 0),
+            loan_amount if loan_amount > 0 else 1000000 # Fallback
+        )
+
+        # Step 8: Generate Recommendation
         logger.info("Generating recommendation")
-        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income.get('net_profit', 0) / 1000000)
+        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income.get('net_profit', 0) / (loan_amount if loan_amount > 0 else 1000000))
         recommendation = RecommendationEngine.generate_recommendation(
             credit_score['total_score'],
             credit_score['category'],
@@ -147,10 +164,13 @@ async def upload_and_analyze(
             language
         )
         
-        # Step 8: Save analysis result
-        # ... logic continued ...
+        # Step 9: Save analysis result
         analysis = AnalysisResult(
             company_id=company.id,
+            requested_loan_amount=loan_amount,
+            approved_amount=loan_amount * 0.8, # Mock logic for approval
+            loan_term_months=loan_term,
+            credit_type=credit_type,
             current_ratio=ratios.get('current_ratio'),
             debt_to_assets=ratios.get('debt_to_assets'),
             leverage_ratio=ratios.get('leverage_ratio'),
@@ -160,6 +180,8 @@ async def upload_and_analyze(
             ebitda_margin=ratios.get('ebitda_margin'),
             interest_coverage=ratios.get('interest_coverage'),
             asset_turnover=ratios.get('asset_turnover'),
+            sales_trend=sales_trend,
+            net_income_coverage=net_income_coverage,
             dso=ratios.get('dso'),
             dio=ratios.get('dio'),
             dpo=ratios.get('dpo'),
@@ -448,7 +470,7 @@ async def export_excel(
         'name': company.name if company else 'Unknown',
         'industry': company.industry if company else 'N/A',
         'years_in_business': company.years_in_business if company else 0,
-        'analyzed_by': current_user.username
+        'analyzed_by': current_user.full_name
     }
     
     analysis_data = {
@@ -482,16 +504,16 @@ async def export_excel(
         'total_assets': float(stmt.total_assets) if stmt.total_assets else 0,
         'current_liabilities': float(stmt.current_liabilities) if stmt.current_liabilities else 0,
         'accounts_payable': float(stmt.accounts_payable) if stmt.accounts_payable else 0,
-        'long_term_debt': float(stmt.long_term_debt) if stmt.long_term_debt else 0,
+        'long_term_debt': float(stmt.long_term_liabilities) if stmt.long_term_liabilities else 0,
         'total_liabilities': float(stmt.total_liabilities) if stmt.total_liabilities else 0,
         'shareholder_equity': float(stmt.shareholder_equity) if stmt.shareholder_equity else 0,
         'revenue': float(stmt.revenue) if stmt.revenue else 0,
         'cost_of_goods_sold': float(stmt.cost_of_goods_sold) if stmt.cost_of_goods_sold else 0,
         'gross_profit': float(stmt.gross_profit) if stmt.gross_profit else 0,
         'operating_expenses': float(stmt.operating_expenses) if stmt.operating_expenses else 0,
-        'operating_income': float(stmt.operating_income) if stmt.operating_income else 0,
+        'operating_income': float(stmt.gross_profit - stmt.operating_expenses) if (stmt.gross_profit is not None and stmt.operating_expenses is not None) else 0,
         'interest_expense': float(stmt.interest_expense) if stmt.interest_expense else 0,
-        'tax_expense': float(stmt.tax_expense) if stmt.tax_expense else 0,
+        'tax_expense': 0, # Not in current model
         'net_profit': float(stmt.net_profit) if stmt.net_profit else 0,
         'ebitda': float(stmt.ebitda) if stmt.ebitda else 0
     } for stmt in statements]

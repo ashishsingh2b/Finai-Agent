@@ -12,7 +12,7 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300">
-            <div className="bg-[#11303B] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider">
+            <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">
                 SWOT Analysis
             </div>
             <div className="p-5 grid grid-cols-2 gap-4">

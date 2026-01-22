@@ -122,23 +122,57 @@ export const DashboardPage: React.FC = () => {
             {/* Metrics Grid (Compact) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-in fade-in slide-in-from-bottom duration-1000">
                 {[
-                    { label: t('dash.total'), val: analyses.length, trend: '+12%', up: true, icon: FileText, color: 'blue' },
-                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: '+4.2', up: true, icon: TrendingUp, color: 'emerald' },
-                    { label: t('dash.highRisk'), val: analyses.filter(a => ['D', 'E'].includes(a.category)).length, trend: '-2', up: true, icon: ShieldAlert, color: 'red' },
+                    { label: t('dash.total'), val: analyses.length, trend: '+12%', up: true, icon: FileText, color: 'blue', border: 'border-blue-400/50', bg: 'bg-blue-50', footer: 'Total System Records' },
+                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: '+4.2', up: true, icon: TrendingUp, color: 'emerald', border: 'border-emerald-400/50', bg: 'bg-emerald-50', footer: 'Network Average Score' },
+                    { label: t('dash.highRisk'), val: analyses.filter(a => ['D', 'E'].includes(a.category)).length, trend: '-2', up: true, icon: ShieldAlert, color: 'red', border: 'border-red-400/50', bg: 'bg-red-50', footer: 'Critical Alerts Active' },
                 ].map((stat, i) => (
-                    <div key={i} className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between h-full">
-                        <div className="flex justify-between items-center mb-1.5">
-                            <div className={`w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#253746]/10 group-hover:text-[#253746] transition-all`}>
-                                <stat.icon className="w-3.5 h-3.5" />
+                    <div key={i} className={`bg-white p-3 rounded-2xl border-4 ${stat.border} shadow-xl hover:shadow-2xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between h-full`}>
+                        {/* Background decoration */}
+                        <div className={`absolute top-0 right-0 w-20 h-20 ${stat.bg} rounded-full -mr-10 -mt-10`}></div>
+
+                        <div className="relative z-10 h-full flex flex-col justify-between">
+                            <div>
+                                <div className="flex justify-between items-center mb-1.5">
+                                    <div className={`w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#11303B]/10 group-hover:text-[#11303B] transition-all`}>
+                                        <stat.icon className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className={`flex items-center gap-1 text-[9px] font-black ${stat.up ? 'text-emerald-500' : 'text-red-500'} bg-white/80 px-2 py-0.5 rounded-full shadow-sm`}>
+                                        {stat.up ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                        {stat.trend}
+                                    </div>
+                                </div>
+
+                                <div className="mb-2">
+                                    <div className="text-xl font-black text-[#1A1A1A] mb-0.5 tracking-tighter">{stat.val}</div>
+                                    <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</div>
+                                </div>
                             </div>
-                            <div className={`flex items-center gap-1 text-[9px] font-black ${stat.up ? 'text-emerald-500' : 'text-red-500'}`}>
-                                {stat.up ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
-                                {stat.trend}
+
+                            <div>
+                                {/* Decorative Sparkline */}
+                                <div className="mb-1.5 opacity-60">
+                                    <svg className={`w-full h-8 ${stat.color === 'blue' ? 'text-blue-400' : stat.color === 'emerald' ? 'text-emerald-400' : 'text-red-400'} fill-current`} viewBox="0 0 300 80" preserveAspectRatio="none">
+                                        <path
+                                            d={i === 0 ? "M 0 50 Q 50 40 100 55 T 200 45 T 300 50 L 300 80 L 0 80 Z"
+                                                : i === 1 ? "M 0 60 Q 75 30 150 50 T 300 40 L 300 80 L 0 80 Z"
+                                                    : "M 0 40 Q 100 60 200 40 T 300 60 L 300 80 L 0 80 Z"}
+                                            opacity="0.2"
+                                        />
+                                        <path
+                                            d={i === 0 ? "M 0 50 Q 50 40 100 55 T 200 45 T 300 50"
+                                                : i === 1 ? "M 0 60 Q 75 30 150 50 T 300 40"
+                                                    : "M 0 40 Q 100 60 200 40 T 300 60"}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <div className="text-[7px] font-black text-gray-400 pt-1.5 border-t border-gray-100 uppercase tracking-widest">
+                                    {stat.footer}
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <div className="text-xl font-black text-[#1A1A1A] mb-0.5 tracking-tighter">{stat.val}</div>
-                            <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</div>
                         </div>
                     </div>
                 ))}
@@ -209,7 +243,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-[#1A1A1A] text-base font-black tracking-tight flex items-center gap-3">
                         {t('dash.recent')}
-                        <span className="bg-[#253746]/10 text-[#253746] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
+                        <span className="bg-[#11303B]/10 text-[#11303B] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
                     </h2>
                 </div>
 
@@ -333,13 +367,13 @@ export const DashboardPage: React.FC = () => {
                                                 </select>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-3" onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                     <button
                                                         onClick={() => navigate(`/analysis/${analysis.id}`)}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-white bg-[#11303B] border border-[#11303B] hover:bg-[#253746] hover:border-[#253746] hover:shadow-md rounded-lg transition-all group/btn"
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group"
+                                                        title="View Report"
                                                     >
-                                                        <Eye size={12} strokeWidth={3} className="text-white" />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Report</span>
+                                                        <Eye size={14} strokeWidth={2.5} />
                                                     </button>
 
                                                     {/* Consolidated Download Button */}
@@ -349,14 +383,13 @@ export const DashboardPage: React.FC = () => {
                                                                 e.stopPropagation();
                                                                 setActiveDownloadId(activeDownloadId === analysis.id ? null : analysis.id);
                                                             }}
-                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all border shadow-sm hover:shadow-md group/dl ${activeDownloadId === analysis.id
-                                                                ? 'bg-[#253746] text-white border-[#253746]'
-                                                                : 'bg-[#11303B] text-white border-[#11303B] hover:bg-[#253746] hover:border-[#253746]'
+                                                            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${activeDownloadId === analysis.id
+                                                                ? 'bg-[#111827] text-white'
+                                                                : 'bg-[#1e293b] text-white hover:bg-[#0f172a]'
                                                                 }`}
                                                             title={t('common.download_report')}
                                                         >
-                                                            <FileDown size={12} strokeWidth={3} className="text-white transition-colors" />
-                                                            <span className="text-[9px] font-black uppercase tracking-widest">{t('common.download_report')}</span>
+                                                            <FileDown size={14} strokeWidth={2.5} />
                                                         </button>
 
                                                         {activeDownloadId === analysis.id && (
@@ -367,7 +400,7 @@ export const DashboardPage: React.FC = () => {
                                                                         handleDownload(analysis.id, 'pdf', analysis.company_name);
                                                                         setActiveDownloadId(null);
                                                                     }}
-                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#253746] hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"
                                                                 >
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
                                                                     {t('common.pdf_version')}
@@ -389,10 +422,10 @@ export const DashboardPage: React.FC = () => {
 
                                                     <button
                                                         onClick={() => navigate('/dashboard/upload')}
-                                                        className="p-1.5 text-gray-300 hover:text-amber-500 hover:bg-white rounded-lg transition-all"
-                                                        title="Update / Re-upload"
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm"
+                                                        title="Update / Edit"
                                                     >
-                                                        <RefreshCcw size={12} />
+                                                        <RefreshCcw size={14} strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             </td>

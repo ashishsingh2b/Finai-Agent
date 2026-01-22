@@ -18,6 +18,7 @@ import {
     FileSpreadsheet,
     FileSearch
 } from 'lucide-react';
+import { useUIStore } from '../store/uiStore';
 import { useTranslation } from 'react-i18next';
 
 export const AnalysisPage: React.FC = () => {
@@ -26,9 +27,9 @@ export const AnalysisPage: React.FC = () => {
     const { t } = useTranslation();
 
     const [data, setData] = useState<AnalysisData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const { setLoading: setGlobalLoading, addToast } = useUIStore();
 
     useEffect(() => {
         const handleClickOutside = () => setIsDownloadOpen(false);
@@ -36,14 +37,12 @@ export const AnalysisPage: React.FC = () => {
 
         if (!id) {
             setError('Missing analysis id.');
-            setLoading(false);
             return;
         }
 
         const parsedId = Number.parseInt(id, 10);
         if (Number.isNaN(parsedId)) {
             setError('Invalid analysis id.');
-            setLoading(false);
             return;
         }
 
@@ -54,7 +53,7 @@ export const AnalysisPage: React.FC = () => {
 
     const fetchAnalysis = async (analysisId: number) => {
         try {
-            setLoading(true);
+            setGlobalLoading(true);
             setError(null);
             const response = await analysisAPI.getAnalysis(analysisId);
             setData(response.data);
@@ -66,8 +65,9 @@ export const AnalysisPage: React.FC = () => {
                 (err as Error)?.message ||
                 'Failed to load analysis.';
             setError(message);
+            addToast(message, 'error');
         } finally {
-            setLoading(false);
+            setGlobalLoading(false);
         }
     };
 
@@ -80,6 +80,7 @@ export const AnalysisPage: React.FC = () => {
 
     const handleDownload = async (type: 'pdf' | 'excel') => {
         if (!id || !data) return;
+        setGlobalLoading(true);
         try {
             const parsedId = Number.parseInt(id, 10);
             const response = type === 'pdf'
@@ -94,9 +95,12 @@ export const AnalysisPage: React.FC = () => {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
+            addToast(`Report downloaded successfully`, 'success');
         } catch (error) {
             console.error(`Failed to download ${type}:`, error);
-            alert(`Failed to download ${type.toUpperCase()}. Please try again.`);
+            addToast(`Failed to download ${type.toUpperCase()}. Please try again.`, 'error');
+        } finally {
+            setGlobalLoading(false);
         }
     };
 
@@ -167,23 +171,16 @@ export const AnalysisPage: React.FC = () => {
                     </div>
                     <button className="relative p-1.5 hover:bg-white/10 rounded-lg transition-all">
                         <Mail size={18} className="opacity-90" />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#253746]"></span>
+                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#11303B]"></span>
                     </button>
-                    <button className="w-8 h-8 rounded-lg bg-white text-[#253746] flex items-center justify-center hover:scale-105 transition-all shadow-md">
+                    <button className="w-8 h-8 rounded-lg bg-white text-[#11303B] flex items-center justify-center hover:scale-105 transition-all shadow-md">
                         <UserIcon size={16} strokeWidth={3} />
                     </button>
                 </div>
             </header>
 
             <main className="p-4 max-w-[1800px] mx-auto animate-in fade-in duration-500">
-                {loading ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="text-[12px] font-black text-gray-700 uppercase tracking-widest">Loading analysis...</div>
-                        <div className="mt-4 h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full w-1/3 bg-[#253746] rounded-full animate-pulse" />
-                        </div>
-                    </div>
-                ) : error ? (
+                {error ? (
                     <div className="bg-red-50/50 border border-red-200 rounded-2xl p-8 max-w-2xl mx-auto text-center animate-in zoom-in duration-300">
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertCircle size={32} className="text-red-500" />
@@ -212,32 +209,54 @@ export const AnalysisPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-12 gap-4 items-start">
                         {/* Sidebar */}
-                        <div className="col-span-12 lg:col-span-2 space-y-[10px]">
+                        <div className="col-span-12 lg:col-span-2 space-y-4">
+                            {/* General Information */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
                                 <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
-                                <div className="p-3 space-y-1">
-                                    <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Industry:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">{data.company_industry || 'N/A'}</div>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex justify-between items-center group/row">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Industry:</div>
+                                        <div className="text-[11px] font-black text-[#11303B]">{data.company_industry || 'N/A'}</div>
                                     </div>
-                                    <div className="h-px bg-gray-100/60"></div>
-                                    <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Years in Business:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">{data.years_in_business ? `${data.years_in_business} years` : 'N/A'}</div>
+                                    <div className="flex justify-between items-center group/row">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Years in Business:</div>
+                                        <div className="text-[11px] font-black text-[#11303B]">{data.years_in_business ? `${data.years_in_business} years` : 'N/A'}</div>
                                     </div>
-                                    <div className="h-px bg-gray-100/60"></div>
-                                    <div className="flex flex-col py-1">
-                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Top Clients:</div>
-                                        <div className="text-[10px] font-bold text-gray-700 leading-tight">{data.top_clients || 'See Billing Report'}</div>
-                                    </div>
-                                    <div className="h-px bg-gray-100/60"></div>
-                                    <div className="flex justify-between items-center group/row py-1">
-                                        <div className="text-[10px] font-black text-[#11303B] whitespace-nowrap">Fiscal Status:</div>
-                                        <div className="text-[10px] font-bold text-gray-700">{data.fiscal_status || 'Compliant'}</div>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Top Clients:</div>
+                                        <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || 'See Billing Report'}</div>
                                     </div>
                                 </div>
                             </div>
 
+                            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-in slide-in-from-left duration-500">
+                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center gap-2">
+                                    <FileSearch size={14} className="opacity-80" />
+                                    Credit Details
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-500">Approved Amount:</span>
+                                        <span className="text-[12px] font-black text-[#10b981]">
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.approved_amount || 0)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-500">Term:</span>
+                                        <span className="text-[11px] font-black text-[#11303B]">{data.loan_term_months || 12} months</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-500">Interest Rate:</span>
+                                        <span className="text-[11px] font-black text-[#11303B]">TIIE + 4.5%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-gray-500">Credit Type:</span>
+                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type || 'New'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Documents */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                                 <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
                                     Documents
@@ -245,10 +264,10 @@ export const AnalysisPage: React.FC = () => {
                                         onClick={() => navigate('/dashboard/upload')}
                                         className="text-[8px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded transition-colors"
                                     >
-                                        Correction
+                                        Edit
                                     </button>
                                 </div>
-                                <div className="p-1.5 space-y-0">
+                                <div className="p-1 space-y-0.5">
                                     {[
                                         { icon: FileText, label: 'Tax Certificate' },
                                         { icon: FileSpreadsheet, label: 'Financial Statements' },
@@ -256,23 +275,11 @@ export const AnalysisPage: React.FC = () => {
                                         { icon: AlertCircle, label: 'Risk Report' },
                                         { icon: FileText, label: 'Company Profile' }
                                     ].map((doc, i) => (
-                                        <React.Fragment key={i}>
-                                            <div className="flex items-center gap-2.5 group cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-all">
-                                                <doc.icon size={13} className="text-[#11303B] group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-                                                <span className="text-[10px] font-black text-[#11303B]/80 group-hover:text-[#11303B] transition-colors">{doc.label}</span>
-                                            </div>
-                                            {i < 4 && <div className="h-px bg-gray-100/60 mx-2"></div>}
-                                        </React.Fragment>
+                                        <div key={i} className="flex items-center gap-3 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg cursor-pointer group">
+                                            <doc.icon size={14} className="text-[#11303B]/60 group-hover:text-[#11303B]" />
+                                            <span className="text-[10px] font-bold text-gray-600 group-hover:text-[#11303B]">{doc.label}</span>
+                                        </div>
                                     ))}
-                                </div>
-                                <div className="p-3 pt-0">
-                                    <button
-                                        onClick={() => navigate('/dashboard/upload')}
-                                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-[#ef6b6b]/5 hover:bg-[#ef6b6b]/10 text-[#ef6b6b] rounded-xl border border-[#ef6b6b]/10 text-[8px] font-black uppercase tracking-widest transition-all"
-                                    >
-                                        <RefreshCcw size={10} />
-                                        Re-upload Files
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -302,25 +309,29 @@ export const AnalysisPage: React.FC = () => {
                                 </div>
 
                                 <div className="h-4 w-px bg-gray-300"></div>
-                                <div className="w-40 h-6 bg-gray-100/50 rounded-md border border-gray-200/50"></div>
+                                <div className="flex flex-col">
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Analyst Assigned</span>
+                                    <span className="text-[10px] font-black text-[#11303B]">Senior Credit Officer</span>
+                                </div>
                                 <div className="h-4 w-px bg-gray-300"></div>
 
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-bold text-gray-700">Payment History:</span>
-                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">Acceptable</span>
+                                    <span className="text-[11px] font-bold text-gray-700">Payment Behavior:</span>
+                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior || 'Acceptable'}</span>
                                 </div>
 
                                 <div className="flex-1"></div>
 
                                 <div className="flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Live Analysis</span>
+                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">Live Neural Analysis</span>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-10 gap-6">
                                 {/* Middle */}
                                 <div className="col-span-10 lg:col-span-6 space-y-4">
+
                                     <FinancialIndicators ratios={{
                                         current_ratio: data.current_ratio ?? 0,
                                         debt_to_assets: data.debt_to_assets ?? 0,

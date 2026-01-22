@@ -9,7 +9,8 @@ import {
     ArrowUpDown,
     FileText,
     FileDown,
-    Eye
+    Eye,
+    RefreshCcw
 } from 'lucide-react';
 import { analysisAPI } from '../services/api';
 import { AnalysisListItem } from '../types';
@@ -290,6 +291,14 @@ export const ReportsPage: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => navigate(`/analysis/${analysis.id}`)}
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group"
+                                                        title="View Report"
+                                                    >
+                                                        <Eye size={14} strokeWidth={2.5} />
+                                                    </button>
+
                                                     {/* Consolidated Download Button */}
                                                     <div className="relative">
                                                         <button
@@ -297,14 +306,13 @@ export const ReportsPage: React.FC = () => {
                                                                 e.stopPropagation();
                                                                 setActiveDownloadId(activeDownloadId === analysis.id ? null : analysis.id);
                                                             }}
-                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all border shadow-sm hover:shadow-md group/dl ${activeDownloadId === analysis.id
-                                                                ? 'bg-[#253746] text-white border-[#253746]'
-                                                                : 'bg-[#11303B] text-white border-[#11303B] hover:bg-[#253746] hover:border-[#253746]'
+                                                            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${activeDownloadId === analysis.id
+                                                                ? 'bg-[#111827] text-white'
+                                                                : 'bg-[#1e293b] text-white hover:bg-[#0f172a]'
                                                                 }`}
                                                             title={t('common.download_report')}
                                                         >
-                                                            <FileDown size={12} strokeWidth={3} className="text-white transition-colors" />
-                                                            <span className="text-[9px] font-black uppercase tracking-widest">{t('common.download_report')}</span>
+                                                            <FileDown size={14} strokeWidth={2.5} />
                                                         </button>
 
                                                         {activeDownloadId === analysis.id && (
@@ -336,20 +344,11 @@ export const ReportsPage: React.FC = () => {
                                                     </div>
 
                                                     <button
-                                                        onClick={() => navigate(`/analysis/${analysis.id}`)}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-white bg-[#11303B] border border-[#11303B] hover:bg-[#253746] hover:border-[#253746] hover:shadow-md rounded-lg transition-all"
-                                                    >
-                                                        <Eye size={12} strokeWidth={3} className="text-white" />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Report</span>
-                                                    </button>
-
-                                                    <button
                                                         onClick={() => navigate('/dashboard/upload')}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-white bg-[#11303B] border border-[#11303B] hover:bg-[#253746] hover:border-[#253746] hover:shadow-md rounded-lg transition-all"
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm"
                                                         title="Update / Edit"
                                                     >
-                                                        <FileText size={12} strokeWidth={3} className="text-white" />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Edit</span>
+                                                        <RefreshCcw size={14} strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             </td>

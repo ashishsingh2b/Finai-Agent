@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { useAuthStore } from '../store/authStore';
+import { useUIStore } from '../store/uiStore';
 import { userAPI } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import {
     Users,
     UserPlus,
-    MoreVertical,
     Shield,
     ShieldAlert,
     Trash2,
@@ -28,23 +28,15 @@ interface User {
 export const UserManagementPage: React.FC = () => {
     const { t } = useTranslation();
     const { user: currentUser } = useAuthStore();
+    const { addToast, setLoading: setGlobalLoading } = useUIStore();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({ email: '', full_name: '', password: '', role: 'analyst' });
-    const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
-
     useEffect(() => {
         fetchUsers();
-    }, []);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = () => setActiveDropdown(null);
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
     const fetchUsers = async () => {
@@ -60,14 +52,18 @@ export const UserManagementPage: React.FC = () => {
 
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
+        setGlobalLoading(true);
         try {
             await userAPI.createUser(formData);
+            addToast('User created successfully', 'success');
             setShowCreateModal(false);
             setFormData({ email: '', full_name: '', password: '', role: 'analyst' });
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create user:', error);
-            alert('Failed to create user.');
+            addToast(error.response?.data?.detail || 'Failed to create user.', 'error');
+        } finally {
+            setGlobalLoading(false);
         }
     };
 
@@ -75,8 +71,8 @@ export const UserManagementPage: React.FC = () => {
         e.preventDefault();
         if (!selectedUser) return;
 
+        setGlobalLoading(true);
         try {
-            // Only send fields that are not empty
             const updateData: any = {};
             if (formData.full_name) updateData.full_name = formData.full_name;
             if (formData.email) updateData.email = formData.email;
@@ -84,36 +80,47 @@ export const UserManagementPage: React.FC = () => {
             if (formData.password) updateData.password = formData.password;
 
             await userAPI.updateUser(selectedUser.id, updateData);
+            addToast('User updated successfully', 'success');
             setShowEditModal(false);
             setSelectedUser(null);
             setFormData({ email: '', full_name: '', password: '', role: 'analyst' });
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to update user:', error);
-            alert('Failed to update user.');
+            addToast(error.response?.data?.detail || 'Failed to update user.', 'error');
+        } finally {
+            setGlobalLoading(false);
         }
     };
 
     const toggleUserStatus = async (userId: number, currentStatus: boolean, e?: React.MouseEvent) => {
         e?.stopPropagation();
+        setGlobalLoading(true);
         try {
             await userAPI.updateStatus(userId, !currentStatus);
+            addToast(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`, 'success');
             fetchUsers();
-            setActiveDropdown(null);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to update user status:', error);
+            addToast('Failed to update user status.', 'error');
+        } finally {
+            setGlobalLoading(false);
         }
     };
 
     const handleDeleteUser = async (userId: number, e?: React.MouseEvent) => {
         e?.stopPropagation();
         if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            setGlobalLoading(true);
             try {
                 await userAPI.deleteUser(userId);
+                addToast('User deleted successfully', 'success');
                 fetchUsers();
-                setActiveDropdown(null);
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to delete user:', error);
+                addToast('Failed to delete user.', 'error');
+            } finally {
+                setGlobalLoading(false);
             }
         }
     };
@@ -128,7 +135,6 @@ export const UserManagementPage: React.FC = () => {
             role: user.role
         });
         setShowEditModal(true);
-        setActiveDropdown(null);
     };
 
     if (currentUser?.role !== 'admin') {
@@ -224,51 +230,38 @@ export const UserManagementPage: React.FC = () => {
                                                     {new Date(user.created_at).toLocaleDateString()}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right relative">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setActiveDropdown(activeDropdown === user.id ? null : user.id);
-                                                    }}
-                                                    className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-[#11303B] hover:border-[#11303B] hover:shadow-md transition-all"
-                                                >
-                                                    <MoreVertical size={14} />
-                                                </button>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={(e) => openEditModal(user, e)}
+                                                        className="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-200 hover:text-[#11303B] transition-all shadow-sm"
+                                                        title={t('users.update')}
+                                                    >
+                                                        <Edit2 size={14} strokeWidth={2.5} />
+                                                    </button>
 
-                                                {/* Actions Dropdown */}
-                                                {activeDropdown === user.id && (
-                                                    <div className="absolute right-8 top-10 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-100 origin-top-right ring-1 ring-black/5">
-                                                        <div className="p-1">
+                                                    {user.id !== currentUser?.id && (
+                                                        <>
                                                             <button
-                                                                onClick={(e) => openEditModal(user, e)}
-                                                                className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                                                                onClick={(e) => toggleUserStatus(user.id, user.is_active, e)}
+                                                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${user.is_active
+                                                                    ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                                                    : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                                                    }`}
+                                                                title={user.is_active ? t('users.deactivate') : t('users.activate')}
                                                             >
-                                                                <Edit2 size={12} className="text-[#11303B]" />
-                                                                {t('users.update')}
+                                                                {user.is_active ? <Ban size={14} strokeWidth={2.5} /> : <CheckCircle size={14} strokeWidth={2.5} />}
                                                             </button>
-
-                                                            {user.id !== currentUser?.id && (
-                                                                <>
-                                                                    <button
-                                                                        onClick={(e) => toggleUserStatus(user.id, user.is_active, e)}
-                                                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold rounded-lg transition-colors text-left ${user.is_active ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
-                                                                    >
-                                                                        {user.is_active ? <Ban size={12} /> : <CheckCircle size={12} />}
-                                                                        {user.is_active ? t('users.deactivate') : t('users.activate')}
-                                                                    </button>
-                                                                    <div className="h-px bg-gray-100 my-0.5"></div>
-                                                                    <button
-                                                                        onClick={(e) => handleDeleteUser(user.id, e)}
-                                                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[10px] font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
-                                                                    >
-                                                                        <Trash2 size={12} />
-                                                                        {t('users.delete')}
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                            <button
+                                                                onClick={(e) => handleDeleteUser(user.id, e)}
+                                                                className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all shadow-sm"
+                                                                title={t('users.delete')}
+                                                            >
+                                                                <Trash2 size={14} strokeWidth={2.5} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -298,7 +291,7 @@ export const UserManagementPage: React.FC = () => {
                             </div>
                             <form onSubmit={showEditModal ? handleUpdateUser : handleCreateUser} className="space-y-6">
                                 <div>
-                                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest block mb-2">{t('login.email')}</label>
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest block mb-2">{t('login.name') || 'Full Name'}</label>
                                     <input
                                         type="text"
                                         required

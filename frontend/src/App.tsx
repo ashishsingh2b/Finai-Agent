@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -11,6 +11,9 @@ import { AnalysisPage } from './pages/AnalysisPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 import { DocumentationPage } from './pages/DocumentationPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import { GlobalLoader } from './components/common/GlobalLoader';
+import { ToastContainer } from './components/common/Toast.tsx';
+import { NotFoundPage } from './pages/NotFound';
 
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
@@ -24,6 +27,8 @@ function App() {
 
     return (
         <BrowserRouter>
+            <GlobalLoader />
+            <ToastContainer />
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginForm />} />
@@ -85,7 +90,7 @@ function App() {
                     }
                 />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
     );

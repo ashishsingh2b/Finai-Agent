@@ -21,6 +21,7 @@ class ExcelReportGenerator:
         
         # Create worksheets
         self._create_company_info_sheet(workbook, company_data, formats)
+        self._create_loan_details_sheet(workbook, analysis_data, formats)
         self._create_balance_sheet(workbook, financial_statements, formats)
         self._create_income_statement(workbook, financial_statements, formats)
         self._create_financial_ratios_sheet(workbook, analysis_data, formats)
@@ -121,6 +122,38 @@ class ExcelReportGenerator:
         for label, value in zip(labels, values):
             worksheet.write(row, 0, label, formats['label'])
             worksheet.write(row, 1, value)
+            row += 1
+
+    def _create_loan_details_sheet(self, workbook, data: Dict, formats):
+        """Sheet 1.5: Loan Details"""
+        worksheet = workbook.add_worksheet('Loan Details' if self.language == 'en' else 'Crédito')
+        
+        worksheet.set_column('A:A', 30)
+        worksheet.set_column('B:B', 30)
+        
+        # Title
+        worksheet.merge_range('A1:B1', 'LOAN DETAILS' if self.language == 'en' else 'DETALLES DEL CRÉDITO', formats['header'])
+        
+        row = 2
+        labels = {
+            'en': ['Requested Amount', 'Approved Amount', 'Term (Months)', 'Interest Rate', 'Credit Type'],
+            'es': ['Monto Solicitado', 'Monto Autorizado', 'Plazo (Meses)', 'Tasa de Interés', 'Tipo de Crédito']
+        }[self.language]
+        
+        values = [
+            data.get('requested_loan_amount', 0),
+            data.get('approved_amount', 0),
+            data.get('loan_term_months', 12),
+            "TIIE + 4.5%",
+            data.get('credit_type', 'NEW')
+        ]
+        
+        for i, (label, value) in enumerate(zip(labels, values)):
+            worksheet.write(row, 0, label, formats['label'])
+            if isinstance(value, (int, float)) and i < 2:
+                worksheet.write(row, 1, value, formats['currency'])
+            else:
+                worksheet.write(row, 1, value)
             row += 1
     
     def _create_balance_sheet(self, workbook, statements: List[Dict], formats):
@@ -276,16 +309,21 @@ class ExcelReportGenerator:
                 ('Interest Coverage', 'interest_coverage', False),
                 ('Asset Turnover', 'asset_turnover', False),
             ],
+            'en': [
+                ('Current Ratio', 'current_ratio', False),
+                ('Leverage (D/A)', 'leverage_ratio', True),
+                ('ROE (%)', 'roe', True),
+                ('Sales Trend (%)', 'sales_trend', False),
+                ('Net Income Coverage', 'net_income_coverage', False),
+                ('Interest Coverage', 'interest_coverage', False),
+            ],
             'es': [
                 ('Razón Corriente', 'current_ratio', False),
-                ('Deuda/Activos', 'debt_to_assets', True),
-                ('Apalancamiento', 'leverage_ratio', False),
+                ('Apalancamiento (D/A)', 'leverage_ratio', True),
                 ('ROE (%)', 'roe', True),
-                ('ROA (%)', 'roa', True),
-                ('Margen de Utilidad (%)', 'profit_margin', True),
-                ('Margen EBITDA (%)', 'ebitda_margin', True),
+                ('Tendencia de Ventas (%)', 'sales_trend', False),
+                ('Cobertura Utilidad Neta', 'net_income_coverage', False),
                 ('Cobertura de Intereses', 'interest_coverage', False),
-                ('Rotación de Activos', 'asset_turnover', False),
             ]
         }[self.language]
         
@@ -417,6 +455,8 @@ class ExcelReportGenerator:
         interpretations = {
             'current_ratio': 'Good' if value > 1.5 else ('Adequate' if value > 1.0 else 'Low'),
             'roe': 'Excellent' if value > 15 else ('Good' if value > 10 else 'Low'),
-            'roa': 'Excellent' if value > 10 else ('Good' if value > 5 else 'Low'),
+            'leverage_ratio': 'Low' if value < 0.4 else ('Moderate' if value < 0.6 else 'High'),
+            'sales_trend': 'Growth' if value > 5 else ('Stable' if value > -2 else 'Decline'),
+            'net_income_coverage': 'Adequate' if value >= 2 else 'Low'
         }
         return interpretations.get(ratio_name, 'N/A')

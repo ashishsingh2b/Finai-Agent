@@ -119,7 +119,7 @@ export const FinancialCharts: React.FC<ChartProps> = () => {
                 }
             `}} />
 
-            <div className="bg-[#11303B] text-white px-5 py-3 font-bold text-sm tracking-wide flex justify-between items-center">
+            <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex justify-between items-center">
                 <span>Financial Charts</span>
             </div>
 

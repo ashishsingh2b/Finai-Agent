@@ -32,8 +32,10 @@ class AnalysisResult(Base):
     
     # Loan details
     requested_loan_amount = Column(Numeric(15, 2))
+    approved_amount = Column(Numeric(15, 2))
     loan_term_months = Column(Integer)
     collateral_type = Column(Integer)  # 1-5
+    credit_type = Column(String(20))   # 'NEW', 'RENEWED'
     
     # Financial Ratios
     current_ratio = Column(Numeric(10, 4))
@@ -45,6 +47,8 @@ class AnalysisResult(Base):
     ebitda_margin = Column(Numeric(10, 4))
     interest_coverage = Column(Numeric(10, 4))
     asset_turnover = Column(Numeric(10, 4))
+    sales_trend = Column(Numeric(10, 4))
+    net_income_coverage = Column(Numeric(10, 4))
     
     # Cycle ratios
     dso = Column(Numeric(10, 4))  # Days Sales Outstanding

@@ -21,7 +21,7 @@ export const Recommendation: React.FC<RecommendationProps> = ({
 
     return (
         <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-full flex flex-col transform hover:-translate-y-0.5 transition-all duration-300">
-            <div className="bg-[#11303B] px-4 py-2.5 text-white font-black text-[11px] uppercase tracking-wider text-left">
+            <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner text-left">
                 Evaluation & Recommendation
             </div>
             <div className="p-5 space-y-5 flex-1 text-left">

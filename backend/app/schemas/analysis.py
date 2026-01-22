@@ -46,6 +46,11 @@ class AnalysisResponse(BaseModel):
     justification: Optional[List[str]] = None
     conditions: Optional[List[str]] = None
     
+    # Loan specifics
+    approved_amount: Optional[float] = None
+    loan_term_months: Optional[int] = None
+    credit_type: Optional[str] = None
+    
     application_status: str
     payment_behavior: str
     
@@ -54,7 +59,11 @@ class AnalysisResponse(BaseModel):
     roe: Optional[float] = None
     roa: Optional[float] = None
     debt_to_assets: Optional[float] = None
+    leverage_ratio: Optional[float] = None
     profit_margin: Optional[float] = None
+    sales_trend: Optional[float] = None
+    net_income_coverage: Optional[float] = None
+    interest_coverage: Optional[float] = None
     
     # Company detail fallbacks/merges
     company_industry: Optional[str] = None

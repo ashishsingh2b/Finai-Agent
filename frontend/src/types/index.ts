@@ -61,6 +61,11 @@ export interface AnalysisData {
     ebitda_margin?: number;
     leverage_ratio?: number;
     interest_coverage?: number;
+    sales_trend?: number;
+    net_income_coverage?: number;
+    approved_amount?: number;
+    loan_term_months?: number;
+    credit_type?: string;
     company_industry?: string;
     years_in_business?: number;
     top_clients?: string;
@@ -91,6 +96,8 @@ export interface FinancialIndicatorsProps {
         profit_margin?: number;
         ebitda_margin?: number;
         interest_coverage?: number;
+        leverage_ratio?: number;
+        sales_trend?: number;
     };
 }
 

@@ -51,7 +51,7 @@ class PDFReportGenerator:
         
         # Body text
         self.styles.add(ParagraphStyle(
-            name='BodyText',
+            name='ReportBodyText',
             parent=self.styles['Normal'],
             fontSize=11,
             leading=14,
@@ -80,6 +80,10 @@ class PDFReportGenerator:
         
         # Executive Summary
         story.extend(self._build_executive_summary(analysis_data))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Loan Details Section
+        story.extend(self._build_loan_details_section(analysis_data))
         story.append(Spacer(1, 0.3*inch))
         
         # Financial Ratios Section
@@ -152,8 +156,47 @@ class PDFReportGenerator:
             category <b>{category}</b>. The final recommendation is: <b>{recommendation}</b>.
             """
         
-        elements.append(Paragraph(summary, self.styles['BodyText']))
+        elements.append(Paragraph(summary, self.styles['ReportBodyText']))
         
+        return elements
+
+    def _build_loan_details_section(self, data: Dict) -> list:
+        """Build loan details table"""
+        elements = []
+        
+        header_text = "DETALLES DEL CRÉDITO" if self.language == 'es' else "LOAN DETAILS"
+        elements.append(Paragraph(header_text, self.styles['SectionHeader']))
+        
+        if self.language == 'es':
+            table_data = [
+                ['Concepto', 'Detalle'],
+                ['Monto Solicitado', f"${data.get('requested_loan_amount', 0):,.2f}"],
+                ['Monto Autorizado', f"${data.get('approved_amount', 0):,.2f}"],
+                ['Plazo (Meses)', f"{data.get('loan_term_months', 12)}"],
+                ['Tasa de Interés', "TIIE + 4.5%"],
+                ['Tipo de Crédito', data.get('credit_type', 'NUEVO')]
+            ]
+        else:
+            table_data = [
+                ['Concept', 'Detail'],
+                ['Requested Amount', f"${data.get('requested_loan_amount', 0):,.2f}"],
+                ['Approved Amount', f"${data.get('approved_amount', 0):,.2f}"],
+                ['Term (Months)', f"{data.get('loan_term_months', 12)}"],
+                ['Interest Rate', "TIIE + 4.5%"],
+                ['Credit Type', data.get('credit_type', 'NEW')]
+            ]
+            
+        table = Table(table_data, colWidths=[3.25*inch, 3.25*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#253746')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ]))
+        
+        elements.append(table)
         return elements
     
     def _build_financial_ratios_section(self, data: Dict) -> list:
@@ -169,9 +212,9 @@ class PDFReportGenerator:
                 ['Indicador', 'Valor', 'Interpretación'],
                 ['Razón Corriente', f"{data.get('current_ratio', 0):.2f}", self._interpret_ratio('current_ratio', data.get('current_ratio', 0))],
                 ['ROE (%)', f"{data.get('roe', 0):.2f}%", self._interpret_ratio('roe', data.get('roe', 0))],
-                ['ROA (%)', f"{data.get('roa', 0):.2f}%", self._interpret_ratio('roa', data.get('roa', 0))],
-                ['Deuda/Activos', f"{data.get('debt_to_assets', 0):.2%}", self._interpret_ratio('debt_to_assets', data.get('debt_to_assets', 0))],
-                ['Margen de Utilidad (%)', f"{data.get('profit_margin', 0):.2f}%", self._interpret_ratio('profit_margin', data.get('profit_margin', 0))],
+                ['Apalancamiento (D/A)', f"{data.get('leverage_ratio', data.get('debt_to_assets', 0)):.2%}", self._interpret_ratio('leverage_ratio', data.get('leverage_ratio', data.get('debt_to_assets', 0)))],
+                ['Tendencia de Ventas (%)', f"{data.get('sales_trend', 0):.2f}%", self._interpret_ratio('sales_trend', data.get('sales_trend', 0))],
+                ['Cobertura Utilidad Neta', f"{data.get('net_income_coverage', 0):.2f}x", self._interpret_ratio('net_income_coverage', data.get('net_income_coverage', 0))],
                 ['Cobertura de Intereses', f"{data.get('interest_coverage', 0):.2f}", self._interpret_ratio('interest_coverage', data.get('interest_coverage', 0))],
             ]
         else:
@@ -179,9 +222,9 @@ class PDFReportGenerator:
                 ['Indicator', 'Value', 'Interpretation'],
                 ['Current Ratio', f"{data.get('current_ratio', 0):.2f}", self._interpret_ratio('current_ratio', data.get('current_ratio', 0))],
                 ['ROE (%)', f"{data.get('roe', 0):.2f}%", self._interpret_ratio('roe', data.get('roe', 0))],
-                ['ROA (%)', f"{data.get('roa', 0):.2f}%", self._interpret_ratio('roa', data.get('roa', 0))],
-                ['Debt/Assets', f"{data.get('debt_to_assets', 0):.2%}", self._interpret_ratio('debt_to_assets', data.get('debt_to_assets', 0))],
-                ['Profit Margin (%)', f"{data.get('profit_margin', 0):.2f}%", self._interpret_ratio('profit_margin', data.get('profit_margin', 0))],
+                ['Leverage (D/A)', f"{data.get('leverage_ratio', data.get('debt_to_assets', 0)):.2%}", self._interpret_ratio('leverage_ratio', data.get('leverage_ratio', data.get('debt_to_assets', 0)))],
+                ['Sales Trend (%)', f"{data.get('sales_trend', 0):.2f}%", self._interpret_ratio('sales_trend', data.get('sales_trend', 0))],
+                ['Net Income Coverage', f"{data.get('net_income_coverage', 0):.2f}x", self._interpret_ratio('net_income_coverage', data.get('net_income_coverage', 0))],
                 ['Interest Coverage', f"{data.get('interest_coverage', 0):.2f}", self._interpret_ratio('interest_coverage', data.get('interest_coverage', 0))],
             ]
         
@@ -314,14 +357,14 @@ class PDFReportGenerator:
         if justification:
             just_text = "Justificación:" if self.language == 'es' else "Justification:"
             elements.append(Paragraph(f"<b>{just_text}</b>", self.styles['Normal']))
-            elements.append(Paragraph(self._format_list(justification), self.styles['BodyText']))
+            elements.append(Paragraph(self._format_list(justification), self.styles['ReportBodyText']))
         
         # Conditions
         if conditions:
             cond_text = "Condiciones:" if self.language == 'es' else "Conditions:"
             elements.append(Spacer(1, 0.2*inch))
             elements.append(Paragraph(f"<b>{cond_text}</b>", self.styles['Normal']))
-            elements.append(Paragraph(self._format_list(conditions), self.styles['BodyText']))
+            elements.append(Paragraph(self._format_list(conditions), self.styles['ReportBodyText']))
         
         return elements
     
@@ -369,6 +412,18 @@ class PDFReportGenerator:
             'interest_coverage': {
                 'es': 'Excelente' if value > 3 else ('Adecuado' if value > 1.5 else 'Riesgoso'),
                 'en': 'Excellent' if value > 3 else ('Adequate' if value > 1.5 else 'Risky')
+            },
+            'leverage_ratio': {
+                'es': 'Bajo' if value < 0.4 else ('Moderado' if value < 0.6 else 'Alto'),
+                'en': 'Low' if value < 0.4 else ('Moderate' if value < 0.6 else 'High')
+            },
+            'sales_trend': {
+                'es': 'Crecimiento' if value > 5 else ('Estable' if value > -2 else 'Decrecimiento'),
+                'en': 'Growth' if value > 5 else ('Stable' if value > -2 else 'Decline')
+            },
+            'net_income_coverage': {
+                'es': 'Adecuada' if value >= 2 else 'Baja',
+                'en': 'Adequate' if value >= 2 else 'Low'
             }
         }
         

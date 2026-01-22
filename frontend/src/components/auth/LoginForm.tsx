@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useUIStore } from '../../store/uiStore';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '../common/LanguageSelector';
 import { authAPI } from '../../services/api';
@@ -14,8 +15,7 @@ import {
     ArrowLeft,
     Mail,
     Eye,
-    EyeOff,
-    AlertCircle
+    EyeOff
 } from 'lucide-react';
 
 export const LoginForm: React.FC = () => {
@@ -26,7 +26,6 @@ export const LoginForm: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     // Forgot Password State
@@ -34,18 +33,19 @@ export const LoginForm: React.FC = () => {
     const [resetStatus, setResetStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
     const { login } = useAuthStore();
+    const { addToast } = useUIStore();
     const navigate = useNavigate();
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
 
         try {
             await login(email, password);
+            addToast('Login successful! Redirecting...', 'success');
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.response?.data?.detail || t('login.invalidCredentials'));
+            addToast(err.response?.data?.detail || t('login.invalidCredentials'), 'error');
             setLoading(false);
         }
     };
@@ -94,12 +94,6 @@ export const LoginForm: React.FC = () => {
                         </div>
 
                         <form onSubmit={handleLoginSubmit} className="space-y-6">
-                            {error && (
-                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 text-xs font-bold animate-in slide-in-from-top-2 duration-300">
-                                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                    {error}
-                                </div>
-                            )}
 
                             <div className="space-y-2">
                                 <div className="relative group">

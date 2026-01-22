@@ -96,7 +96,10 @@
         "high": "High",
         "interestCov": "Interest Coverage",
         "solvency": "Solvency",
-        "acceptable": "Acceptable"
+        "acceptable": "Acceptable",
+        "salesTrend": "Sales Trend",
+        "growth": "Growth",
+        "decline": "Decline"
     },
     "rec": {
         "title": "Recommendation",
