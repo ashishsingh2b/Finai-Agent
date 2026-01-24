@@ -70,9 +70,12 @@ export interface AnalysisData {
     years_in_business?: number;
     top_clients?: string;
     fiscal_status?: string;
+    analyzed_by_name?: string;
     created_at?: string;
     application_status: 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
     payment_behavior: 'ON_TIME' | 'DELINQUENT' | 'NA';
+    applicable_interest_rate?: number;
+    tiie_rate_used?: number;
 }
 
 export interface AnalysisListItem {
@@ -85,6 +88,7 @@ export interface AnalysisListItem {
     application_status: 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
     payment_behavior: 'ON_TIME' | 'DELINQUENT' | 'NA';
     credit_amount?: number;
+    requested_amount?: number;
 }
 
 export interface FinancialIndicatorsProps {

@@ -169,7 +169,6 @@ class FinancialCalculator:
             'roe': FinancialCalculator.calculate_roe(net_profit, equity),
             'asset_turnover': FinancialCalculator.calculate_asset_turnover(revenue, total_assets),
             'interest_coverage': FinancialCalculator.calculate_interest_coverage(ebitda, interest_expense),
-            'leverage_ratio': FinancialCalculator.calculate_leverage(total_liabilities, total_assets),
         }
         
         # Calculate cash conversion cycle

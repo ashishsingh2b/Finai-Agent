@@ -96,10 +96,14 @@ async def upload_and_analyze(
             )
         
         # Step 2: Create company record
+        # Use extracted metadata if available
+        industry = company_info.get('industry')
+        years_in_business = company_info.get('years_in_business')
+        
         company = Company(
             name=company_info.get('name', 'Unknown Company'),
-            industry=company_info.get('industry'),
-            years_in_business=company_info.get('years_in_business'),
+            industry=industry,
+            years_in_business=years_in_business,
             created_by=current_user.id
         )
         db.add(company)
@@ -124,6 +128,16 @@ async def upload_and_analyze(
             latest_balance,
             latest_income
         )
+
+        # Merge file metadata with API params (File takes precedence if API params are defaults)
+        file_amount = company_info.get('requested_amount', 0)
+        file_term = company_info.get('loan_term', 0)
+        file_rate = company_info.get('interest_rate', 0)
+        file_type = company_info.get('credit_type')
+
+        final_loan_amount = file_amount if file_amount > 0 else loan_amount
+        final_loan_term = file_term if file_term > 0 else loan_term
+        final_credit_type = file_type if file_type else credit_type
         
         # Step 5: Credit scoring
         logger.info("Calculating credit score")
@@ -150,12 +164,12 @@ async def upload_and_analyze(
         
         net_income_coverage = FinancialCalculator.calculate_net_income_coverage(
             latest_income.get('net_profit', 0),
-            loan_amount if loan_amount > 0 else 1000000 # Fallback
+            final_loan_amount if final_loan_amount > 0 else 1000000 # Fallback
         )
 
         # Step 8: Generate Recommendation
         logger.info("Generating recommendation")
-        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income.get('net_profit', 0) / (loan_amount if loan_amount > 0 else 1000000))
+        profit_to_loan = ratios.get('profit_to_loan_ratio', latest_income.get('net_profit', 0) / (final_loan_amount if final_loan_amount > 0 else 1000000))
         recommendation = RecommendationEngine.generate_recommendation(
             credit_score['total_score'],
             credit_score['category'],
@@ -165,12 +179,19 @@ async def upload_and_analyze(
         )
         
         # Step 9: Save analysis result
+        # Calculate approved amount logic
+        approved_amt = final_loan_amount * 0.8
+        if credit_score['category'] == 'A':
+            approved_amt = final_loan_amount # 100% approval for A grade
+            
         analysis = AnalysisResult(
             company_id=company.id,
-            requested_loan_amount=loan_amount,
-            approved_amount=loan_amount * 0.8, # Mock logic for approval
-            loan_term_months=loan_term,
-            credit_type=credit_type,
+            requested_loan_amount=final_loan_amount,
+            approved_amount=approved_amt, 
+            loan_term_months=final_loan_term,
+            credit_type=final_credit_type,
+            applicable_interest_rate=file_rate,
+            tiie_rate_used=0.1125, # Mock current TIIE
             current_ratio=ratios.get('current_ratio'),
             debt_to_assets=ratios.get('debt_to_assets'),
             leverage_ratio=ratios.get('leverage_ratio'),
@@ -349,11 +370,14 @@ def get_analysis(
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
+    analyst = db.query(User).filter(User.id == analysis.analyzed_by).first()
+    
     return {
         **analysis.__dict__,
         "company_name": company.name if company else "Unknown",
         "company_industry": company.industry if company else "N/A",
         "years_in_business": company.years_in_business if company else 0,
+        "analyzed_by_name": analyst.full_name if analyst else "System Neural Engine",
         "justification": analysis.recommendation_justification
     }
 
@@ -377,11 +401,13 @@ def list_analyses(
             "recommendation": analysis.recommendation.value if analysis.recommendation else None,
             "created_at": analysis.created_at,
             "application_status": analysis.application_status.value if analysis.application_status else "UNDER_REVIEW",
-            "payment_behavior": analysis.payment_behavior.value if analysis.payment_behavior else "NA"
+            "payment_behavior": analysis.payment_behavior.value if analysis.payment_behavior else "NA",
+            "credit_amount": float(analysis.approved_amount) if analysis.approved_amount else 0,
+            "requested_amount": float(analysis.requested_loan_amount) if analysis.requested_loan_amount else 0,
         })
     return {"analyses": results, "total": len(results)}
 
-@router.patch("/{analysis_id}/status", response_model=AnalysisResponse)
+@router.post("/{analysis_id}/status", response_model=AnalysisResponse)
 def update_analysis_status(
     analysis_id: int,
     status_update: AnalysisUpdateStatus,
@@ -393,20 +419,27 @@ def update_analysis_status(
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
     
+    logger.info(f"Updating analysis {analysis_id} with status: {status_update.application_status}, behavior: {status_update.payment_behavior}")
+    
     if status_update.application_status:
         try:
             analysis.application_status = ApplicationStatus(status_update.application_status)
+            logger.info(f"Set application_status to {analysis.application_status}")
         except ValueError:
+            logger.error(f"Invalid application status: {status_update.application_status}")
             raise HTTPException(status_code=400, detail=f"Invalid application status: {status_update.application_status}")
             
     if status_update.payment_behavior:
         try:
             analysis.payment_behavior = PaymentBehavior(status_update.payment_behavior)
+            logger.info(f"Set payment_behavior to {analysis.payment_behavior}")
         except ValueError:
+            logger.error(f"Invalid payment behavior: {status_update.payment_behavior}")
             raise HTTPException(status_code=400, detail=f"Invalid payment behavior: {status_update.payment_behavior}")
             
     db.commit()
     db.refresh(analysis)
+    logger.info(f"Committed changes for analysis {analysis_id}. Final status: {analysis.application_status}")
     
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
     return {

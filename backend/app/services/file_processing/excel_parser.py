@@ -18,28 +18,68 @@ class ExcelParser:
             raise
     
     def extract_company_info(self, sheet_name='BG'):
-        """Extract company name and basic info from BG sheet"""
+        """Extract company name and extended metadata from BG sheet"""
         try:
             ws = self.workbook[sheet_name]
-            company_name = ws['A5'].value  # "Prospecto: TA SOLUCIONES"
             
-            if company_name and ":" in str(company_name):
-                company_name = str(company_name).split(":")[1].strip()
-            
-            return {
-                'name': company_name or "Unknown Company",
-                'industry': '',  # To be filled manually or from other source
-                'years_in_business': None,
+            # Default values
+            info = {
+                'name': "Unknown Company",
+                'industry': "General Trading",
+                'years_in_business': 5,
+                'requested_amount': 0,
+                'loan_term': 12,
+                'interest_rate': 0.055, # Default 5.5%
+                'credit_type': 'revolving'
             }
+
+            # Search first 10 rows for metadata keys
+            for row in range(1, 15):
+                cell_val = str(ws[f'A{row}'].value or "").strip()
+                val_cell = ws[f'B{row}'].value
+                
+                if not cell_val: continue
+                
+                lower_val = cell_val.lower()
+                
+                # Company Name
+                if "prospecto:" in lower_val:
+                    info['name'] = cell_val.split(":")[1].strip()
+                
+                # Industry
+                elif "industry:" in lower_val or "industria:" in lower_val:
+                    info['industry'] = str(val_cell).strip() if val_cell else "General"
+                    
+                # Years in Business
+                elif "years in business:" in lower_val or "años en negocio:" in lower_val:
+                    info['years_in_business'] = int(val_cell) if val_cell else 5
+                    
+                # Requested Amount
+                elif "requested amount:" in lower_val or "monto solicitado:" in lower_val:
+                    info['requested_amount'] = float(val_cell) if val_cell else 0
+                    
+                # Loan Term
+                elif "loan term:" in lower_val or "plazo:" in lower_val:
+                    info['loan_term'] = int(val_cell) if val_cell else 12
+                    
+                # Interest Rate
+                elif "interest rate:" in lower_val or "tasa de interés:" in lower_val:
+                    info['interest_rate'] = float(val_cell) if val_cell else 0.055
+                    
+                # Credit Type
+                elif "credit type:" in lower_val or "tipo de crédito:" in lower_val:
+                    info['credit_type'] = str(val_cell).strip().lower()
+
+            return info
         except Exception as e:
             logger.error(f"Failed to extract company info: {e}")
-            return {'name': 'Unknown Company', 'industry': '', 'years_in_business': None}
+            return {'name': 'Unknown Company', 'industry': 'Error', 'years_in_business': 0}
     
     def _find_years_columns(self, ws):
         """Find columns that correspond to years (20XX)"""
         years_cols = {}
-        # Search first 10 rows for years
-        for row in range(1, 11):
+        # Search first 20 rows for years (increased to accommodate metadata)
+        for row in range(1, 21):
             for col in range(1, 15): # A to N
                 val = ws.cell(row=row, column=col).value
                 if val and isinstance(val, (int, float)) and 2000 <= int(val) <= 2100:

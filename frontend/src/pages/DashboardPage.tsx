@@ -19,10 +19,12 @@ import {
     ArrowLeft
 } from 'lucide-react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { useUIStore } from '../store/uiStore';
 
 export const DashboardPage: React.FC = () => {
     const { user } = useAuthStore();
     const { t } = useTranslation();
+    const { addToast } = useUIStore();
     const navigate = useNavigate();
     const [analyses, setAnalyses] = useState<AnalysisListItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,6 +48,40 @@ export const DashboardPage: React.FC = () => {
             setError('System could not retrieve historical data. Please check connection and refresh.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusUpdate = async (id: number, status: string, currentBehavior: string) => {
+        try {
+            const payload = {
+                application_status: status,
+                payment_behavior: status !== 'APPROVED' ? 'NA' : currentBehavior
+            };
+
+            console.log('Sending status update payload:', payload);
+
+            await analysisAPI.updateAnalysisStatus(id, payload);
+
+            // Optimistic Update: Refresh the list
+            fetchAnalyses();
+            addToast(`Status updated to ${status}`, 'success');
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            addToast('Failed to update analysis status. Please try again.', 'error');
+        }
+    };
+
+    const handleBehaviorUpdate = async (id: number, behavior: string) => {
+        try {
+            const payload = { payment_behavior: behavior };
+            console.log('Sending behavior update payload:', payload);
+
+            await analysisAPI.updateAnalysisStatus(id, payload);
+            fetchAnalyses();
+            addToast('Payment behavior recorded.', 'success');
+        } catch (error) {
+            console.error('Failed to update behavior:', error);
+            addToast('Error saving behavior update.', 'error');
         }
     };
 
@@ -80,10 +116,37 @@ export const DashboardPage: React.FC = () => {
         }
     };
 
-    // Calculate Total Active Portfolio (Sum of APPROVED credits)
+    // Calculate Dynamic Stats and Trends
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+    const fourteenDaysAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
+
+    // 1. Total Analyses
+    const recentAnalyses = analyses.filter(a => new Date(a.created_at) >= sevenDaysAgo);
+    const prevAnalyses = analyses.filter(a => new Date(a.created_at) >= fourteenDaysAgo && new Date(a.created_at) < sevenDaysAgo);
+    const totalTrend = prevAnalyses.length === 0 ? '+100%' : `${(((recentAnalyses.length - prevAnalyses.length) / prevAnalyses.length) * 100).toFixed(0)}%`;
+
+    // 2. Avg Risk Score
+    const recentAvg = recentAnalyses.length > 0 ? recentAnalyses.reduce((acc, curr) => acc + curr.credit_score, 0) / recentAnalyses.length : 0;
+    const prevAvg = prevAnalyses.length > 0 ? prevAnalyses.reduce((acc, curr) => acc + curr.credit_score, 0) / prevAnalyses.length : 0;
+    const scoreTrend = (recentAvg - prevAvg).toFixed(1);
+    const scoreTrendUp = recentAvg >= prevAvg;
+
+    // 3. High Risk Units
+    const currentHighRisk = analyses.filter(a => ['D', 'E'].includes(a.category)).length;
+    const prevHighRisk = prevAnalyses.filter(a => ['D', 'E'].includes(a.category)).length;
+    const highRiskTrend = (currentHighRisk - prevHighRisk);
+
+    // 4. Total Active Portfolio (Sum of APPROVED credits)
     const totalActivePortfolio = analyses
         .filter(a => a.application_status === 'APPROVED')
         .reduce((sum, curr) => sum + (curr.credit_amount || 0), 0);
+
+    const prevActivePortfolio = prevAnalyses
+        .filter(a => a.application_status === 'APPROVED')
+        .reduce((sum, curr) => sum + (curr.credit_amount || 0), 0);
+
+    const portfolioTrendPercentage = prevActivePortfolio === 0 ? '+100%' : `${(((totalActivePortfolio - prevActivePortfolio) / prevActivePortfolio) * 100).toFixed(0)}%`;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-MX', {
@@ -122,9 +185,9 @@ export const DashboardPage: React.FC = () => {
             {/* Metrics Grid (Compact) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-in fade-in slide-in-from-bottom duration-1000">
                 {[
-                    { label: t('dash.total'), val: analyses.length, trend: '+12%', up: true, icon: FileText, color: 'blue', border: 'border-blue-400/50', bg: 'bg-blue-50', footer: 'Total System Records' },
-                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: '+4.2', up: true, icon: TrendingUp, color: 'emerald', border: 'border-emerald-400/50', bg: 'bg-emerald-50', footer: 'Network Average Score' },
-                    { label: t('dash.highRisk'), val: analyses.filter(a => ['D', 'E'].includes(a.category)).length, trend: '-2', up: true, icon: ShieldAlert, color: 'red', border: 'border-red-400/50', bg: 'bg-red-50', footer: 'Critical Alerts Active' },
+                    { label: t('dash.total'), val: analyses.length, trend: totalTrend, up: true, icon: FileText, color: 'blue', border: 'border-blue-400/50', bg: 'bg-blue-50', footer: 'Total System Records' },
+                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: scoreTrend, up: scoreTrendUp, icon: TrendingUp, color: 'emerald', border: 'border-emerald-400/50', bg: 'bg-emerald-50', footer: 'Network Average Score' },
+                    { label: t('dash.highRisk'), val: currentHighRisk, trend: highRiskTrend > 0 ? `+${highRiskTrend}` : highRiskTrend, up: highRiskTrend <= 0, icon: ShieldAlert, color: 'red', border: 'border-red-400/50', bg: 'bg-red-50', footer: 'Critical Alerts Active' },
                 ].map((stat, i) => (
                     <div key={i} className={`bg-white p-3 rounded-2xl border-4 ${stat.border} shadow-xl hover:shadow-2xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between h-full`}>
                         {/* Background decoration */}
@@ -191,7 +254,7 @@ export const DashboardPage: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
                                 <TrendingUp className="w-2.5 h-2.5 text-[#6ECEB2]" />
-                                <span className="text-[9px] font-bold text-[#6ECEB2]">+5%</span>
+                                <span className="text-[9px] font-bold text-[#6ECEB2]">{portfolioTrendPercentage}</span>
                             </div>
                         </div>
 
@@ -316,22 +379,10 @@ export const DashboardPage: React.FC = () => {
                                                 </span>
                                             </td>
                                             {/* Status Column */}
-                                            <td className="px-4 py-4">
+                                            <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
-                                                    defaultValue={analysis.application_status}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    onChange={async (e) => {
-                                                        const newStatus = e.target.value;
-                                                        try {
-                                                            await analysisAPI.updateAnalysisStatus(analysis.id, {
-                                                                application_status: newStatus,
-                                                                payment_behavior: newStatus !== 'APPROVED' ? 'NA' : analysis.payment_behavior
-                                                            });
-                                                            fetchAnalyses(); // Refresh data
-                                                        } catch (error) {
-                                                            console.error('Failed to update status:', error);
-                                                        }
-                                                    }}
+                                                    value={analysis.application_status}
+                                                    onChange={(e) => handleStatusUpdate(analysis.id, e.target.value, analysis.payment_behavior)}
                                                     className={`w-full px-3 py-1.5 rounded-lg text-[9px] font-black border tracking-wider cursor-pointer shadow-sm outline-none transition-all ${analysis.application_status === 'APPROVED' ? 'bg-[#5aac44] text-white border-[#5aac44]' :
                                                         analysis.application_status === 'REJECTED' ? 'bg-[#ef4444] text-white border-[#ef4444]' :
                                                             'bg-[#fbbf24] text-white border-[#fbbf24]'
@@ -343,19 +394,11 @@ export const DashboardPage: React.FC = () => {
                                                 </select>
                                             </td>
                                             {/* Behavior Column */}
-                                            <td className="px-4 py-4">
+                                            <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     disabled={analysis.application_status !== 'APPROVED'}
                                                     value={analysis.payment_behavior}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    onChange={async (e) => {
-                                                        try {
-                                                            await analysisAPI.updateAnalysisStatus(analysis.id, { payment_behavior: e.target.value });
-                                                            fetchAnalyses();
-                                                        } catch (error) {
-                                                            console.error('Failed to update behavior:', error);
-                                                        }
-                                                    }}
+                                                    onChange={(e) => handleBehaviorUpdate(analysis.id, e.target.value)}
                                                     className={`w-full px-3 py-1.5 rounded-lg text-[9px] font-black border tracking-wider shadow-sm outline-none transition-all appearance-none cursor-pointer ${analysis.application_status !== 'APPROVED'
                                                         ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
                                                         : 'bg-white text-[#11303B] border-[#11303B]/20 hover:border-[#11303B] hover:shadow-md'

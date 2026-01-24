@@ -294,7 +294,7 @@ class PDFReportGenerator:
             return None
     
     def _build_swot_section(self, data: Dict) -> list:
-        """Build SWOT analysis section"""
+        """Build SWOT analysis section with wrapped text"""
         elements = []
         
         header_text = "ANÁLISIS FODA" if self.language == 'es' else "SWOT ANALYSIS"
@@ -302,21 +302,38 @@ class PDFReportGenerator:
         
         swot = data.get('swot_analysis', {})
         
-        # SWOT Table
-        if self.language == 'es':
-            swot_data = [
-                ['FORTALEZAS', 'OPORTUNIDADES'],
-                [self._format_list(swot.get('strengths', [])), self._format_list(swot.get('opportunities', []))],
-                ['DEBILIDADES', 'AMENAZAS'],
-                [self._format_list(swot.get('weaknesses', [])), self._format_list(swot.get('threats', []))]
+        # Helper to create wrapped cell content
+        def create_paragraph_cell(text_list):
+            content = []
+            if not text_list:
+                content.append(Paragraph("N/A", self.styles['Normal']))
+            else:
+                for item in text_list:
+                    # Create bullet point paragraph
+                    p = Paragraph(f"• {item}", self.styles['ReportBodyText'])
+                    content.append(p)
+                    content.append(Spacer(1, 2))
+            return content
+
+        # Create table data with Paragraph flowables
+        swot_data = [
+            [
+                Paragraph('<b>FORTALEZAS</b>' if self.language == 'es' else '<b>STRENGTHS</b>', self.styles['Normal']), 
+                Paragraph('<b>OPORTUNIDADES</b>' if self.language == 'es' else '<b>OPPORTUNITIES</b>', self.styles['Normal'])
+            ],
+            [
+                create_paragraph_cell(swot.get('strengths', [])), 
+                create_paragraph_cell(swot.get('opportunities', []))
+            ],
+            [
+                Paragraph('<b>DEBILIDADES</b>' if self.language == 'es' else '<b>WEAKNESSES</b>', self.styles['Normal']), 
+                Paragraph('<b>AMENAZAS</b>' if self.language == 'es' else '<b>THREATS</b>', self.styles['Normal'])
+            ],
+            [
+                create_paragraph_cell(swot.get('weaknesses', [])), 
+                create_paragraph_cell(swot.get('threats', []))
             ]
-        else:
-            swot_data = [
-                ['STRENGTHS', 'OPPORTUNITIES'],
-                [self._format_list(swot.get('strengths', [])), self._format_list(swot.get('opportunities', []))],
-                ['WEAKNESSES', 'THREATS'],
-                [self._format_list(swot.get('weaknesses', [])), self._format_list(swot.get('threats', []))]
-            ]
+        ]
         
         table = Table(swot_data, colWidths=[3.25*inch, 3.25*inch])
         table.setStyle(TableStyle([
@@ -327,11 +344,13 @@ class PDFReportGenerator:
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('TEXTCOLOR', (0, 2), (-1, 2), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 11),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('PADDING', (0, 0), (-1, -1), 10),
+            ('PADDING', (0, 0), (-1, -1), 6),
+            ('LEFTPADDING', (0, 1), (-1, 1), 10),
+            ('LEFTPADDING', (0, 3), (-1, 3), 10),
+            ('RIGHTPADDING', (0, 1), (-1, 1), 10),
+            ('RIGHTPADDING', (0, 3), (-1, 3), 10),
         ]))
         
         elements.append(table)
@@ -350,7 +369,7 @@ class PDFReportGenerator:
         conditions = data.get('conditions', [])
         
         # Recommendation decision
-        decision_color = colors.green if recommendation == 'APPROVE' else (colors.orange if recommendation == 'APPROVE_WITH_CONDITIONS' else colors.red)
+        decision_color = 'green' if recommendation == 'APPROVE' else ('orange' if 'CONDITIONAL' in str(recommendation) else 'red')
         elements.append(Paragraph(f"<b>Decisión: <font color='{decision_color}'>{recommendation}</font></b>", self.styles['Heading3']))
         
         # Justification
@@ -369,13 +388,33 @@ class PDFReportGenerator:
         return elements
     
     def _build_footer(self) -> list:
-        """Build report footer"""
+        """Build report footer with copyright"""
         elements = []
         
         elements.append(Spacer(1, 0.5*inch))
         elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey))
+        elements.append(Spacer(1, 0.1*inch))
         
-        footer_text = f"Generado por Moskalti FinAI Agent - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        date_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+        year = datetime.now().year
+        
+        if self.language == 'es':
+            footer_text = f"""
+            <font size=8 color='grey'>
+            Generado por <b>Moskalti FinAI Agent</b> - {date_str}<br/>
+            Confidencial - Uso exclusivo de Moskalti Capital<br/>
+            © {year} Moskalti Capital. Todos los derechos reservados.
+            </font>
+            """
+        else:
+            footer_text = f"""
+            <font size=8 color='grey'>
+            Generated by <b>Moskalti FinAI Agent</b> - {date_str}<br/>
+            Confidential - Exclusive use of Moskalti Capital<br/>
+            © {year} Moskalti Capital. All rights reserved.
+            </font>
+            """
+            
         elements.append(Paragraph(footer_text, self.styles['Normal']))
         
         return elements

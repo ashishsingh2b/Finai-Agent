@@ -6,7 +6,9 @@ def migrate():
         ("approved_amount", "NUMERIC(15, 2)"),
         ("credit_type", "VARCHAR(20)"),
         ("sales_trend", "NUMERIC(10, 4)"),
-        ("net_income_coverage", "NUMERIC(10, 4)")
+        ("net_income_coverage", "NUMERIC(10, 4)"),
+        ("application_status", "VARCHAR(50) DEFAULT 'UNDER_REVIEW'"),
+        ("payment_behavior", "VARCHAR(50) DEFAULT 'NA'")
     ]
                 
     with engine.connect() as conn:

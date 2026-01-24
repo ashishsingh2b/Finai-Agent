@@ -16,10 +16,12 @@ import { analysisAPI } from '../services/api';
 import { AnalysisListItem } from '../types';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { useTranslation } from 'react-i18next';
+import { useUIStore } from '../store/uiStore';
 
 export const ReportsPage: React.FC = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { addToast } = useUIStore();
     const [analyses, setAnalyses] = useState<AnalysisListItem[]>([]);
     const [filteredAnalyses, setFilteredAnalyses] = useState<AnalysisListItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -80,6 +82,32 @@ export const ReportsPage: React.FC = () => {
             console.error('Failed to fetch analyses:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusUpdate = async (id: number, status: string, currentBehavior: string) => {
+        try {
+            const payload = {
+                application_status: status,
+                payment_behavior: status !== 'APPROVED' ? 'NA' : currentBehavior
+            };
+            await analysisAPI.updateAnalysisStatus(id, payload);
+            fetchAnalyses();
+            addToast(`Status updated to ${status}`, 'success');
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            addToast('Failed to update analysis status.', 'error');
+        }
+    };
+
+    const handleBehaviorUpdate = async (id: number, behavior: string) => {
+        try {
+            await analysisAPI.updateAnalysisStatus(id, { payment_behavior: behavior });
+            fetchAnalyses();
+            addToast('Payment behavior updated.', 'success');
+        } catch (error) {
+            console.error('Failed to update behavior:', error);
+            addToast('Error saving behavior.', 'error');
         }
     };
 
@@ -235,21 +263,10 @@ export const ReportsPage: React.FC = () => {
                                                 </div>
                                             </td>
                                             {/* Status Column */}
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
-                                                    defaultValue={analysis.application_status}
-                                                    onChange={async (e) => {
-                                                        const newStatus = e.target.value;
-                                                        try {
-                                                            await analysisAPI.updateAnalysisStatus(analysis.id, {
-                                                                application_status: newStatus,
-                                                                payment_behavior: newStatus !== 'APPROVED' ? 'NA' : analysis.payment_behavior
-                                                            });
-                                                            fetchAnalyses(); // Refresh data
-                                                        } catch (error) {
-                                                            console.error('Failed to update status:', error);
-                                                        }
-                                                    }}
+                                                    value={analysis.application_status}
+                                                    onChange={(e) => handleStatusUpdate(analysis.id, e.target.value, analysis.payment_behavior)}
                                                     className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider cursor-pointer shadow-sm outline-none transition-all ${analysis.application_status === 'APPROVED' ? 'bg-[#5aac44] text-white border-[#5aac44]' :
                                                         analysis.application_status === 'REJECTED' ? 'bg-[#ef4444] text-white border-[#ef4444]' :
                                                             'bg-[#fbbf24] text-white border-[#fbbf24]'
@@ -261,18 +278,11 @@ export const ReportsPage: React.FC = () => {
                                                 </select>
                                             </td>
                                             {/* Behavior Column */}
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     disabled={analysis.application_status !== 'APPROVED'}
                                                     value={analysis.payment_behavior}
-                                                    onChange={async (e) => {
-                                                        try {
-                                                            await analysisAPI.updateAnalysisStatus(analysis.id, { payment_behavior: e.target.value });
-                                                            fetchAnalyses();
-                                                        } catch (error) {
-                                                            console.error('Failed to update behavior:', error);
-                                                        }
-                                                    }}
+                                                    onChange={(e) => handleBehaviorUpdate(analysis.id, e.target.value)}
                                                     className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider shadow-sm outline-none transition-all appearance-none cursor-pointer ${analysis.application_status !== 'APPROVED'
                                                         ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
                                                         : 'bg-white text-[#11303B] border-[#11303B]/20 hover:border-[#11303B] hover:shadow-md'

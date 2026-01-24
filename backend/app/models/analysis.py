@@ -64,20 +64,20 @@ class AnalysisResult(Base):
     credit_category = Column(String(1))  # A, B, C, D, E
     
     # Risk Assessment
-    risk_level = Column(SQLEnum(RiskLevel))
+    risk_level = Column(SQLEnum(RiskLevel, native_enum=False))
     profit_to_loan_ratio = Column(Numeric(10, 4))
     
     # SWOT Analysis (JSON)
     swot_analysis = Column(JSON)
     
     # Recommendation
-    recommendation = Column(SQLEnum(RecommendationType))
+    recommendation = Column(SQLEnum(RecommendationType, native_enum=False))
     recommendation_justification = Column(JSON)  # Array of reasons
     conditions = Column(JSON)  # Array of conditions if CONDITIONAL
     
     # Manual Status Tracking
-    application_status = Column(SQLEnum(ApplicationStatus), default=ApplicationStatus.UNDER_REVIEW)
-    payment_behavior = Column(SQLEnum(PaymentBehavior), default=PaymentBehavior.NA)
+    application_status = Column(SQLEnum(ApplicationStatus, native_enum=False), default=ApplicationStatus.UNDER_REVIEW)
+    payment_behavior = Column(SQLEnum(PaymentBehavior, native_enum=False), default=PaymentBehavior.NA)
     
     # Interest Rate
     applicable_interest_rate = Column(Numeric(5, 4))

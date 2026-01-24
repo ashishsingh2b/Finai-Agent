@@ -247,11 +247,15 @@ export const AnalysisPage: React.FC = () => {
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-bold text-gray-500">Interest Rate:</span>
-                                        <span className="text-[11px] font-black text-[#11303B]">TIIE + 4.5%</span>
+                                        <span className="text-[11px] font-black text-[#11303B]">
+                                            {data.applicable_interest_rate
+                                                ? `TIIE + ${(data.applicable_interest_rate * 100).toFixed(1)}%`
+                                                : 'TIIE + 5.5% (Indicative)'}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-bold text-gray-500">Credit Type:</span>
-                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type || 'New'}</span>
+                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type || 'Revolving'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -310,14 +314,14 @@ export const AnalysisPage: React.FC = () => {
 
                                 <div className="h-4 w-px bg-gray-300"></div>
                                 <div className="flex flex-col">
-                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Analyst Assigned</span>
-                                    <span className="text-[10px] font-black text-[#11303B]">Senior Credit Officer</span>
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Analyst Identity</span>
+                                    <span className="text-[10px] font-black text-[#11303B]">{data.analyzed_by_name || 'System Neural Engine'}</span>
                                 </div>
                                 <div className="h-4 w-px bg-gray-300"></div>
 
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] font-bold text-gray-700">Payment Behavior:</span>
-                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior || 'Acceptable'}</span>
+                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior || 'NA'}</span>
                                 </div>
 
                                 <div className="flex-1"></div>
@@ -339,14 +343,16 @@ export const AnalysisPage: React.FC = () => {
                                         roa: data.roa ?? 0,
                                         profit_margin: data.profit_margin ?? 0,
                                         ebitda_margin: data.ebitda_margin ?? 0,
-                                        interest_coverage: data.interest_coverage
+                                        interest_coverage: data.interest_coverage,
+                                        leverage_ratio: data.leverage_ratio,
+                                        sales_trend: data.sales_trend
                                     }} />
                                     <SWOTAnalysis swot={swot} />
                                 </div>
 
                                 {/* Right */}
                                 <div className="col-span-10 lg:col-span-4 space-y-4 flex flex-col">
-                                    <FinancialCharts />
+                                    <FinancialCharts analysis={data} />
                                     <Recommendation
                                         recommendation={data.recommendation}
                                         category={data.credit_category}

@@ -65,11 +65,16 @@ class AnalysisResponse(BaseModel):
     net_income_coverage: Optional[float] = None
     interest_coverage: Optional[float] = None
     
+    # Interest Rate details
+    applicable_interest_rate: Optional[float] = None
+    tiie_rate_used: Optional[float] = None
+    
     # Company detail fallbacks/merges
     company_industry: Optional[str] = None
     years_in_business: Optional[int] = None
     top_clients: Optional[str] = None
     fiscal_status: Optional[str] = None
+    analyzed_by_name: Optional[str] = None
     
     class Config:
         from_attributes = True

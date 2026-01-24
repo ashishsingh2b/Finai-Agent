@@ -41,27 +41,35 @@ export const Recommendation: React.FC<RecommendationProps> = ({
                     {/* Justification */}
                     <div className="space-y-3">
                         <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">Justification:</div>
-                        <ul className="space-y-2">
-                            {(justificationPoints.length > 0 ? justificationPoints : ['Adequate liquidity', 'Moderate debt']).map((point, i) => (
-                                <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
-                                    <span className="mt-1.5 w-1.5 h-1.5 bg-[#11303B] rounded-full flex-shrink-0"></span>
-                                    {point}
-                                </li>
-                            ))}
-                        </ul>
+                        {justificationPoints.length > 0 ? (
+                            <ul className="space-y-2">
+                                {justificationPoints.map((point, i) => (
+                                    <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
+                                        <span className="mt-1.5 w-1.5 h-1.5 bg-[#11303B] rounded-full flex-shrink-0"></span>
+                                        {point}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <span className="text-[10px] text-gray-400 italic">No justification provided</span>
+                        )}
                     </div>
 
                     {/* Conditions */}
                     <div className="space-y-3">
                         <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">Conditions:</div>
-                        <ul className="space-y-2">
-                            {(conditionPoints.length > 0 ? conditionPoints : ['18 months term', 'Collateral']).map((point, i) => (
-                                <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
-                                    <span className="mt-1.5 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
-                                    {point}
-                                </li>
-                            ))}
-                        </ul>
+                        {conditionPoints.length > 0 ? (
+                            <ul className="space-y-2">
+                                {conditionPoints.map((point, i) => (
+                                    <li key={i} className="flex items-start gap-2.5 text-[10px] font-bold text-gray-700 leading-relaxed">
+                                        <span className="mt-1.5 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
+                                        {point}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <span className="text-[10px] text-gray-400 italic">No conditions specified</span>
+                        )}
                     </div>
                 </div>
             </div>

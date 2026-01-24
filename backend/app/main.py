@@ -17,15 +17,26 @@ app = FastAPI(
 )
 
 # CORS Configuration
-origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
-
+# Use regex to allow any localhost or 127.0.0.1 origin with any port
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex="https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Custom Logging Middleware to debug CORS/API calls
+@app.middleware("http")
+async def log_requests(request, call_next):
+    origin = request.headers.get("origin")
+    method = request.method
+    path = request.url.path
+    print(f"DEBUG_API: {method} {path} | Origin: {origin}")
+    response = await call_next(request)
+    print(f"DEBUG_API: Response {response.status_code}")
+    return response
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])

@@ -8,18 +8,18 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
     const indicators = [
         {
             label: t('fin.liquidity'),
-            value: (ratios.current_ratio || 1.5).toFixed(1),
-            status: (ratios.current_ratio || 1.5) > 1.2 ? t('fin.adequate') : t('fin.low'),
+            value: (ratios.current_ratio || 0).toFixed(1),
+            status: (ratios.current_ratio || 0) > 1.2 ? t('fin.adequate') : t('fin.low'),
         },
         {
             label: t('fin.roe'),
-            value: `${((ratios.roe || 0.124) * 100).toFixed(1)}%`,
-            status: (ratios.roe || 0.124) > 0.1 ? t('fin.profitable') : t('fin.low'),
+            value: `${(ratios.roe || 0).toFixed(1)}%`,
+            status: (ratios.roe || 0) > 10 ? t('fin.profitable') : t('fin.low'),
         },
         {
             label: t('fin.leverage'),
-            value: `${((ratios.leverage_ratio || ratios.debt_to_assets || 0.55) * 100).toFixed(0)}%`,
-            status: (ratios.leverage_ratio || ratios.debt_to_assets || 0.55) < 0.6 ? t('fin.moderate') : t('fin.high'),
+            value: `${((ratios.leverage_ratio ?? ratios.debt_to_assets ?? 0) * 100).toFixed(0)}%`,
+            status: (ratios.leverage_ratio ?? ratios.debt_to_assets ?? 0) < 0.6 ? t('fin.moderate') : t('fin.high'),
         },
         {
             label: t('fin.salesTrend'),

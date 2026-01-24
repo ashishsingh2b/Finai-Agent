@@ -78,7 +78,7 @@ export const analysisAPI = {
         api.get(`/analysis/?skip=${skip}&limit=${limit}`),
 
     updateAnalysisStatus: (id: number, data: { application_status?: string, payment_behavior?: string }) =>
-        api.patch(`/analysis/${id}/status`, data),
+        api.post(`/analysis/${id}/status`, data),
 };
 
 // User Management APIs

@@ -9,16 +9,50 @@ import {
     CloudIcon,
     Zap,
     ArrowUpRight,
-    Loader2
+    Loader2,
+    X,
+    RefreshCw,
+    Layers
 } from 'lucide-react';
 import { analysisAPI } from '../../services/api';
 
+type UploadMode = 'single' | 'batch';
+type FileStatus = 'pending' | 'uploading' | 'success' | 'error';
+
+interface UploadFile {
+    file: File;
+    id: string;
+    status: FileStatus;
+    progress: number;
+    error?: string;
+    analysisId?: number;
+    retryCount: number;
+}
+
+const MAX_FILES = 10;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_RETRIES = 2;
+
 export const FileUpload: React.FC = () => {
-    const [file, setFile] = useState<File | null>(null);
+    const [uploadMode, setUploadMode] = useState<UploadMode>('single');
+    const [files, setFiles] = useState<UploadFile[]>([]);
     const [uploading, setUploading] = useState(false);
-    const [error, setError] = useState('');
+    const [globalError, setGlobalError] = useState('');
     const [isDragging, setIsDragging] = useState(false);
     const navigate = useNavigate();
+
+    const validateFile = (file: File): string | null => {
+        if (!file.name.match(/\.(xlsx|xls|pdf)$/i)) {
+            return 'Invalid file type. Only .xlsx, .xls, or .pdf files are allowed.';
+        }
+        if (file.size > MAX_FILE_SIZE) {
+            return `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`;
+        }
+        if (file.size === 0) {
+            return 'File is empty.';
+        }
+        return null;
+    };
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -33,123 +67,324 @@ export const FileUpload: React.FC = () => {
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-        const droppedFile = e.dataTransfer.files[0];
-
-        if (droppedFile && (droppedFile.name.endsWith('.xlsx') || droppedFile.name.endsWith('.xls'))) {
-            setFile(droppedFile);
-            setError('');
-        } else {
-            setError('Please upload an Excel file (.xlsx or .xls)');
-        }
-    }, []);
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        addFiles(droppedFiles);
+    }, [uploadMode, files]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            setError('');
+        const selectedFiles = Array.from(e.target.files || []);
+        addFiles(selectedFiles);
+        e.target.value = ''; // Reset input
+    };
+
+    const addFiles = (newFiles: File[]) => {
+        setGlobalError('');
+
+        if (uploadMode === 'single' && newFiles.length > 1) {
+            setGlobalError('Single mode: Please upload only one file at a time.');
+            return;
+        }
+
+        const currentCount = uploadMode === 'single' ? 0 : files.length;
+        if (currentCount + newFiles.length > (uploadMode === 'single' ? 1 : MAX_FILES)) {
+            setGlobalError(`Maximum ${uploadMode === 'single' ? 1 : MAX_FILES} files allowed.`);
+            return;
+        }
+
+        const validatedFiles: UploadFile[] = [];
+        let hasError = false;
+
+        newFiles.forEach(file => {
+            const error = validateFile(file);
+            if (error) {
+                setGlobalError(error);
+                hasError = true;
+            } else {
+                validatedFiles.push({
+                    file,
+                    id: `${Date.now()} -${Math.random()} `,
+                    status: 'pending',
+                    progress: 0,
+                    retryCount: 0
+                });
+            }
+        });
+
+        if (!hasError) {
+            setFiles(uploadMode === 'single' ? validatedFiles : [...files, ...validatedFiles]);
+        }
+    };
+
+    const removeFile = (id: string) => {
+        setFiles(files.filter(f => f.id !== id));
+        setGlobalError('');
+    };
+
+    const uploadSingleFile = async (uploadFile: UploadFile): Promise<void> => {
+        setFiles(prev => prev.map(f =>
+            f.id === uploadFile.id
+                ? { ...f, status: 'uploading' as FileStatus, progress: 0 }
+                : f
+        ));
+
+        try {
+            const response = await analysisAPI.uploadFile(uploadFile.file);
+            const { analysis_id } = response.data;
+
+            setFiles(prev => prev.map(f =>
+                f.id === uploadFile.id
+                    ? { ...f, status: 'success' as FileStatus, progress: 100, analysisId: analysis_id }
+                    : f
+            ));
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.detail || 'Upload failed. Please try again.';
+
+            if (uploadFile.retryCount < MAX_RETRIES) {
+                // Retry
+                setFiles(prev => prev.map(f =>
+                    f.id === uploadFile.id
+                        ? { ...f, retryCount: f.retryCount + 1 }
+                        : f
+                ));
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+                return uploadSingleFile(uploadFile);
+            } else {
+                setFiles(prev => prev.map(f =>
+                    f.id === uploadFile.id
+                        ? { ...f, status: 'error' as FileStatus, error: errorMessage }
+                        : f
+                ));
+            }
         }
     };
 
     const handleUpload = async () => {
-        if (!file) return;
+        if (files.length === 0) return;
 
         setUploading(true);
-        setError('');
+        setGlobalError('');
 
         try {
-            const response = await analysisAPI.uploadFile(file);
-            const { analysis_id } = response.data;
-            navigate(`/analysis/${analysis_id}`);
-        } catch (err: any) {
-            setError(err.response?.data?.detail || 'Upload failed. Please contact the neural link support.');
+            if (uploadMode === 'single') {
+                await uploadSingleFile(files[0]);
+                const uploadedFile = files.find(f => f.status === 'success');
+                if (uploadedFile?.analysisId) {
+                    navigate(`/analysis/${uploadedFile.analysisId}`);
+                }
+            } else {
+                // Batch mode: Upload sequentially
+                for (const file of files) {
+                    if (file.status === 'pending' || file.status === 'error') {
+                        await uploadSingleFile(file);
+                    }
+                }
+
+                const successCount = files.filter(f => f.status === 'success').length;
+                if (successCount > 0) {
+                    setTimeout(() => navigate('/dashboard'), 2000);
+                }
+            }
+        } catch (err) {
+            setGlobalError('An unexpected error occurred. Please try again.');
         } finally {
             setUploading(false);
         }
     };
 
+    const retryFailed = () => {
+        setFiles(prev => prev.map(f =>
+            f.status === 'error'
+                ? { ...f, status: 'pending' as FileStatus, error: undefined, retryCount: 0 }
+                : f
+        ));
+    };
+
+    const getStatusIcon = (status: FileStatus) => {
+        switch (status) {
+            case 'pending': return <FileSpreadsheet className="w-4 h-4 text-gray-400" />;
+            case 'uploading': return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
+            case 'success': return <CheckCircle className="w-4 h-4 text-emerald-500" />;
+            case 'error': return <AlertCircle className="w-4 h-4 text-red-500" />;
+        }
+    };
+
+    const getStatusText = (uploadFile: UploadFile) => {
+        switch (uploadFile.status) {
+            case 'pending': return 'Ready';
+            case 'uploading': return `Processing... ${uploadFile.retryCount > 0 ? `(Retry ${uploadFile.retryCount})` : ''} `;
+            case 'success': return 'Complete';
+            case 'error': return uploadFile.error || 'Failed';
+        }
+    };
+
+    const successCount = files.filter(f => f.status === 'success').length;
+    const errorCount = files.filter(f => f.status === 'error').length;
+    const canUpload = files.length > 0 && !uploading && files.some(f => f.status === 'pending' || f.status === 'error');
+
     return (
-        <div className="w-full max-w-4xl mx-auto p-12">
-            <div className="flex items-start justify-between mb-10">
+        <div className="w-full max-w-5xl mx-auto p-8">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-8">
                 <div>
                     <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-3">
                         <CloudIcon size={14} />
                         Data Ingestion Terminal
                     </div>
-                    <h1 className="text-[#1A1A1A] text-3xl font-black tracking-tight leading-none mb-3">Initialize Neural Scan</h1>
-                    <p className="text-gray-500 font-medium">Upload financial statements for instant risk stratification.</p>
+                    <h1 className="text-[#1A1A1A] text-3xl font-black tracking-tight leading-none mb-3">
+                        Initialize Neural Scan
+                    </h1>
+                    <p className="text-gray-500 font-medium">
+                        Upload financial statements for instant risk stratification.
+                    </p>
                 </div>
                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300">
                     <Zap size={24} />
                 </div>
             </div>
 
+            {/* Mode Toggle */}
+            <div className="mb-6 flex items-center justify-center gap-3">
+                <button
+                    onClick={() => {
+                        setUploadMode('single');
+                        setFiles([]);
+                        setGlobalError('');
+                    }}
+                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${uploadMode === 'single'
+                        ? 'bg-[#253746] text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                >
+                    <FileSpreadsheet className="w-4 h-4 inline mr-2" />
+                    Single Company
+                </button>
+                <button
+                    onClick={() => {
+                        setUploadMode('batch');
+                        setFiles([]);
+                        setGlobalError('');
+                    }}
+                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${uploadMode === 'batch'
+                        ? 'bg-[#253746] text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                >
+                    <Layers className="w-4 h-4 inline mr-2" />
+                    Batch Upload (Max {MAX_FILES})
+                </button>
+            </div>
+
+            {/* Drop Zone */}
             <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => document.getElementById('file-input')?.click()}
-                className={`group relative border-2 border-dashed rounded-[2.5rem] p-16 text-center transition-all duration-500 cursor-pointer overflow-hidden ${isDragging
-                    ? 'border-[#253746] bg-[#253746]/5 shadow-2xl shadow-blue-900/10'
-                    : 'border-gray-200 bg-white hover:border-[#253746] hover:bg-gray-50/50 hover:shadow-xl hover:shadow-gray-200/50'
-                    }`}
+                className={`group relative border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-500 cursor-pointer overflow-hidden ${isDragging
+                    ? 'border-[#253746] bg-[#253746]/5 shadow-2xl'
+                    : 'border-gray-200 bg-white hover:border-[#253746] hover:bg-gray-50/50 hover:shadow-xl'
+                    } `}
             >
-                {/* Background Decor */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#253746]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-6 transition-all duration-300 ${file ? 'bg-emerald-50 text-emerald-500 scale-110' : 'bg-[#F1F5F9] text-[#253746] group-hover:scale-110 group-hover:shadow-lg'
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-all ${files.length > 0 ? 'bg-emerald-50 text-emerald-500' : 'bg-[#F1F5F9] text-[#253746] group-hover:scale-110'
                         }`}>
-                        {file ? <FileSpreadsheet className="w-8 h-8" /> : <Upload className="w-8 h-8 transition-transform group-hover:translate-y-[-4px]" />}
+                        <Upload className="w-7 h-7" />
                     </div>
 
-                    {file ? (
-                        <div className="space-y-4 animate-in fade-in zoom-in-95">
-                            <div className="flex flex-col items-center">
-                                <span className="text-xl font-black text-[#1A1A1A] tracking-tight">{file.name}</span>
-                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">Ready for transition</span>
-                            </div>
-                            <div className="flex items-center justify-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-widest">
-                                <CheckCircle size={14} />
-                                Excel Structure Validated
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-2xl font-black text-[#1A1A1A] tracking-tight mb-1">
-                                    Drop your statement here
-                                </p>
-                                <p className="text-gray-400 font-medium">or click to browse local files</p>
-                            </div>
-                            <div className="flex items-center justify-center gap-4 pt-4">
-                                <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase tracking-widest">.XLSX</span>
-                                <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase tracking-widest">.XLS</span>
-                            </div>
-                        </div>
-                    )}
+                    <p className="text-xl font-black text-[#1A1A1A] tracking-tight mb-1">
+                        {uploadMode === 'single' ? 'Drop your file here' : `Drop up to ${MAX_FILES} files here`}
+                    </p>
+                    <p className="text-gray-400 font-medium mb-4">or click to browse</p>
+
+                    <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.XLSX</span>
+                        <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.XLS</span>
+                        <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.PDF</span>
+                    </div>
                 </div>
 
                 <input
                     type="file"
-                    accept=".xlsx,.xls"
+                    accept=".xlsx,.xls,.pdf"
                     onChange={handleFileChange}
                     className="hidden"
                     id="file-input"
+                    multiple={uploadMode === 'batch'}
                 />
             </div>
 
-            {error && (
-                <div className="mt-6 bg-red-50 border border-red-100 text-red-700 px-6 py-4 rounded-[1.5rem] flex items-center gap-3 animate-in slide-in-from-top-4">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-sm font-black tracking-tight">{error}</span>
+            {/* File List */}
+            {files.length > 0 && (
+                <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 space-y-2">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-black text-sm text-[#1A1A1A] uppercase tracking-wider">
+                            Files ({files.length})
+                        </h3>
+                        {uploadMode === 'batch' && (
+                            <div className="text-xs font-bold text-gray-500">
+                                ✓ {successCount} • ✗ {errorCount} • ⏳ {files.length - successCount - errorCount}
+                            </div>
+                        )}
+                    </div>
+                    {files.map(uploadFile => (
+                        <div
+                            key={uploadFile.id}
+                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200"
+                        >
+                            <div className="flex-shrink-0">
+                                {getStatusIcon(uploadFile.status)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-bold text-sm text-[#1A1A1A] truncate">
+                                    {uploadFile.file.name}
+                                </p>
+                                <p className={`text - xs font - medium ${uploadFile.status === 'error' ? 'text-red-500' : 'text-gray-500'
+                                    } `}>
+                                    {getStatusText(uploadFile)}
+                                </p>
+                            </div>
+                            {uploadFile.status === 'pending' && !uploading && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeFile(uploadFile.id);
+                                    }}
+                                    className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition"
+                                >
+                                    <X className="w-4 h-4 text-gray-400" />
+                                </button>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
 
+            {/* Global Error */}
+            {globalError && (
+                <div className="mt-5 bg-red-50 border border-red-100 text-red-700 px-5 py-4 rounded-xl flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm font-bold">{globalError}</span>
+                </div>
+            )}
+
+            {/* Retry Button */}
+            {errorCount > 0 && !uploading && (
+                <button
+                    onClick={retryFailed}
+                    className="mt-5 w-full py-4 bg-orange-500 text-white rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-orange-600 transition"
+                >
+                    <RefreshCw className="w-5 h-5" />
+                    Retry Failed Uploads ({errorCount})
+                </button>
+            )}
+
+            {/* Upload Button */}
             <button
                 onClick={handleUpload}
-                disabled={!file || uploading}
-                className={`mt-10 w-full rounded-2xl py-6 font-black text-sm tracking-widest uppercase flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] ${!file || uploading
+                disabled={!canUpload}
+                className={`mt-8 w-full rounded-2xl py-6 font-black text-sm tracking-widest uppercase flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] ${!canUpload
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-[#1A1A1A] text-white hover:bg-[#1A2630] shadow-2xl shadow-gray-900/20 hover:scale-[1.01]'
                     }`}
@@ -157,12 +392,16 @@ export const FileUpload: React.FC = () => {
                 {uploading ? (
                     <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing Neural Signal...
+                        {uploadMode === 'batch'
+                            ? `Processing ${successCount + 1} of ${files.length}...`
+                            : 'Processing Neural Signal...'}
                     </>
                 ) : (
                     <>
-                        Run Deep Analysis
-                        <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        {uploadMode === 'batch' && successCount > 0 && successCount === files.length
+                            ? 'All Complete - View Dashboard'
+                            : 'Run Deep Analysis'}
+                        <ArrowUpRight className="w-5 h-5" />
                     </>
                 )}
             </button>
