@@ -7,10 +7,12 @@ import {
     Lock,
     Camera,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const ProfilePage: React.FC = () => {
     const { user } = useAuthStore();
     const [activeTab, setActiveTab] = useState('profile');
+    const { t } = useTranslation();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -23,17 +25,17 @@ export const ProfilePage: React.FC = () => {
         setPasswordSuccess(null);
 
         if (!newPassword || !confirmPassword) {
-            setPasswordError('Please fill in both password fields.');
+            setPasswordError(t('profile.errFillFields'));
             return;
         }
 
         if (newPassword.length < 8) {
-            setPasswordError('Password must be at least 8 characters long.');
+            setPasswordError(t('profile.errLength'));
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setPasswordError('Passwords do not match.');
+            setPasswordError(t('profile.errMatch'));
             return;
         }
 
@@ -42,9 +44,9 @@ export const ProfilePage: React.FC = () => {
             await authAPI.updateProfile({ password: newPassword });
             setNewPassword('');
             setConfirmPassword('');
-            setPasswordSuccess('Password updated successfully.');
+            setPasswordSuccess(t('profile.successUpdate'));
         } catch (err: any) {
-            const msg = err?.response?.data?.detail || err?.message || 'Failed to update password.';
+            const msg = err?.response?.data?.detail || err?.message || t('profile.errUpdate');
             setPasswordError(String(msg));
         } finally {
             setPasswordSaving(false);
@@ -56,15 +58,15 @@ export const ProfilePage: React.FC = () => {
             <div className="flex flex-col gap-8">
                 {/* Header */}
                 <div>
-                    <h1 className="text-[#1A1A1A] text-2xl font-black tracking-tight">Account settings</h1>
+                    <h1 className="text-[#1A1A1A] text-2xl font-black tracking-tight">{t('profile.title')}</h1>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8 items-start">
                     {/* Settings Sidebar */}
                     <div className="w-full lg:w-64 flex-shrink-0 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                         {[
-                            { id: 'profile', label: 'Profile Settings', icon: User },
-                            { id: 'password', label: 'Change Password', icon: Lock },
+                            { id: 'profile', label: t('profile.settings'), icon: User },
+                            { id: 'password', label: t('profile.changePassword'), icon: Lock },
                         ].map((item) => (
                             <button
                                 key={item.id}
@@ -84,7 +86,7 @@ export const ProfilePage: React.FC = () => {
                     </div>
 
                     {/* Main Content Form */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-8">
                         {activeTab === 'profile' && (
                             <div className="space-y-8">
                                 {/* Avatar Section */}
@@ -103,7 +105,7 @@ export const ProfilePage: React.FC = () => {
                                     </div>
                                     <div className="flex gap-4">
                                         <button className="px-5 py-3 bg-[#6ECEB2] text-[#11303B] text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-[#6ECEB2]/20 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-                                            Upload New
+                                            {t('profile.uploadNew')}
                                         </button>
                                     </div>
                                 </div>
@@ -111,7 +113,7 @@ export const ProfilePage: React.FC = () => {
                                 {/* Form Fields */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">First Name <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.firstName')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             defaultValue={user?.full_name?.split(' ')[0]}
@@ -120,7 +122,7 @@ export const ProfilePage: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Last Name <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.lastName')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
                                             defaultValue={user?.full_name?.split(' ')[1] || ''}
@@ -130,7 +132,7 @@ export const ProfilePage: React.FC = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Email</label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.email')}</label>
                                         <input
                                             type="email"
                                             defaultValue={user?.email}
@@ -139,7 +141,7 @@ export const ProfilePage: React.FC = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Mobile Number <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.mobileNumber')} <span className="text-red-500">*</span></label>
                                         <div className="flex gap-2">
                                             <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 flex items-center gap-2">
                                                 <div className="w-5 h-4 bg-green-600 rounded-sm relative overflow-hidden">
@@ -155,15 +157,15 @@ export const ProfilePage: React.FC = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Gender</label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.gender')}</label>
                                         <div className="grid grid-cols-2 gap-4">
                                             <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                                                 <input type="radio" name="gender" className="w-4 h-4 text-[#11303B] focus:ring-[#11303B]" />
-                                                <span className="text-sm font-bold text-gray-700">Male</span>
+                                                <span className="text-sm font-bold text-gray-700">{t('profile.male')}</span>
                                             </label>
                                             <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                                                 <input type="radio" name="gender" className="w-4 h-4 text-[#11303B] focus:ring-[#11303B]" />
-                                                <span className="text-sm font-bold text-gray-700">Female</span>
+                                                <span className="text-sm font-bold text-gray-700">{t('profile.female')}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -172,7 +174,7 @@ export const ProfilePage: React.FC = () => {
                                 {/* Action Buttons */}
                                 <div className="pt-4">
                                     <button className="bg-[#6ECEB2] text-[#11303B] px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#6ECEB2]/20 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 group">
-                                        Save Changes
+                                        {t('profile.saveChanges')}
                                     </button>
                                 </div>
                             </div>
@@ -180,13 +182,13 @@ export const ProfilePage: React.FC = () => {
                         {activeTab === 'password' && (
                             <form onSubmit={handleChangePassword} className="space-y-8">
                                 <div>
-                                    <h2 className="text-lg font-black text-[#1A1A1A] tracking-tight">Change Password</h2>
-                                    <p className="text-sm text-gray-500 mt-1">Choose a strong password to keep your account secure.</p>
+                                    <h2 className="text-lg font-black text-[#1A1A1A] tracking-tight">{t('profile.changePassword')}</h2>
+                                    <p className="text-sm text-gray-500 mt-1">{t('profile.passwordDesc')}</p>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">New Password <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.newPassword')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="password"
                                             value={newPassword}
@@ -197,7 +199,7 @@ export const ProfilePage: React.FC = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Confirm Password <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.confirmPassword')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="password"
                                             value={confirmPassword}
@@ -226,7 +228,7 @@ export const ProfilePage: React.FC = () => {
                                         disabled={passwordSaving}
                                         className={`bg-[#6ECEB2] text-[#11303B] px-8 py-3 rounded-xl font-black text-sm shadow-xl shadow-[#6ECEB2]/20 transition-all transform active:scale-[0.98] ${passwordSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#5bc1a6] hover:scale-[1.02]'}`}
                                     >
-                                        {passwordSaving ? 'Saving...' : 'Update Password'}
+                                        {passwordSaving ? t('profile.saving') : t('profile.updatePassword')}
                                     </button>
                                 </div>
                             </form>

@@ -8,6 +8,7 @@ import {
     FileText,
     Trash2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { analysisAPI } from '../../services/api';
 
 export const SplitFileUpload: React.FC = () => {
@@ -16,6 +17,7 @@ export const SplitFileUpload: React.FC = () => {
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
     const [isDragging, setIsDragging] = useState(false);
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
     // Simulate progress
@@ -57,7 +59,7 @@ export const SplitFileUpload: React.FC = () => {
             setError('');
             setProgress(0);
         } else {
-            setError(`Format not supported for ${f.name}`);
+            setError(t('split.errFormat', { name: f.name }));
         }
     };
 
@@ -76,8 +78,8 @@ export const SplitFileUpload: React.FC = () => {
 
         try {
             const response = files.length === 1
-                ? await analysisAPI.uploadFile(files[0])
-                : await analysisAPI.uploadSplitFiles(files);
+                ? await analysisAPI.uploadFile(files[0], i18n.language)
+                : await analysisAPI.uploadSplitFiles(files, i18n.language);
 
             setProgress(100);
             setTimeout(() => {
@@ -85,7 +87,7 @@ export const SplitFileUpload: React.FC = () => {
                 navigate(`/analysis/${analysis_id}`);
             }, 500);
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Upload failed.');
+            setError(err.response?.data?.detail || t('upload.errFailed'));
             setUploading(false);
         }
     };
@@ -98,8 +100,8 @@ export const SplitFileUpload: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}>
 
-                <h2 className="text-[#11303B] font-black text-xl mb-2 tracking-tight">Financial Terminal</h2>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">Upload one or multiple files for consolidated analysis</p>
+                <h2 className="text-[#11303B] font-black text-xl mb-2 tracking-tight">{t('split.terminal')}</h2>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">{t('split.desc')}</p>
 
                 <div
                     className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer group 
@@ -109,11 +111,11 @@ export const SplitFileUpload: React.FC = () => {
                     <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 text-gray-400 group-hover:scale-110 transition-transform group-hover:text-[#11303B]">
                         <CloudIcon size={32} />
                     </div>
-                    <p className="text-[#11303B] font-black text-sm mb-2">Drop Balance Sheet, P&L, etc.</p>
-                    <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">- OR -</p>
+                    <p className="text-[#11303B] font-black text-sm mb-2">{t('split.dropDesc')}</p>
+                    <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">{t('split.or')}</p>
                     <button className="bg-[#6ECEB2] text-[#11303B] px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group">
                         <FileText className="w-3.5 h-3.5 group-hover:-translate-y-1 transition-transform duration-300" />
-                        Select Documents
+                        {t('split.selectDocs')}
                     </button>
                     <input
                         type="file"
@@ -128,7 +130,7 @@ export const SplitFileUpload: React.FC = () => {
 
             {/* Right: Uploaded Files List */}
             <div className="w-full md:w-[450px] bg-gray-50/50 p-8 flex flex-col">
-                <h3 className="text-[#1A1A1A] font-black text-lg mb-8 tracking-tight">Package Queue</h3>
+                <h3 className="text-[#1A1A1A] font-black text-lg mb-8 tracking-tight">{t('split.queue')}</h3>
 
                 <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                     {files.map((f, index) => (
@@ -157,7 +159,7 @@ export const SplitFileUpload: React.FC = () => {
                     {files.length === 0 && (
                         <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
                             <FileText size={48} className="text-gray-300 mb-4" />
-                            <p className="text-sm font-bold text-gray-400">Queue is empty</p>
+                            <p className="text-sm font-bold text-gray-400">{t('split.emptyQueue')}</p>
                         </div>
                     )}
                 </div>
@@ -168,14 +170,14 @@ export const SplitFileUpload: React.FC = () => {
                             onClick={handleUpload}
                             className="w-full mb-6 bg-[#ef6b6b] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-[#d95d5d] transition-all transform hover:scale-[1.02] shadow-xl shadow-red-900/20"
                         >
-                            Execute Analysis ({files.length} Files)
+                            {t('split.execute', { count: files.length })}
                         </button>
                     )}
 
                     {uploading && (
                         <div className="mb-6 space-y-2">
                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                <span className="text-[#11303B]">Processing Package...</span>
+                                <span className="text-[#11303B]">{t('split.processing')}</span>
                                 <span className="text-gray-400">{progress}%</span>
                             </div>
                             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -194,10 +196,10 @@ export const SplitFileUpload: React.FC = () => {
 
                 <div className="mt-8 pt-6 border-t border-gray-200">
                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        <span>System Status</span>
+                        <span>{t('split.status')}</span>
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                            Online
+                            {t('split.online')}
                         </div>
                     </div>
                 </div>

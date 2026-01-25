@@ -20,27 +20,27 @@ export const Recommendation: React.FC<RecommendationProps> = ({
     const conditionPoints = processPoints(conditions);
 
     return (
-        <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-full flex flex-col transform hover:-translate-y-0.5 transition-all duration-300">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden flex flex-col transform hover:-translate-y-0.5 transition-all duration-300">
             <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner text-left">
-                Evaluation & Recommendation
+                {t('rec.title')}
             </div>
             <div className="p-5 space-y-5 flex-1 text-left">
                 {/* Conclusion */}
                 <div>
-                    <div className="text-[10px] font-black text-gray-700 uppercase tracking-widest mb-3">Conclusion:</div>
+                    <div className="text-[10px] font-black text-gray-700 uppercase tracking-widest mb-3">{t('rec.conclusion')}</div>
                     <div className={`flex items-center gap-2.5 font-black text-xs px-4 py-3 rounded-lg border-2 shadow-sm ${recommendation?.toLowerCase().includes('reject')
                         ? 'text-red-700 bg-red-50 border-red-200'
                         : 'text-[#11303B] bg-[#6ECEB2]/20 border-[#6ECEB2]/50'
                         }`}>
                         <Check size={18} strokeWidth={4} />
-                        <span className="tracking-tight uppercase text-sm">{(recommendation || t('rec.approveCond'))}</span>
+                        <span className="tracking-tight uppercase text-sm">{(recommendation ? t(`rec.status.${recommendation.toUpperCase()}`, { defaultValue: recommendation }) : t('rec.approveCond'))}</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 pt-3 border-t-2 border-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-6 pt-3 border-t-2 border-gray-100">
                     {/* Justification */}
                     <div className="space-y-3">
-                        <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">Justification:</div>
+                        <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">{t('rec.justification')}</div>
                         {justificationPoints.length > 0 ? (
                             <ul className="space-y-2">
                                 {justificationPoints.map((point, i) => (
@@ -51,13 +51,13 @@ export const Recommendation: React.FC<RecommendationProps> = ({
                                 ))}
                             </ul>
                         ) : (
-                            <span className="text-[10px] text-gray-400 italic">No justification provided</span>
+                            <span className="text-[10px] text-gray-400 italic">{t('rec.noJustification')}</span>
                         )}
                     </div>
 
                     {/* Conditions */}
                     <div className="space-y-3">
-                        <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">Conditions:</div>
+                        <div className="text-[10px] font-black text-[#11303B] uppercase tracking-widest mb-2">{t('rec.conditions')}</div>
                         {conditionPoints.length > 0 ? (
                             <ul className="space-y-2">
                                 {conditionPoints.map((point, i) => (
@@ -68,7 +68,7 @@ export const Recommendation: React.FC<RecommendationProps> = ({
                                 ))}
                             </ul>
                         ) : (
-                            <span className="text-[10px] text-gray-400 italic">No conditions specified</span>
+                            <span className="text-[10px] text-gray-400 italic">{t('rec.noConditions')}</span>
                         )}
                     </div>
                 </div>

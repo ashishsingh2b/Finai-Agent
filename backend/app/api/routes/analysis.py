@@ -362,23 +362,67 @@ async def upload_split_files(
 @router.get("/{analysis_id}", response_model=AnalysisResponse)
 def get_analysis(
     analysis_id: int,
+    language: str = "es",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Get analysis results by ID"""
+    """Get analysis results by ID, optionally translated on-the-fly"""
     analysis = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
     company = db.query(Company).filter(Company.id == analysis.company_id).first()
     analyst = db.query(User).filter(User.id == analysis.analyzed_by).first()
-    
+
+    # Re-derive swot and recommendations if requested language differs from stored language
+    swot = analysis.swot_analysis
+    recommendation_justification = analysis.recommendation_justification
+    conditions = analysis.conditions
+
+    if language != analysis.language:
+        logger.info(f"Re-deriving localized content for analysis {analysis_id} (requested: {language}, stored: {analysis.language})")
+        ratios = {
+            'current_ratio': float(analysis.current_ratio) if analysis.current_ratio else 0,
+            'debt_to_assets': float(analysis.debt_to_assets) if analysis.debt_to_assets else 0,
+            'leverage_ratio': float(analysis.leverage_ratio) if analysis.leverage_ratio else 0,
+            'roe': float(analysis.roe) if analysis.roe else 0,
+            'roa': float(analysis.roa) if analysis.roa else 0,
+            'profit_margin': float(analysis.profit_margin) if analysis.profit_margin else 0,
+            'interest_coverage': float(analysis.interest_coverage) if analysis.interest_coverage else 0,
+            'ebitda_margin': float(analysis.ebitda_margin) if analysis.ebitda_margin else 0,
+            'profit_to_loan_ratio': float(analysis.profit_to_loan_ratio) if analysis.profit_to_loan_ratio else 1.0
+        }
+        
+        company_info = {
+            'name': company.name if company else 'Company',
+            'industry': company.industry if company else 'General',
+            'years_in_business': company.years_in_business
+        }
+
+        # Use SWOTGenerator._generate_rule_based_swot to avoid expensive/slow LLM calls during GET
+        # or use SWOTGenerator.generate_swot if you want the full AI experience (user might prefer fast retrieval)
+        swot_gen = SWOTGenerator()
+        swot = swot_gen.generate_swot(company_info, ratios, language)
+
+        rec_engine = RecommendationEngine()
+        rec_data = rec_engine.generate_recommendation(
+            float(analysis.total_credit_score) if analysis.total_credit_score else 0,
+            analysis.credit_category,
+            ratios['profit_to_loan_ratio'],
+            ratios,
+            language
+        )
+        recommendation_justification = rec_data['justification']
+        conditions = rec_data.get('conditions')
+
     return {
         **analysis.__dict__,
         "company_name": company.name if company else "Unknown",
         "company_industry": company.industry if company else "N/A",
         "years_in_business": company.years_in_business if company else 0,
         "analyzed_by_name": analyst.full_name if analyst else "System Neural Engine",
-        "justification": analysis.recommendation_justification
+        "swot_analysis": swot,
+        "justification": recommendation_justification,
+        "conditions": conditions
     }
 
 @router.get("/")

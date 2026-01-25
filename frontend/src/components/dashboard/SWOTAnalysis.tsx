@@ -13,9 +13,9 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
     return (
         <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300">
             <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">
-                SWOT Analysis
+                {t('swot.title')}
             </div>
-            <div className="p-5 grid grid-cols-2 gap-4">
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
                 {/* Strengths */}
                 <div className="space-y-2">
                     <div className="bg-[#6ECEB2]/10 px-3 py-1.5 flex items-center gap-2 border-l-3 border-[#6ECEB2] rounded-sm">
@@ -31,7 +31,7 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
                                 </li>
                             ))}
                         </ul>
-                    ) : <span className="text-[10px] text-gray-400 italic pl-1">No data available</span>}
+                    ) : <span className="text-[10px] text-gray-400 italic pl-1">{t('swot.noData')}</span>}
                 </div>
 
                 {/* Opportunities */}
@@ -49,7 +49,7 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
                                 </li>
                             ))}
                         </ul>
-                    ) : <span className="text-[10px] text-gray-400 italic pl-1">No data available</span>}
+                    ) : <span className="text-[10px] text-gray-400 italic pl-1">{t('swot.noData')}</span>}
                 </div>
 
                 {/* Weaknesses */}
@@ -67,7 +67,7 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
                                 </li>
                             ))}
                         </ul>
-                    ) : <span className="text-[10px] text-gray-400 italic pl-1">No data available</span>}
+                    ) : <span className="text-[10px] text-gray-400 italic pl-1">{t('swot.noData')}</span>}
                 </div>
 
                 {/* Threats */}
@@ -85,7 +85,7 @@ export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
                                 </li>
                             ))}
                         </ul>
-                    ) : <span className="text-[10px] text-gray-400 italic pl-1">No data available</span>}
+                    ) : <span className="text-[10px] text-gray-400 italic pl-1">{t('swot.noData')}</span>}
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import {
     ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
@@ -11,14 +12,15 @@ interface ChartProps {
 
 export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
     const [isFullScreen, setIsFullScreen] = React.useState(false);
+    const { t } = useTranslation();
 
     // Dynamic data derivation
     const debtValue = analysis?.debt_to_assets ? Math.round(analysis.debt_to_assets * 100) : 55;
     const equityValue = 100 - debtValue;
 
     const pieData = [
-        { name: 'Debt', value: debtValue },
-        { name: 'Equity', value: equityValue },
+        { name: t('charts.debt'), value: debtValue },
+        { name: t('charts.equity'), value: equityValue },
     ];
 
     // Simplistic trend data derived from scores/ratios
@@ -31,10 +33,10 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
     ];
 
     const ChartContent = ({ full = false }) => (
-        <div className={`bg-white border border-gray-200 rounded-md p-5 grid ${full ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-2'} gap-6 items-start ${full ? 'h-full' : 'min-h-[225px]'}`}>
+        <div className={`bg-white border border-gray-200 rounded-md p-5 grid ${full ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2'} gap-8 md:gap-6 items-start ${full ? 'h-full' : 'min-h-[225px]'}`}>
             {/* Revenue & Profit Trend */}
             <div className="flex flex-col h-full">
-                <h3 className="text-[10px] font-black text-[#1A1A1A] mb-5 uppercase tracking-tight text-center">Indicators Visualization</h3>
+                <h3 className="text-[10px] font-black text-[#1A1A1A] mb-5 uppercase tracking-tight text-center">{t('charts.visualization')}</h3>
                 <div className="flex-1 min-h-[145px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart data={trendData} margin={{ top: 8, right: 10, left: -22, bottom: 15 }}>
@@ -71,7 +73,7 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
 
             {/* Debt / Equity Pie Chart */}
             <div className="flex flex-col items-center h-full">
-                <h3 className={`font-black text-[#1A1A1A] ${full ? 'text-sm mb-6' : 'text-[10px] mb-5'} uppercase tracking-tight text-center`}>Debt / Equity Ratio</h3>
+                <h3 className={`font-black text-[#1A1A1A] ${full ? 'text-sm mb-6' : 'text-[10px] mb-5'} uppercase tracking-tight text-center`}>{t('charts.debtEquityRatio')}</h3>
                 <div className="flex-1 w-full relative min-h-[145px] flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -88,7 +90,7 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                                 stroke="white"
                                 strokeWidth={2}
                                 label={full ? (props: any) => {
-                                    const { cx, cy, midAngle, outerRadius, percent, index } = props;
+                                    const { cx, cy, midAngle, outerRadius, percent } = props;
                                     const radius = outerRadius * 0.6; // Position at 60% of radius (inside the slice)
                                     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
                                     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
@@ -119,11 +121,11 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                             <div className="relative w-full h-full">
                                 <div className="absolute top-[42%] right-[28%] flex flex-col items-center">
                                     <span className="text-white text-[10px] font-black leading-tight">{debtValue}%</span>
-                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">Debt</span>
+                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">{t('charts.debt')}</span>
                                 </div>
                                 <div className="absolute top-[42%] left-[28%] flex flex-col items-center">
                                     <span className="text-white text-[10px] font-black leading-tight">{equityValue}%</span>
-                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">Equity</span>
+                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">{t('charts.equity')}</span>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +136,7 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
     );
 
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden h-full border border-gray-200 flex flex-col">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .recharts-sector:focus, .recharts-surface:focus, .recharts-pie-sector:focus, .recharts-wrapper:focus {
@@ -146,7 +148,7 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
             `}} />
 
             <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex justify-between items-center">
-                <span>Financial Charts</span>
+                <span>{t('charts.title')}</span>
             </div>
 
             <div
@@ -161,7 +163,7 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                 <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-300">
                         <div className="bg-[#11303B] text-white px-6 py-4 font-bold text-lg flex justify-between items-center shadow-md">
-                            <span>Analysis Report - Financial Charts</span>
+                            <span>{t('charts.fullTitle')}</span>
                             <button
                                 onClick={() => setIsFullScreen(false)}
                                 className="p-2 hover:bg-white/10 rounded-full transition-colors"

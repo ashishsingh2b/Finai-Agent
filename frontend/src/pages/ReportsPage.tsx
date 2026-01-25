@@ -52,7 +52,7 @@ export const ReportsPage: React.FC = () => {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error(`Failed to download ${type}:`, error);
-            alert(`Failed to download ${type.toUpperCase()}. Please try again.`);
+            alert(t('analysis.downloadFailed', { type: type.toUpperCase() }));
         }
     };
 
@@ -126,7 +126,7 @@ export const ReportsPage: React.FC = () => {
         <DashboardLayout>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Header Area */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                     <div>
                         <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                             <FileText size={14} />
@@ -136,7 +136,7 @@ export const ReportsPage: React.FC = () => {
                         <p className="text-gray-500 font-medium text-xs">{t('reports.subtitle')}</p>
                     </div>
 
-                    <button className="bg-[#6ECEB2] text-[#11303B] px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group">
+                    <button className="w-full sm:w-auto bg-[#6ECEB2] text-[#11303B] px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group">
                         <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
                         {t('reports.export')}
                     </button>
@@ -185,16 +185,16 @@ export const ReportsPage: React.FC = () => {
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
                                     <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">
                                         <div className="flex items-center gap-2">
-                                            Company Entity
+                                            {t('reports.col.entity')}
                                             <ArrowUpDown size={10} />
                                         </div>
                                     </th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Health Index</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center">Grade Placement</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Application Status</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Payment Behavior</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">Analysis Period</th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-right">Actions</th>
+                                    <th className="hidden lg:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('reports.col.health')}</th>
+                                    <th className="hidden sm:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center">{t('reports.col.grade')}</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('dash.cols.status')}</th>
+                                    <th className="hidden xl:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('dash.cols.behavior')}</th>
+                                    <th className="hidden md:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('reports.col.period')}</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-right">{t('reports.col.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -241,10 +241,10 @@ export const ReportsPage: React.FC = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
+                                            <td className="hidden lg:table-cell px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex flex-col gap-1 w-32">
                                                     <div className="flex justify-between items-end">
-                                                        <span className="text-[9px] font-black text-[#1A1A1A] uppercase">Health Index</span>
+                                                        <span className="text-[9px] font-black text-[#1A1A1A] uppercase">{t('reports.col.health')}</span>
                                                         <span className="text-[10px] font-black text-[#11303B]">{analysis.credit_score.toFixed(0)}%</span>
                                                     </div>
                                                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -255,10 +255,10 @@ export const ReportsPage: React.FC = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
+                                            <td className="hidden sm:table-cell px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex justify-center">
                                                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-all ${getCategoryStyles(analysis.category)} shadow-sm`}>
-                                                        GRADE {analysis.category}
+                                                        {t('reports.filter.grade', { grade: analysis.category })}
                                                     </span>
                                                 </div>
                                             </td>
@@ -278,7 +278,7 @@ export const ReportsPage: React.FC = () => {
                                                 </select>
                                             </td>
                                             {/* Behavior Column */}
-                                            <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                            <td className="hidden xl:table-cell px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     disabled={analysis.application_status !== 'APPROVED'}
                                                     value={analysis.payment_behavior}
@@ -293,7 +293,7 @@ export const ReportsPage: React.FC = () => {
                                                     <option value="DELINQUENT">{t('behavior.DELINQUENT')}</option>
                                                 </select>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="hidden md:table-cell px-6 py-4">
                                                 <div className="flex items-center gap-2 text-[#11303B]">
                                                     <Calendar size={12} className="text-[#11303B]/60" />
                                                     <span className="text-[11px] font-black">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -304,7 +304,7 @@ export const ReportsPage: React.FC = () => {
                                                     <button
                                                         onClick={() => navigate(`/analysis/${analysis.id}`)}
                                                         className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group"
-                                                        title="View Report"
+                                                        title={t('dash.viewReport')}
                                                     >
                                                         <Eye size={14} strokeWidth={2.5} />
                                                     </button>
@@ -356,7 +356,7 @@ export const ReportsPage: React.FC = () => {
                                                     <button
                                                         onClick={() => navigate('/dashboard/upload')}
                                                         className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm"
-                                                        title="Update / Edit"
+                                                        title={t('dash.updateEdit')}
                                                     >
                                                         <RefreshCcw size={14} strokeWidth={2.5} />
                                                     </button>

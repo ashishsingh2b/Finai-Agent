@@ -39,7 +39,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative z-10 flex flex-col items-center space-y-10 animate-in fade-in zoom-in duration-700">
                 {/* Logo & Title Container */}
                 <div className="flex flex-col items-center space-y-6">
-                    <div className="relative w-64 h-32 flex items-center justify-center transition-transform hover:scale-105 duration-500">
+                    <div className="relative w-48 h-24 sm:w-64 sm:h-32 flex items-center justify-center transition-transform hover:scale-105 duration-500">
                         <img src="/logo.avif" alt="Moskalti Capital" className="w-full h-full object-contain drop-shadow-2xl" />
                     </div>
                 </div>
@@ -62,7 +62,7 @@ export const LandingPage: React.FC = () => {
                     <p className="text-white/60 font-medium text-sm leading-relaxed">
                         {t('landing.desc')}
                     </p>
-                    <div className="flex items-center justify-center gap-6 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[10px] font-bold text-white/40 uppercase tracking-widest px-4">
                         <span>• {t('landing.security')}</span>
                         <span>• {t('landing.uptime')}</span>
                         <span>• {t('landing.analytics')}</span>

@@ -25,7 +25,9 @@
         "checkEmail": "Check your email",
         "emailSent": "We've sent password reset instructions to",
         "backLogin": "Back to Login",
-        "invalidCredentials": "Invalid credentials or user inactive."
+        "invalidCredentials": "Invalid credentials or user inactive.",
+        "successToast": "Login successful! Redirecting...",
+        "name": "Full Name"
     },
     "nav": {
         "dashboard": "Dashboard",
@@ -35,7 +37,11 @@
         "users": "Users",
         "upload": "Upload Data",
         "documentation": "Documentation",
-        "logout": "Logout"
+        "logout": "Logout",
+        "menu": "Menu",
+        "searchPlaceholder": "Universal search...",
+        "copyright": "© 2025 Moskalti Capital",
+        "privacy": "Privacy Policy"
     },
     "common": {
         "accessDenied": "Access Denied",
@@ -70,7 +76,27 @@
         "score": "Score",
         "action": "Action",
         "status": "Application Status",
-        "behavior": "Payment Behavior"
+        "behavior": "Payment Behavior",
+        "systemRecords": "Total System Records",
+        "networkAvg": "Network Average Score",
+        "criticalAlerts": "Critical Alerts Active",
+        "portfolioLabel": "Total Active Portfolio MXN",
+        "totalBadge": "Total",
+        "retry": "Retry",
+        "cols": {
+            "entity": "Company Entity",
+            "period": "Analysis Period",
+            "health": "Health Index",
+            "status": "Application Status",
+            "behavior": "Payment Behavior",
+            "actions": "Actions"
+        },
+        "updateEdit": "Update / Edit",
+        "errLoad": "System could not retrieve historical data. Please check connection and refresh.",
+        "statusUpdated": "Status updated to {{status}}",
+        "errStatus": "Failed to update analysis status. Please try again.",
+        "behaviorRecorded": "Payment behavior recorded.",
+        "errBehavior": "Error saving behavior update."
     },
     "status": {
         "UNDER_REVIEW": "Under Review",
@@ -83,6 +109,7 @@
         "NA": "N/A"
     },
     "fin": {
+        "title": "Financial Indicators",
         "liquidity": "Liquidity",
         "currentRatio": "Current Ratio",
         "adequate": "Adequate",
@@ -102,11 +129,19 @@
         "decline": "Decline"
     },
     "rec": {
-        "title": "Recommendation",
-        "conclusion": "Conclusion",
-        "justification": "Justification",
-        "conditions": "Conditions",
-        "approveCond": "Approve with Conditions"
+        "title": "Evaluation & Recommendation",
+        "conclusion": "Conclusion:",
+        "justification": "Justification:",
+        "noJustification": "No justification provided",
+        "conditions": "Conditions:",
+        "noConditions": "No conditions specified",
+        "approveCond": "Approve with Conditions",
+        "status": {
+            "REJECT": "REJECT",
+            "APPROVE": "APPROVE",
+            "UNDER_REVIEW": "UNDER REVIEW",
+            "APPROVED": "APPROVED"
+        }
     },
     "users": {
         "title": "User Management",
@@ -122,13 +157,37 @@
         "activate": "Activate User",
         "delete": "Delete User",
         "active": "Active",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "total": "{{count}} Total",
+        "createTitle": "Create New User",
+        "updateTitle": "Update User Details",
+        "enterInfo": "Enter user information below.",
+        "newPasswordOpt": "New Password (Optional)",
+        "saveChanges": "Save Changes",
+        "createBtn": "Create User",
+        "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone.",
+        "activated": "User activated successfully",
+        "deactivated": "User deactivated successfully",
+        "successCreate": "User created successfully",
+        "successUpdate": "User updated successfully",
+        "errCreate": "Failed to create user.",
+        "errUpdate": "Failed to update user.",
+        "errStatus": "Failed to update user status.",
+        "errDelete": "Failed to delete user.",
+        "deniedDesc": "You do not have permission to view this page. Contact your administrator.",
+        "roles": {
+            "admin": "Admin",
+            "manager": "Manager",
+            "analyst": "Analyst"
+        }
     },
     "swot": {
+        "title": "SWOT Analysis",
         "strengths": "Strengths",
         "weaknesses": "Weaknesses",
         "opportunities": "Opportunities",
-        "threats": "Threats"
+        "threats": "Threats",
+        "noData": "No data available"
     },
     "reports": {
         "title": "Neural Archive",
@@ -245,7 +304,18 @@
         "needHelp": "Need More Help?",
         "needHelpDesc": "Can't find what you're looking for? Our support team is ready to assist you.",
         "contactSupport": "Contact Support",
-        "visitWebsite": "Visit Website"
+        "visitWebsite": "Visit Website",
+        "v2_1": "v2.1 STABLE",
+        "workflow": "System Neural Workflow",
+        "adminVerified": "Admin Verified",
+        "encryptionActive": "Encryption Active",
+        "swotSynthesis": "Neural SWOT Synthesis",
+        "ai": "AI",
+        "contextMapping": "Contextual Mapping",
+        "contextMappingDesc": "The AI engine doesn't just read numbers; it maps them against sector averages and current interest rate environments (TIIE).",
+        "narrativeGen": "Narrative Generation",
+        "narrativeGenDesc": "Converts complex balance sheet trends into clear, actionable bullet points for the SWOT (Strengths, Weaknesses, Opportunities, Threats).",
+        "g": "G"
     },
     "resetPassword": {
         "title": "Reset Terminal Access",
@@ -259,5 +329,140 @@
         "invalidToken": "The security token is invalid or has expired.",
         "passwordsDoNotMatch": "The passwords provided do not match our security requirements.",
         "resetFailed": "Critical Error: Failed to update credentials. Please contact systems administrator."
+    },
+    "analysis": {
+        "missingId": "Missing analysis id.",
+        "invalidId": "Invalid analysis id.",
+        "loadFailed": "Failed to load analysis.",
+        "downloadSuccess": "Report downloaded successfully",
+        "downloadFailed": "Failed to download {{type}}. Please try again.",
+        "fileLabel": "FILE:",
+        "loading": "LOADING...",
+        "updateDocs": "Update Documents",
+        "errorTitle": "Analysis Error",
+        "noData": "No analysis data",
+        "generalInfo": "General Information",
+        "industry": "Industry:",
+        "yearsInBusiness": "Years in Business:",
+        "yearsUnit": "{{count}} years",
+        "topClients": "Top Clients:",
+        "seeBilling": "See Billing Report",
+        "creditDetails": "Credit Details",
+        "approvedAmount": "Approved Amount:",
+        "term": "Term:",
+        "monthsUnit": "{{count}} months",
+        "interestRate": "Interest Rate:",
+        "creditType": "Credit Type:",
+        "creditTypeRevolving": "Revolving",
+        "types": {
+            "amortized": "Amortized",
+            "amortizado": "Amortized",
+            "revolving": "Revolving",
+            "simple": "Simple",
+            "linea_cre": "Credit Line"
+        },
+        "indicative": "Indicative",
+        "documents": "Documents",
+        "edit": "Edit",
+        "riskLabel": "Credit Risk:",
+        "category": "CATEGORY {{category}}",
+        "analyst": "Analyst Identity",
+        "systemEngine": "System Neural Engine",
+        "behaviorLabel": "Payment Behavior:",
+        "liveAnalysis": "Live Neural Analysis",
+        "taxCertificate": "Tax Certificate",
+        "financialStatements": "Financial Statements",
+        "billingReport": "Billing Report",
+        "riskReport": "Risk Report",
+        "companyProfile": "Company Profile"
+    },
+    "upload": {
+        "ingestionTerminal": "Data Ingestion Terminal",
+        "initScan": "Initialize Neural Scan",
+        "desc": "Upload financial statements for instant risk stratification.",
+        "singleCompany": "Single Company",
+        "batchUpload": "Batch Upload (Max {{max}})",
+        "dropHere": "Drop your file here",
+        "dropMultiple": "Drop up to {{max}} files here",
+        "clickBrowse": "or click to browse",
+        "files": "Files",
+        "retryFailed": "Retry Failed Uploads ({{count}})",
+        "processingBatch": "Processing {{current}} of {{total}}...",
+        "processingNeural": "Processing Neural Signal...",
+        "allComplete": "All Complete - View Dashboard",
+        "runAnalysis": "Run Deep Analysis",
+        "errFileType": "Invalid file type. Only .xlsx, .xls, or .pdf files are allowed.",
+        "errFileSize": "File too large. Maximum size is {{size}}MB.",
+        "errEmpty": "File is empty.",
+        "errSingleMode": "Single mode: Please upload only one file at a time.",
+        "errMaxFiles": "Maximum {{max}} files allowed.",
+        "errFailed": "Upload failed. Please try again.",
+        "errUnexpected": "An unexpected error occurred. Please try again.",
+        "status": {
+            "ready": "Ready",
+            "processing": "Processing...",
+            "complete": "Complete",
+            "failed": "Failed"
+        }
+    },
+    "split": {
+        "terminal": "Financial Terminal",
+        "desc": "Upload one or multiple files for consolidated analysis",
+        "dropDesc": "Drop Balance Sheet, P&L, etc.",
+        "or": "- OR -",
+        "selectDocs": "Select Documents",
+        "queue": "Package Queue",
+        "emptyQueue": "Queue is empty",
+        "execute": "Execute Analysis ({{count}} Files)",
+        "processing": "Processing Package...",
+        "status": "System Status",
+        "online": "Online",
+        "errFormat": "Format not supported for {{name}}"
+    },
+    "charts": {
+        "title": "Financial Charts",
+        "fullTitle": "Analysis Report - Financial Charts",
+        "visualization": "Indicators Visualization",
+        "debtEquityRatio": "Debt / Equity Ratio",
+        "debt": "Debt",
+        "equity": "Equity"
+    },
+    "toast": {
+        "success": "Success",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info"
+    },
+    "notfound": {
+        "title": "Neural Hub Out of Range",
+        "desc": "The requested data stream could not be localized within our institutional network. Access to this sector is restricted or non-existent.",
+        "back": "Return to Terminal",
+        "goBack": "Go Back",
+        "protocol": "Protocol: v2.1.0-ERROR",
+        "segment": "Secured Access Segment"
+    },
+    "profile": {
+        "title": "Account settings",
+        "settings": "Profile Settings",
+        "changePassword": "Change Password",
+        "uploadNew": "Upload New",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobileNumber": "Mobile Number",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "saveChanges": "Save Changes",
+        "passwordDesc": "Choose a strong password to keep your account secure.",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password",
+        "errFillFields": "Please fill in both password fields.",
+        "errLength": "Password must be at least 8 characters long.",
+        "errMatch": "Passwords do not match.",
+        "successUpdate": "Password updated successfully.",
+        "errUpdate": "Failed to update password.",
+        "saving": "Saving...",
+        "updatePassword": "Update Password"
     }
 }

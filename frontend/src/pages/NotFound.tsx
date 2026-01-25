@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Home, AlertCircle, Cpu } from 'lucide-react';
 
 export const NotFoundPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -38,10 +40,10 @@ export const NotFoundPage: React.FC = () => {
                 </div>
 
                 <h1 className="text-[#1A1A1A] text-4xl font-black tracking-tight mb-4">
-                    Neural Hub Out of Range
+                    {t('notfound.title')}
                 </h1>
                 <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-[10px] mb-8 leading-relaxed">
-                    The requested data stream could not be localized within our institutional network. Access to this sector is restricted or non-existent.
+                    {t('notfound.desc')}
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -50,13 +52,13 @@ export const NotFoundPage: React.FC = () => {
                         className="w-full sm:w-auto bg-[#11303B] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#0a1e25] transition-all transform hover:scale-[1.05] shadow-2xl shadow-blue-900/30"
                     >
                         <Home size={18} />
-                        Return to Terminal
+                        {t('notfound.back')}
                     </button>
                     <button
                         onClick={() => navigate(-1)}
                         className="w-full sm:w-auto bg-white text-[#11303B] border border-gray-100 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-xl"
                     >
-                        Go Back
+                        {t('notfound.goBack')}
                     </button>
                 </div>
 
@@ -64,12 +66,13 @@ export const NotFoundPage: React.FC = () => {
                 <div className="mt-16 flex items-center justify-center gap-6 text-[9px] font-black text-gray-300 uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                         <Cpu size={12} />
-                        Protocol: v2.1.0-ERROR
+                        {t('notfound.protocol')}
                     </div>
                     <div className="w-1 h-1 bg-gray-200 rounded-full" />
-                    <div>Secured Access Segment</div>
+                    <div>{t('notfound.segment')}</div>
                 </div>
             </motion.div>
         </div>
     );
 };
+

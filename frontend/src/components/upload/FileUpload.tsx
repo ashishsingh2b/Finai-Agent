@@ -14,6 +14,7 @@ import {
     RefreshCw,
     Layers
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { analysisAPI } from '../../services/api';
 
 type UploadMode = 'single' | 'batch';
@@ -39,17 +40,18 @@ export const FileUpload: React.FC = () => {
     const [uploading, setUploading] = useState(false);
     const [globalError, setGlobalError] = useState('');
     const [isDragging, setIsDragging] = useState(false);
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
     const validateFile = (file: File): string | null => {
         if (!file.name.match(/\.(xlsx|xls|pdf)$/i)) {
-            return 'Invalid file type. Only .xlsx, .xls, or .pdf files are allowed.';
+            return t('upload.errFileType');
         }
         if (file.size > MAX_FILE_SIZE) {
-            return `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`;
+            return t('upload.errFileSize', { size: MAX_FILE_SIZE / 1024 / 1024 });
         }
         if (file.size === 0) {
-            return 'File is empty.';
+            return t('upload.errEmpty');
         }
         return null;
     };
@@ -81,13 +83,13 @@ export const FileUpload: React.FC = () => {
         setGlobalError('');
 
         if (uploadMode === 'single' && newFiles.length > 1) {
-            setGlobalError('Single mode: Please upload only one file at a time.');
+            setGlobalError(t('upload.errSingleMode'));
             return;
         }
 
         const currentCount = uploadMode === 'single' ? 0 : files.length;
         if (currentCount + newFiles.length > (uploadMode === 'single' ? 1 : MAX_FILES)) {
-            setGlobalError(`Maximum ${uploadMode === 'single' ? 1 : MAX_FILES} files allowed.`);
+            setGlobalError(t('upload.errMaxFiles', { max: uploadMode === 'single' ? 1 : MAX_FILES }));
             return;
         }
 
@@ -128,7 +130,7 @@ export const FileUpload: React.FC = () => {
         ));
 
         try {
-            const response = await analysisAPI.uploadFile(uploadFile.file);
+            const response = await analysisAPI.uploadFile(uploadFile.file, i18n.language);
             const { analysis_id } = response.data;
 
             setFiles(prev => prev.map(f =>
@@ -137,7 +139,7 @@ export const FileUpload: React.FC = () => {
                     : f
             ));
         } catch (err: any) {
-            const errorMessage = err.response?.data?.detail || 'Upload failed. Please try again.';
+            const errorMessage = err.response?.data?.detail || t('upload.errFailed');
 
             if (uploadFile.retryCount < MAX_RETRIES) {
                 // Retry
@@ -185,7 +187,7 @@ export const FileUpload: React.FC = () => {
                 }
             }
         } catch (err) {
-            setGlobalError('An unexpected error occurred. Please try again.');
+            setGlobalError(t('upload.errUnexpected'));
         } finally {
             setUploading(false);
         }
@@ -210,10 +212,10 @@ export const FileUpload: React.FC = () => {
 
     const getStatusText = (uploadFile: UploadFile) => {
         switch (uploadFile.status) {
-            case 'pending': return 'Ready';
-            case 'uploading': return `Processing... ${uploadFile.retryCount > 0 ? `(Retry ${uploadFile.retryCount})` : ''} `;
-            case 'success': return 'Complete';
-            case 'error': return uploadFile.error || 'Failed';
+            case 'pending': return t('upload.status.ready');
+            case 'uploading': return `${t('upload.status.processing')} ${uploadFile.retryCount > 0 ? `(Retry ${uploadFile.retryCount})` : ''} `;
+            case 'success': return t('upload.status.complete');
+            case 'error': return uploadFile.error || t('upload.status.failed');
         }
     };
 
@@ -222,41 +224,41 @@ export const FileUpload: React.FC = () => {
     const canUpload = files.length > 0 && !uploading && files.some(f => f.status === 'pending' || f.status === 'error');
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-8">
+        <div className="w-full max-w-5xl mx-auto p-4 sm:p-8">
             {/* Header */}
-            <div className="flex items-start justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
                 <div>
                     <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-3">
                         <CloudIcon size={14} />
-                        Data Ingestion Terminal
+                        {t('upload.ingestionTerminal')}
                     </div>
-                    <h1 className="text-[#1A1A1A] text-3xl font-black tracking-tight leading-none mb-3">
-                        Initialize Neural Scan
+                    <h1 className="text-[#1A1A1A] text-2xl sm:text-3xl font-black tracking-tight leading-none mb-3">
+                        {t('upload.initScan')}
                     </h1>
-                    <p className="text-gray-500 font-medium">
-                        Upload financial statements for instant risk stratification.
+                    <p className="text-gray-500 font-medium text-sm sm:text-base">
+                        {t('upload.desc')}
                     </p>
                 </div>
-                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300">
+                <div className="hidden sm:flex w-12 h-12 bg-gray-50 rounded-2xl items-center justify-center text-gray-300">
                     <Zap size={24} />
                 </div>
             </div>
 
             {/* Mode Toggle */}
-            <div className="mb-6 flex items-center justify-center gap-3">
+            <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
                 <button
                     onClick={() => {
                         setUploadMode('single');
                         setFiles([]);
                         setGlobalError('');
                     }}
-                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${uploadMode === 'single'
+                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center ${uploadMode === 'single'
                         ? 'bg-[#253746] text-white shadow-lg'
                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                 >
-                    <FileSpreadsheet className="w-4 h-4 inline mr-2" />
-                    Single Company
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    {t('upload.singleCompany')}
                 </button>
                 <button
                     onClick={() => {
@@ -264,13 +266,13 @@ export const FileUpload: React.FC = () => {
                         setFiles([]);
                         setGlobalError('');
                     }}
-                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${uploadMode === 'batch'
+                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center ${uploadMode === 'batch'
                         ? 'bg-[#253746] text-white shadow-lg'
                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                 >
-                    <Layers className="w-4 h-4 inline mr-2" />
-                    Batch Upload (Max {MAX_FILES})
+                    <Layers className="w-4 h-4 mr-2" />
+                    {t('upload.batchUpload', { max: MAX_FILES })}
                 </button>
             </div>
 
@@ -280,7 +282,7 @@ export const FileUpload: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => document.getElementById('file-input')?.click()}
-                className={`group relative border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-500 cursor-pointer overflow-hidden ${isDragging
+                className={`group relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all duration-500 cursor-pointer overflow-hidden ${isDragging
                     ? 'border-[#253746] bg-[#253746]/5 shadow-2xl'
                     : 'border-gray-200 bg-white hover:border-[#253746] hover:bg-gray-50/50 hover:shadow-xl'
                     } `}
@@ -288,17 +290,17 @@ export const FileUpload: React.FC = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#253746]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-all ${files.length > 0 ? 'bg-emerald-50 text-emerald-500' : 'bg-[#F1F5F9] text-[#253746] group-hover:scale-110'
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mb-5 transition-all ${files.length > 0 ? 'bg-emerald-50 text-emerald-500' : 'bg-[#F1F5F9] text-[#253746] group-hover:scale-110'
                         }`}>
-                        <Upload className="w-7 h-7" />
+                        <Upload className="w-6 h-6 sm:w-7 sm:h-7" />
                     </div>
 
-                    <p className="text-xl font-black text-[#1A1A1A] tracking-tight mb-1">
-                        {uploadMode === 'single' ? 'Drop your file here' : `Drop up to ${MAX_FILES} files here`}
+                    <p className="text-lg sm:text-xl font-black text-[#1A1A1A] tracking-tight mb-1">
+                        {uploadMode === 'single' ? t('upload.dropHere') : t('upload.dropMultiple', { max: MAX_FILES })}
                     </p>
-                    <p className="text-gray-400 font-medium mb-4">or click to browse</p>
+                    <p className="text-gray-400 font-medium text-xs sm:text-sm mb-4">{t('upload.clickBrowse')}</p>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                         <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.XLSX</span>
                         <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.XLS</span>
                         <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase">.PDF</span>
@@ -320,7 +322,7 @@ export const FileUpload: React.FC = () => {
                 <div className="mt-6 bg-white border border-gray-200 rounded-2xl p-5 space-y-2">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="font-black text-sm text-[#1A1A1A] uppercase tracking-wider">
-                            Files ({files.length})
+                            {t('upload.files')} ({files.length})
                         </h3>
                         {uploadMode === 'batch' && (
                             <div className="text-xs font-bold text-gray-500">
@@ -376,7 +378,7 @@ export const FileUpload: React.FC = () => {
                     className="mt-5 w-full py-4 bg-orange-500 text-white rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-orange-600 transition"
                 >
                     <RefreshCw className="w-5 h-5" />
-                    Retry Failed Uploads ({errorCount})
+                    {t('upload.retryFailed', { count: errorCount })}
                 </button>
             )}
 
@@ -384,7 +386,7 @@ export const FileUpload: React.FC = () => {
             <button
                 onClick={handleUpload}
                 disabled={!canUpload}
-                className={`mt-8 w-full rounded-2xl py-6 font-black text-sm tracking-widest uppercase flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] ${!canUpload
+                className={`mt-8 w-full rounded-2xl py-4 sm:py-6 font-black text-sm tracking-widest uppercase flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] ${!canUpload
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-[#1A1A1A] text-white hover:bg-[#1A2630] shadow-2xl shadow-gray-900/20 hover:scale-[1.01]'
                     }`}
@@ -393,14 +395,14 @@ export const FileUpload: React.FC = () => {
                     <>
                         <Loader2 className="w-5 h-5 animate-spin" />
                         {uploadMode === 'batch'
-                            ? `Processing ${successCount + 1} of ${files.length}...`
-                            : 'Processing Neural Signal...'}
+                            ? t('upload.processingBatch', { current: successCount + 1, total: files.length })
+                            : t('upload.processingNeural')}
                     </>
                 ) : (
                     <>
                         {uploadMode === 'batch' && successCount > 0 && successCount === files.length
-                            ? 'All Complete - View Dashboard'
-                            : 'Run Deep Analysis'}
+                            ? t('upload.allComplete')
+                            : t('upload.runAnalysis')}
                         <ArrowUpRight className="w-5 h-5" />
                     </>
                 )}

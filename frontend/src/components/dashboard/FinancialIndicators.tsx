@@ -31,16 +31,16 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
     return (
         <div className="bg-white rounded-xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300">
             <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">
-                Financial Indicators
+                {t('fin.title')}
             </div>
             <div className="p-5 bg-white">
-                <div className="border border-gray-200 rounded-lg flex items-stretch divide-x divide-gray-200 bg-gray-50/30 shadow-sm overflow-hidden">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                     {indicators.map((ind, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center py-5 px-2 hover:bg-white/60 transition-colors group">
+                        <div key={i} className="flex flex-col items-center py-5 px-2 bg-gray-50/30 hover:bg-white transition-colors group">
                             <div className="text-[10px] font-black text-gray-500 mb-3 group-hover:text-[#11303B] transition-colors whitespace-nowrap uppercase tracking-widest leading-none">
                                 {ind.label}
                             </div>
-                            <div className="text-3xl font-black text-gray-900 tracking-tight mb-5 group-hover:scale-105 transition-transform leading-none">
+                            <div className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-5 group-hover:scale-105 transition-transform leading-none text-center">
                                 {ind.value}
                             </div>
                             <div className={`w-full max-w-[110px] text-center text-[10px] font-black px-3 py-2 rounded-md shadow-md uppercase tracking-wider ${ind.status === t('fin.adequate') ? 'bg-[#6ECEB2] text-[#11303B]' :

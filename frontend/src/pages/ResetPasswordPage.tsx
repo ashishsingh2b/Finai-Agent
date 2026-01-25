@@ -65,11 +65,11 @@ export const ResetPasswordPage: React.FC = () => {
                 <LanguageSelector />
             </div>
 
-            <div className="relative z-10 w-full max-width-md">
-                <div className="bg-[#11303B] border border-white/10 rounded-3xl p-8 shadow-2xl max-w-md mx-auto relative overflow-hidden">
-                    <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                            <ShieldCheck size={32} className="text-[#11303B]" />
+            <div className="relative z-10 w-full max-w-md">
+                <div className="bg-[#11303B] border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl max-w-md mx-auto relative overflow-hidden">
+                    <div className="flex flex-col items-center mb-6 sm:mb-8">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+                            <ShieldCheck size={28} className="text-[#11303B]" />
                         </div>
                         <h1 className="text-2xl font-bold text-white tracking-tight uppercase">
                             {status === 'success' ? t('resetPassword.successTitle') : t('resetPassword.title')}

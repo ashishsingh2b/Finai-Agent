@@ -23,7 +23,7 @@ import { useUIStore } from '../store/uiStore';
 
 export const DashboardPage: React.FC = () => {
     const { user } = useAuthStore();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { addToast } = useUIStore();
     const navigate = useNavigate();
     const [analyses, setAnalyses] = useState<AnalysisListItem[]>([]);
@@ -45,7 +45,7 @@ export const DashboardPage: React.FC = () => {
             setAnalyses(response.data.analyses || []);
         } catch (error) {
             console.error('Failed to fetch analyses:', error);
-            setError('System could not retrieve historical data. Please check connection and refresh.');
+            setError(t('dash.errLoad'));
         } finally {
             setLoading(false);
         }
@@ -64,10 +64,10 @@ export const DashboardPage: React.FC = () => {
 
             // Optimistic Update: Refresh the list
             fetchAnalyses();
-            addToast(`Status updated to ${status}`, 'success');
+            addToast(t('dash.statusUpdated', { status }), 'success');
         } catch (error) {
             console.error('Failed to update status:', error);
-            addToast('Failed to update analysis status. Please try again.', 'error');
+            addToast(t('dash.errStatus'), 'error');
         }
     };
 
@@ -78,10 +78,10 @@ export const DashboardPage: React.FC = () => {
 
             await analysisAPI.updateAnalysisStatus(id, payload);
             fetchAnalyses();
-            addToast('Payment behavior recorded.', 'success');
+            addToast(t('dash.behaviorRecorded'), 'success');
         } catch (error) {
             console.error('Failed to update behavior:', error);
-            addToast('Error saving behavior update.', 'error');
+            addToast(t('dash.errBehavior'), 'error');
         }
     };
 
@@ -99,8 +99,8 @@ export const DashboardPage: React.FC = () => {
     const handleDownload = async (id: number, type: 'pdf' | 'excel', companyName: string) => {
         try {
             const response = type === 'pdf'
-                ? await analysisAPI.downloadPDF(id)
-                : await analysisAPI.downloadExcel(id);
+                ? await analysisAPI.downloadPDF(id, i18n.language)
+                : await analysisAPI.downloadExcel(id, i18n.language);
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -112,7 +112,7 @@ export const DashboardPage: React.FC = () => {
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error(`Failed to download ${type}:`, error);
-            alert(`Failed to download ${type.toUpperCase()}. Please try again.`);
+            alert(t('analysis.downloadFailed', { type: type.toUpperCase() }));
         }
     };
 
@@ -183,38 +183,38 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Metrics Grid (Compact) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-in fade-in slide-in-from-bottom duration-1000">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-6 animate-in fade-in slide-in-from-bottom duration-1000">
                 {[
-                    { label: t('dash.total'), val: analyses.length, trend: totalTrend, up: true, icon: FileText, color: 'blue', border: 'border-blue-400/50', bg: 'bg-blue-50', footer: 'Total System Records' },
-                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: scoreTrend, up: scoreTrendUp, icon: TrendingUp, color: 'emerald', border: 'border-emerald-400/50', bg: 'bg-emerald-50', footer: 'Network Average Score' },
-                    { label: t('dash.highRisk'), val: currentHighRisk, trend: highRiskTrend > 0 ? `+${highRiskTrend}` : highRiskTrend, up: highRiskTrend <= 0, icon: ShieldAlert, color: 'red', border: 'border-red-400/50', bg: 'bg-red-50', footer: 'Critical Alerts Active' },
+                    { label: t('dash.total'), val: analyses.length, trend: totalTrend, up: true, icon: FileText, color: 'blue', border: 'border-blue-400/50', bg: 'bg-blue-50', footer: t('dash.systemRecords') },
+                    { label: t('dash.avgRisk'), val: (analyses.reduce((acc, curr) => acc + curr.credit_score, 0) / (analyses.length || 1)).toFixed(0), trend: scoreTrend, up: scoreTrendUp, icon: TrendingUp, color: 'emerald', border: 'border-emerald-400/50', bg: 'bg-emerald-50', footer: t('dash.networkAvg') },
+                    { label: t('dash.highRisk'), val: currentHighRisk, trend: highRiskTrend > 0 ? `+${highRiskTrend}` : highRiskTrend, up: highRiskTrend <= 0, icon: ShieldAlert, color: 'red', border: 'border-red-400/50', bg: 'bg-red-50', footer: t('dash.criticalAlerts') },
                 ].map((stat, i) => (
-                    <div key={i} className={`bg-white p-3 rounded-2xl border-4 ${stat.border} shadow-xl hover:shadow-2xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between h-full`}>
+                    <div key={i} className={`bg-white p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border-2 sm:border-4 ${stat.border} shadow-lg hover:shadow-2xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between h-full`}>
                         {/* Background decoration */}
                         <div className={`absolute top-0 right-0 w-20 h-20 ${stat.bg} rounded-full -mr-10 -mt-10`}></div>
 
                         <div className="relative z-10 h-full flex flex-col justify-between">
                             <div>
-                                <div className="flex justify-between items-center mb-1.5">
-                                    <div className={`w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#11303B]/10 group-hover:text-[#11303B] transition-all`}>
-                                        <stat.icon className="w-3.5 h-3.5" />
+                                <div className="flex justify-between items-center mb-1">
+                                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#11303B]/10 group-hover:text-[#11303B] transition-all`}>
+                                        <stat.icon size={12} className="sm:w-3.5 sm:h-3.5" />
                                     </div>
-                                    <div className={`flex items-center gap-1 text-[9px] font-black ${stat.up ? 'text-emerald-500' : 'text-red-500'} bg-white/80 px-2 py-0.5 rounded-full shadow-sm`}>
-                                        {stat.up ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                                    <div className={`flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-black ${stat.up ? 'text-emerald-500' : 'text-red-500'} bg-white/80 px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm`}>
+                                        {stat.up ? <ArrowUpRight size={8} /> : <ArrowDownRight size={8} />}
                                         {stat.trend}
                                     </div>
                                 </div>
 
-                                <div className="mb-2">
-                                    <div className="text-xl font-black text-[#1A1A1A] mb-0.5 tracking-tighter">{stat.val}</div>
-                                    <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</div>
+                                <div className="mb-1.5 sm:mb-2">
+                                    <div className="text-lg sm:text-xl font-black text-[#1A1A1A] mb-0 rounded hover:bg-gray-50 tracking-tighter leading-none">{stat.val}</div>
+                                    <div className="text-[7px] sm:text-[8px] font-black text-gray-400 uppercase tracking-widest truncate">{stat.label}</div>
                                 </div>
                             </div>
 
                             <div>
                                 {/* Decorative Sparkline */}
-                                <div className="mb-1.5 opacity-60">
-                                    <svg className={`w-full h-8 ${stat.color === 'blue' ? 'text-blue-400' : stat.color === 'emerald' ? 'text-emerald-400' : 'text-red-400'} fill-current`} viewBox="0 0 300 80" preserveAspectRatio="none">
+                                <div className="mb-1 sm:mb-1.5 opacity-60">
+                                    <svg className={`w-full h-6 sm:h-8 ${stat.color === 'blue' ? 'text-blue-400' : stat.color === 'emerald' ? 'text-emerald-400' : 'text-red-400'} fill-current`} viewBox="0 0 300 80" preserveAspectRatio="none">
                                         <path
                                             d={i === 0 ? "M 0 50 Q 50 40 100 55 T 200 45 T 300 50 L 300 80 L 0 80 Z"
                                                 : i === 1 ? "M 0 60 Q 75 30 150 50 T 300 40 L 300 80 L 0 80 Z"
@@ -232,7 +232,7 @@ export const DashboardPage: React.FC = () => {
                                     </svg>
                                 </div>
 
-                                <div className="text-[7px] font-black text-gray-400 pt-1.5 border-t border-gray-100 uppercase tracking-widest">
+                                <div className="text-[6px] sm:text-[7px] font-black text-gray-400 pt-1 sm:pt-1.5 border-t border-gray-100 uppercase tracking-widest truncate">
                                     {stat.footer}
                                 </div>
                             </div>
@@ -241,61 +241,65 @@ export const DashboardPage: React.FC = () => {
                 ))}
 
                 {/* Total Active Portfolio Card */}
-                <div className="bg-white rounded-2xl shadow-xl p-3 border-4 border-[#6ECEB2] relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-2.5 sm:p-3 border-2 sm:border-4 border-[#6ECEB2] relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
                     {/* Background decoration */}
                     <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-full -mr-10 -mt-10"></div>
 
-                    <div className="relative z-10">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center gap-2">
-                                <ArrowLeft className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-[10px] font-semibold text-gray-600">MXN</span>
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                    <ArrowLeft size={10} className="sm:w-3.5 sm:h-3.5 text-gray-400" />
+                                    <span className="text-[8px] sm:text-[10px] font-semibold text-gray-600">MXN</span>
+                                </div>
+                                <div className="flex items-center gap-0.5 sm:gap-1 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-full">
+                                    <TrendingUp size={8} className="sm:w-2.5 sm:h-2.5 text-[#6ECEB2]" />
+                                    <span className="text-[8px] sm:text-[9px] font-bold text-[#6ECEB2]">{portfolioTrendPercentage}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
-                                <TrendingUp className="w-2.5 h-2.5 text-[#6ECEB2]" />
-                                <span className="text-[9px] font-bold text-[#6ECEB2]">{portfolioTrendPercentage}</span>
+
+                            {/* Balance */}
+                            <div className="mb-1 sm:mb-1.5">
+                                <div className="text-lg sm:text-xl font-black text-[#11303B] mb-0 tracking-tight leading-none">
+                                    {formatCurrency(totalActivePortfolio).replace('USD', '$')}
+                                </div>
+                                <div className="text-[7px] sm:text-[8px] text-gray-500 font-bold uppercase tracking-wider truncate">
+                                    {t('dash.portfolioLabel')}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Balance */}
-                        <div className="mb-1.5">
-                            <div className="text-xl font-black text-[#11303B] mb-0.5 tracking-tight">
-                                {formatCurrency(totalActivePortfolio).replace('USD', '$')}
+                        <div>
+                            {/* Chart visualization */}
+                            <div className="mb-1 sm:mb-1.5">
+                                <svg className="w-full h-6 sm:h-8" viewBox="0 0 300 80" preserveAspectRatio="none">
+                                    {/* Chart line */}
+                                    <path
+                                        d="M 0 50 Q 30 45 60 48 T 120 45 T 180 42 T 240 38 T 300 35"
+                                        fill="none"
+                                        stroke="#6ECEB2"
+                                        strokeWidth="3"
+                                    />
+                                    {/* Filled area under line */}
+                                    <path
+                                        d="M 0 50 Q 30 45 60 48 T 120 45 T 180 42 T 240 38 T 300 35 L 300 80 L 0 80 Z"
+                                        fill="url(#gradient-compact)"
+                                        opacity="0.2"
+                                    />
+                                    <defs>
+                                        <linearGradient id="gradient-compact" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#6ECEB2" stopOpacity="0.5" />
+                                            <stop offset="100%" stopColor="#6ECEB2" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
                             </div>
-                            <div className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">
-                                Cartera activa total MXN
+
+                            {/* Footer */}
+                            <div className="text-[6px] sm:text-[8px] font-black text-gray-400 pt-1 sm:pt-1.5 border-t border-gray-100 uppercase tracking-widest truncate">
+                                {t('dash.systemRecords')}
                             </div>
-                        </div>
-
-                        {/* Chart visualization */}
-                        <div className="mb-1">
-                            <svg className="w-full h-8" viewBox="0 0 300 80" preserveAspectRatio="none">
-                                {/* Chart line */}
-                                <path
-                                    d="M 0 50 Q 30 45 60 48 T 120 45 T 180 42 T 240 38 T 300 35"
-                                    fill="none"
-                                    stroke="#6ECEB2"
-                                    strokeWidth="3"
-                                />
-                                {/* Filled area under line */}
-                                <path
-                                    d="M 0 50 Q 30 45 60 48 T 120 45 T 180 42 T 240 38 T 300 35 L 300 80 L 0 80 Z"
-                                    fill="url(#gradient)"
-                                    opacity="0.2"
-                                />
-                                <defs>
-                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" stopColor="#6ECEB2" stopOpacity="0.5" />
-                                        <stop offset="100%" stopColor="#6ECEB2" stopOpacity="0" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="text-[8px] font-black text-gray-400 pt-1.5 border-t border-gray-100 uppercase tracking-widest">
-                            RECT Total Animate MXN $
                         </div>
                     </div>
                 </div>
@@ -306,7 +310,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-[#1A1A1A] text-base font-black tracking-tight flex items-center gap-3">
                         {t('dash.recent')}
-                        <span className="bg-[#11303B]/10 text-[#11303B] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} Total</span>
+                        <span className="bg-[#11303B]/10 text-[#11303B] px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">{analyses.length} {t('dash.totalBadge')}</span>
                     </h2>
                 </div>
 
@@ -320,7 +324,7 @@ export const DashboardPage: React.FC = () => {
                             onClick={fetchAnalyses}
                             className="bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded-lg transition-colors"
                         >
-                            Retry
+                            {t('dash.retry')}
                         </button>
                     </div>
                 )}
@@ -347,12 +351,12 @@ export const DashboardPage: React.FC = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-gray-50/50 border-b border-gray-100">
-                                        <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">Company Entity</th>
-                                        <th className="px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">Analysis Period</th>
-                                        <th className="px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none text-center">Health Index</th>
-                                        <th className="px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">Application Status</th>
-                                        <th className="px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">Payment Behavior</th>
-                                        <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none text-right">Actions</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">{t('dash.cols.entity')}</th>
+                                        <th className="hidden sm:table-cell px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">{t('dash.cols.period')}</th>
+                                        <th className="hidden md:table-cell px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none text-center">{t('dash.cols.health')}</th>
+                                        <th className="px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">{t('dash.cols.status')}</th>
+                                        <th className="hidden lg:table-cell px-4 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none">{t('dash.cols.behavior')}</th>
+                                        <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-widest leading-none text-right">{t('dash.cols.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
@@ -370,10 +374,10 @@ export const DashboardPage: React.FC = () => {
                                                     <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#11303B] transition-colors">{analysis.company_name}</div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-4">
+                                            <td className="hidden sm:table-cell px-4 py-4">
                                                 <div className="text-[10px] font-black text-[#11303B] capitalize">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
                                             </td>
-                                            <td className="px-4 py-4 text-center">
+                                            <td className="hidden md:table-cell px-4 py-4 text-center">
                                                 <span className={`px-2.5 py-1 rounded-md text-[9px] font-black border transition-all ${getCategoryStyles(analysis.category)}`}>
                                                     {analysis.credit_score}% ({analysis.category})
                                                 </span>
@@ -394,7 +398,7 @@ export const DashboardPage: React.FC = () => {
                                                 </select>
                                             </td>
                                             {/* Behavior Column */}
-                                            <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                                            <td className="hidden lg:table-cell px-4 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     disabled={analysis.application_status !== 'APPROVED'}
                                                     value={analysis.payment_behavior}
@@ -414,7 +418,7 @@ export const DashboardPage: React.FC = () => {
                                                     <button
                                                         onClick={() => navigate(`/analysis/${analysis.id}`)}
                                                         className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group"
-                                                        title="View Report"
+                                                        title={t('dash.viewReport')}
                                                     >
                                                         <Eye size={14} strokeWidth={2.5} />
                                                     </button>
@@ -466,7 +470,7 @@ export const DashboardPage: React.FC = () => {
                                                     <button
                                                         onClick={() => navigate('/dashboard/upload')}
                                                         className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm"
-                                                        title="Update / Edit"
+                                                        title={t('dash.updateEdit')}
                                                     >
                                                         <RefreshCcw size={14} strokeWidth={2.5} />
                                                     </button>

@@ -55,7 +55,7 @@ export const DocumentationPage: React.FC = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1400px] mx-auto p-6 md:p-8">
+            <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-8">
                 {/* Header */}
                 <div className="mb-10 animate-in fade-in slide-in-from-left duration-700">
                     <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.3em] mb-3">
@@ -111,7 +111,7 @@ export const DocumentationPage: React.FC = () => {
 
                     {/* Content Area */}
                     <div className="col-span-12 lg:col-span-9">
-                        <div className="bg-white rounded-3xl border border-gray-100 shadow-2xl p-8 md:p-12 min-h-[700px]">
+                        <div className="bg-white rounded-[2rem] sm:rounded-3xl border border-gray-100 shadow-2xl p-6 sm:p-8 md:p-12 min-h-[700px]">
                             {/* Getting Started */}
                             {activeSection === 'getting-started' && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right duration-500">
@@ -120,7 +120,7 @@ export const DocumentationPage: React.FC = () => {
                                             <Zap size={32} className="text-[#6ECEB2]" strokeWidth={3} />
                                             {t('docs.gettingStarted')}
                                         </h2>
-                                        <div className="px-4 py-1.5 bg-gray-100 rounded-full text-[10px] font-black text-gray-500 tracking-widest">v2.1 STABLE</div>
+                                        <div className="px-4 py-1.5 bg-gray-100 rounded-full text-[10px] font-black text-gray-500 tracking-widest">{t('docs.v2_1')}</div>
                                     </div>
 
                                     <div className="prose prose-sm max-w-none">
@@ -128,7 +128,7 @@ export const DocumentationPage: React.FC = () => {
 
                                         {/* Visual Workflow Diagram */}
                                         <div className="bg-gray-50 rounded-3xl p-8 border-2 border-dashed border-gray-200 mb-12">
-                                            <h4 className="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-10">System Neural Workflow</h4>
+                                            <h4 className="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-10">{t('docs.workflow')}</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
                                                 {[
                                                     { icon: Upload, label: 'Data Ingestion', desc: 'Secure File Upload' },
@@ -140,8 +140,8 @@ export const DocumentationPage: React.FC = () => {
                                                         <div className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-4 border border-gray-100 group-hover:-translate-y-1 transition-transform">
                                                             <step.icon size={24} className="text-[#11303B]" />
                                                         </div>
-                                                        <div className="text-[11px] font-black text-[#11303B] uppercase mb-1">{step.label}</div>
-                                                        <div className="text-[9px] font-bold text-gray-500 px-4">{step.desc}</div>
+                                                        <div className="text-[10px] sm:text-[11px] font-black text-[#11303B] uppercase mb-1">{step.label}</div>
+                                                        <div className="text-[8px] sm:text-[9px] font-bold text-gray-500 px-2 sm:px-4">{step.desc}</div>
                                                         {idx < 3 && (
                                                             <div className="hidden md:block absolute top-7 left-full w-full h-[2px] bg-gradient-to-r from-[#11303B]/20 to-transparent -ml-2">
                                                                 <ArrowRight size={14} className="absolute -right-2 -top-1.5 text-[#11303B]/20" />
@@ -177,8 +177,8 @@ export const DocumentationPage: React.FC = () => {
                                                 <div>
                                                     <p className="text-base font-bold leading-relaxed">{t('docs.gsStep2Desc')}</p>
                                                     <div className="mt-4 flex gap-4">
-                                                        <div className="px-3 py-1 bg-white/10 rounded text-[10px] font-black tracking-widest uppercase">Admin Verified</div>
-                                                        <div className="px-3 py-1 bg-white/10 rounded text-[10px] font-black tracking-widest uppercase">Encryption Active</div>
+                                                        <div className="px-3 py-1 bg-white/10 rounded text-[10px] font-black tracking-widest uppercase">{t('docs.adminVerified')}</div>
+                                                        <div className="px-3 py-1 bg-white/10 rounded text-[10px] font-black tracking-widest uppercase">{t('docs.encryptionActive')}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -282,20 +282,20 @@ export const DocumentationPage: React.FC = () => {
                                         </div>
 
                                         <div className="mt-12 bg-gray-50 rounded-3xl p-10 border-2 border-gray-100">
-                                            <h3 className="text-xl font-black text-[#11303B] text-center mb-8 uppercase tracking-widest">Neural SWOT Synthesis</h3>
+                                            <h3 className="text-xl font-black text-[#11303B] text-center mb-8 uppercase tracking-widest">{t('docs.swotSynthesis')}</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                                 <div className="flex items-start gap-5">
-                                                    <div className="w-10 h-10 bg-[#6ECEB2] text-[#11303B] rounded-xl flex items-center justify-center font-black flex-shrink-0">IA</div>
+                                                    <div className="w-10 h-10 bg-[#6ECEB2] text-[#11303B] rounded-xl flex items-center justify-center font-black flex-shrink-0">{t('docs.ai')}</div>
                                                     <div>
-                                                        <h5 className="text-sm font-black text-gray-900 mb-2 uppercase tracking-tight">Contextual Mapping</h5>
-                                                        <p className="text-xs font-bold text-gray-500 leading-relaxed">The AI engine doesn't just read numbers; it maps them against sector averages and current interest rate environments (TIIE).</p>
+                                                        <h5 className="text-sm font-black text-gray-900 mb-2 uppercase tracking-tight">{t('docs.contextMapping')}</h5>
+                                                        <p className="text-xs font-bold text-gray-500 leading-relaxed">{t('docs.contextMappingDesc')}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-start gap-5">
-                                                    <div className="w-10 h-10 bg-[#11303B] text-white rounded-xl flex items-center justify-center font-black flex-shrink-0">G</div>
+                                                    <div className="w-10 h-10 bg-[#11303B] text-white rounded-xl flex items-center justify-center font-black flex-shrink-0">{t('docs.g')}</div>
                                                     <div>
-                                                        <h5 className="text-sm font-black text-gray-900 mb-2 uppercase tracking-tight">Narrative Generation</h5>
-                                                        <p className="text-xs font-bold text-gray-500 leading-relaxed">Converts complex balance sheet trends into clear, actionable bullet points for the SWOT (Strengths, Weaknesses, Opportunities, Threats).</p>
+                                                        <h5 className="text-sm font-black text-gray-900 mb-2 uppercase tracking-tight">{t('docs.narrativeGen')}</h5>
+                                                        <p className="text-xs font-bold text-gray-500 leading-relaxed">{t('docs.narrativeGenDesc')}</p>
                                                     </div>
                                                 </div>
                                             </div>

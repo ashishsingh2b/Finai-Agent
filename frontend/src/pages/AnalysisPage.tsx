@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 export const AnalysisPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const [data, setData] = useState<AnalysisData | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -36,26 +36,26 @@ export const AnalysisPage: React.FC = () => {
         window.addEventListener('click', handleClickOutside);
 
         if (!id) {
-            setError('Missing analysis id.');
+            setError(t('analysis.missingId'));
             return;
         }
 
         const parsedId = Number.parseInt(id, 10);
         if (Number.isNaN(parsedId)) {
-            setError('Invalid analysis id.');
+            setError(t('analysis.invalidId'));
             return;
         }
 
         fetchAnalysis(parsedId);
 
         return () => window.removeEventListener('click', handleClickOutside);
-    }, [id]);
+    }, [id, i18n.language]);
 
     const fetchAnalysis = async (analysisId: number) => {
         try {
             setGlobalLoading(true);
             setError(null);
-            const response = await analysisAPI.getAnalysis(analysisId);
+            const response = await analysisAPI.getAnalysis(analysisId, i18n.language);
             setData(response.data);
         } catch (err) {
             console.error(err);
@@ -63,7 +63,7 @@ export const AnalysisPage: React.FC = () => {
                 (err as any)?.response?.data?.detail ||
                 (err as any)?.response?.data?.message ||
                 (err as Error)?.message ||
-                'Failed to load analysis.';
+                t('analysis.loadFailed');
             setError(message);
             addToast(message, 'error');
         } finally {
@@ -84,8 +84,8 @@ export const AnalysisPage: React.FC = () => {
         try {
             const parsedId = Number.parseInt(id, 10);
             const response = type === 'pdf'
-                ? await analysisAPI.downloadPDF(parsedId)
-                : await analysisAPI.downloadExcel(parsedId);
+                ? await analysisAPI.downloadPDF(parsedId, i18n.language)
+                : await analysisAPI.downloadExcel(parsedId, i18n.language);
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -95,10 +95,10 @@ export const AnalysisPage: React.FC = () => {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            addToast(`Report downloaded successfully`, 'success');
+            addToast(t('analysis.downloadSuccess'), 'success');
         } catch (error) {
             console.error(`Failed to download ${type}:`, error);
-            addToast(`Failed to download ${type.toUpperCase()}. Please try again.`, 'error');
+            addToast(t('analysis.downloadFailed', { type: type.toUpperCase() }), 'error');
         } finally {
             setGlobalLoading(false);
         }
@@ -117,9 +117,9 @@ export const AnalysisPage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 flex justify-center px-4">
-                    <div className="text-[10px] font-black opacity-90 bg-white/10 px-4 py-1 rounded-full border border-white/10 max-w-md truncate">
-                        FILE: <span className="text-white">{data?.company_name || 'LOADING...'}</span>
+                <div className="flex-1 flex justify-center px-4 overflow-hidden">
+                    <div className="text-[10px] sm:text-[10px] font-black opacity-90 bg-white/10 px-4 py-1 rounded-full border border-white/10 max-w-xs sm:max-w-md truncate">
+                        <span className="hidden xs:inline">{t('analysis.fileLabel')}</span> <span className="text-white">{data?.company_name || t('analysis.loading')}</span>
                     </div>
                 </div>
 
@@ -132,13 +132,14 @@ export const AnalysisPage: React.FC = () => {
                                     e.stopPropagation();
                                     setIsDownloadOpen(!isDownloadOpen);
                                 }}
-                                className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg ${isDownloadOpen
+                                className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg ${isDownloadOpen
                                     ? 'bg-white text-[#11303B] border-white'
                                     : 'bg-white/10 hover:bg-white/20 border-white/10 text-white'
                                     }`}
                             >
                                 <FilePieChart size={14} />
-                                {t('common.download_report')}
+                                <span className="hidden md:inline">{t('common.download_report')}</span>
+                                <span className="md:hidden">{t('common.download')}</span>
                             </button>
 
                             {isDownloadOpen && (
@@ -166,7 +167,8 @@ export const AnalysisPage: React.FC = () => {
                             className="bg-[#6ECEB2] hover:bg-[#5bc1a6] px-3 py-1.5 rounded-lg text-[#11303B] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-[#6ECEB2]/20"
                         >
                             <RefreshCcw size={14} />
-                            Update Documents
+                            <span className="hidden md:inline">{t('analysis.updateDocs')}</span>
+                            <span className="md:hidden">{t('dash.update')}</span>
                         </button>
                     </div>
                     <button className="relative p-1.5 hover:bg-white/10 rounded-lg transition-all">
@@ -185,26 +187,26 @@ export const AnalysisPage: React.FC = () => {
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <AlertCircle size={32} className="text-red-500" />
                         </div>
-                        <h2 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">Analysis Error</h2>
+                        <h2 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">{t('analysis.errorTitle')}</h2>
                         <p className="text-sm font-bold text-red-600/80 mb-8">{error}</p>
                         <div className="flex items-center justify-center gap-4">
                             <button
                                 onClick={() => navigate('/dashboard')}
                                 className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-colors"
                             >
-                                Dashboard
+                                {t('nav.dashboard')}
                             </button>
                             <button
                                 onClick={() => id && fetchAnalysis(Number.parseInt(id))}
                                 className="px-6 py-3 rounded-xl bg-[#11303B] text-white text-xs font-black uppercase tracking-widest hover:bg-[#0a1e25] transition-all shadow-lg shadow-blue-900/20"
                             >
-                                Retry Analysis
+                                {t('dash.retry')}
                             </button>
                         </div>
                     </div>
                 ) : !data ? (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="text-[12px] font-black text-gray-700 uppercase tracking-widest">No analysis data</div>
+                        <div className="text-[12px] font-black text-gray-700 uppercase tracking-widest">{t('analysis.noData')}</div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-12 gap-4 items-start">
@@ -212,19 +214,19 @@ export const AnalysisPage: React.FC = () => {
                         <div className="col-span-12 lg:col-span-2 space-y-4">
                             {/* General Information */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
-                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">General Information</div>
+                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">{t('analysis.generalInfo')}</div>
                                 <div className="p-4 space-y-3">
                                     <div className="flex justify-between items-center group/row">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Industry:</div>
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.industry')}</div>
                                         <div className="text-[11px] font-black text-[#11303B]">{data.company_industry || 'N/A'}</div>
                                     </div>
                                     <div className="flex justify-between items-center group/row">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Years in Business:</div>
-                                        <div className="text-[11px] font-black text-[#11303B]">{data.years_in_business ? `${data.years_in_business} years` : 'N/A'}</div>
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.yearsInBusiness')}</div>
+                                        <div className="text-[11px] font-black text-[#11303B]">{data.years_in_business ? t('analysis.yearsUnit', { count: data.years_in_business }) : 'N/A'}</div>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Top Clients:</div>
-                                        <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || 'See Billing Report'}</div>
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.topClients')}</div>
+                                        <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || t('analysis.seeBilling')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -232,30 +234,30 @@ export const AnalysisPage: React.FC = () => {
                             <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-in slide-in-from-left duration-500">
                                 <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center gap-2">
                                     <FileSearch size={14} className="opacity-80" />
-                                    Credit Details
+                                    {t('analysis.creditDetails')}
                                 </div>
                                 <div className="p-4 space-y-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">Approved Amount:</span>
+                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.approvedAmount')}</span>
                                         <span className="text-[12px] font-black text-[#10b981]">
                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.approved_amount || 0)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">Term:</span>
-                                        <span className="text-[11px] font-black text-[#11303B]">{data.loan_term_months || 12} months</span>
+                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.term')}</span>
+                                        <span className="text-[11px] font-black text-[#11303B]">{t('analysis.monthsUnit', { count: data.loan_term_months || 12 })}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">Interest Rate:</span>
+                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.interestRate')}</span>
                                         <span className="text-[11px] font-black text-[#11303B]">
                                             {data.applicable_interest_rate
                                                 ? `TIIE + ${(data.applicable_interest_rate * 100).toFixed(1)}%`
-                                                : 'TIIE + 5.5% (Indicative)'}
+                                                : `TIIE + 5.5% (${t('analysis.indicative')})`}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">Credit Type:</span>
-                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type || 'Revolving'}</span>
+                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.creditType')}</span>
+                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type ? t(`analysis.types.${data.credit_type.toLowerCase()}`, { defaultValue: data.credit_type }) : t('analysis.creditTypeRevolving')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -263,21 +265,21 @@ export const AnalysisPage: React.FC = () => {
                             {/* Documents */}
                             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                                 <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
-                                    Documents
+                                    {t('analysis.documents')}
                                     <button
                                         onClick={() => navigate('/dashboard/upload')}
                                         className="text-[8px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded transition-colors"
                                     >
-                                        Edit
+                                        {t('analysis.edit')}
                                     </button>
                                 </div>
                                 <div className="p-1 space-y-0.5">
                                     {[
-                                        { icon: FileText, label: 'Tax Certificate' },
-                                        { icon: FileSpreadsheet, label: 'Financial Statements' },
-                                        { icon: FileSearch, label: 'Billing Report' },
-                                        { icon: AlertCircle, label: 'Risk Report' },
-                                        { icon: FileText, label: 'Company Profile' }
+                                        { icon: FileText, label: t('analysis.taxCertificate') },
+                                        { icon: FileSpreadsheet, label: t('analysis.financialStatements') },
+                                        { icon: FileSearch, label: t('analysis.billingReport') },
+                                        { icon: AlertCircle, label: t('analysis.riskReport') },
+                                        { icon: FileText, label: t('analysis.companyProfile') }
                                     ].map((doc, i) => (
                                         <div key={i} className="flex items-center gap-3 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg cursor-pointer group">
                                             <doc.icon size={14} className="text-[#11303B]/60 group-hover:text-[#11303B]" />
@@ -291,9 +293,9 @@ export const AnalysisPage: React.FC = () => {
                         {/* Main Content Area */}
                         <div className="col-span-12 lg:col-span-10 space-y-4">
                             {/* Status Bar */}
-                            <div className="bg-white/50 border-b border-gray-200 py-1.5 flex items-center justify-start gap-6 px-4">
+                            <div className="bg-white/50 border-b border-gray-200 py-2 sm:py-1.5 flex flex-wrap items-center justify-start gap-y-3 gap-x-6 px-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-bold text-gray-700">Credit Risk:</span>
+                                    <span className="text-[11px] font-bold text-gray-700">{t('analysis.riskLabel')}</span>
                                     <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'A' ? 'bg-emerald-500' :
                                         data.credit_category === 'B' ? 'bg-blue-500' :
                                             data.credit_category === 'C' ? 'bg-amber-500' :
@@ -307,28 +309,28 @@ export const AnalysisPage: React.FC = () => {
                                                 }`} />
                                         </div>
                                         <span className={`text-[10px] font-black leading-none ${['A', 'B', 'D', 'E'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'}`}>
-                                            CATEGORY {data.credit_category}
+                                            {t('analysis.category', { category: data.credit_category })}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="h-4 w-px bg-gray-300"></div>
+                                <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
                                 <div className="flex flex-col">
-                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Analyst Identity</span>
-                                    <span className="text-[10px] font-black text-[#11303B]">{data.analyzed_by_name || 'System Neural Engine'}</span>
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{t('analysis.analyst')}</span>
+                                    <span className="text-[10px] font-black text-[#11303B]">{data.analyzed_by_name || t('analysis.systemEngine')}</span>
                                 </div>
-                                <div className="h-4 w-px bg-gray-300"></div>
+                                <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
 
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-bold text-gray-700">Payment Behavior:</span>
-                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior || 'NA'}</span>
+                                    <span className="text-[11px] font-bold text-gray-700">{t('analysis.behaviorLabel')}</span>
+                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior ? t(`behavior.${data.payment_behavior}`) : 'NA'}</span>
                                 </div>
 
-                                <div className="flex-1"></div>
+                                <div className="hidden xl:flex flex-1"></div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 ml-auto sm:ml-0">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">Live Neural Analysis</span>
+                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">{t('analysis.liveAnalysis')}</span>
                                 </div>
                             </div>
 

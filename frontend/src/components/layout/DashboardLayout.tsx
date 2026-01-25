@@ -100,7 +100,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
 
                 {/* Mobile Header */}
                 <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#11303B] z-[60] px-4 flex items-center justify-between border-b border-white/10 shadow-lg shadow-blue-900/20">
-                    <div className="flex items-center justify-center w-32 h-10">
+                    <div className="flex items-center justify-start w-24 h-8">
                         <img src="/logo.avif" alt="Moskalti Capital" className="w-full h-full object-contain drop-shadow-md" />
                     </div>
                     <div className="flex items-center gap-4">
@@ -122,7 +122,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-10">
-                                <span className="text-white font-black text-xl tracking-tighter">Menu</span>
+                                <span className="text-white font-black text-xl tracking-tighter">{t('nav.menu')}</span>
                                 <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-200 hover:text-white">
                                     <ChevronLeft className="w-6 h-6 rotate-180" />
                                 </button>
@@ -168,7 +168,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                             <Search className="w-3.5 h-3.5 text-white group-focus-within:text-[#6ECEB2]" />
                             <input
                                 type="text"
-                                placeholder="Universal search..."
+                                placeholder={t('nav.searchPlaceholder')}
                                 className="bg-transparent border-none text-[10px] font-medium w-full focus:ring-0 placeholder:text-white/60 text-white focus:text-white placeholder-focus:text-white/60"
                             />
                         </div>
@@ -192,7 +192,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                     </header>
 
                     {/* Content Container */}
-                    <div className="px-6 md:px-10 pb-6 md:pb-10 pt-2 md:pt-8 max-w-[1600px] mx-auto flex-1 w-full">
+                    <div className="px-3 sm:px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-8 max-w-[1600px] mx-auto flex-1 w-full gap-4">
                         {children}
                     </div>
 
@@ -201,7 +201,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                         <div className="max-w-[1600px] mx-auto px-10 flex flex-col items-center">
                             <p className="font-bold text-gray-400 text-[11px] uppercase tracking-[0.2em] mb-4">
                                 <a href="https://www.moskalti.com/aviso-de-privacidad" target="_blank" rel="noopener noreferrer" className="hover:text-[#11303B] underline underline-offset-4 transition-colors">
-                                    © 2025 Moskalti Capital - Aviso de privacidad
+                                    {t('nav.copyright')} - {t('nav.privacy')}
                                 </a>
                             </p>
                             <div className="flex items-center gap-4 opacity-30 grayscale active:grayscale-0 transition-all hover:opacity-60">

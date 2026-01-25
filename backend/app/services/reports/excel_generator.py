@@ -99,6 +99,12 @@ class ExcelReportGenerator:
                 'bold': True,
                 'align': 'center',
                 'border': 1
+            }),
+            'footer': workbook.add_format({
+                'font_size': 9,
+                'italic': True,
+                'align': 'center',
+                'font_color': '#666666'
             })
         }
     
@@ -239,6 +245,8 @@ class ExcelReportGenerator:
                     value = stmt.get(field, 0)
                     worksheet.write(row, i+1, value, formats['currency'])
             row += 1
+            
+        self._add_footer(worksheet, row + 2, len(years), formats)
     
     def _create_income_statement(self, workbook, statements:   List[Dict], formats):
         """Sheet 3: Income Statement (Multiple Years)"""
@@ -292,6 +300,8 @@ class ExcelReportGenerator:
                 value = stmt.get(field, 0)
                 worksheet.write(row, i+1, value, formats['currency'])
             row += 1
+            
+        self._add_footer(worksheet, row + 2, len(years), formats)
     
     def _create_financial_ratios_sheet(self, workbook, analysis_data: Dict, formats):
         """Sheet 4: Financial Ratios"""
@@ -321,14 +331,6 @@ class ExcelReportGenerator:
                 ('Interest Coverage', 'interest_coverage', False),
                 ('Asset Turnover', 'asset_turnover', False),
             ],
-            'en': [
-                ('Current Ratio', 'current_ratio', False),
-                ('Leverage (D/A)', 'leverage_ratio', True),
-                ('ROE (%)', 'roe', True),
-                ('Sales Trend (%)', 'sales_trend', False),
-                ('Net Income Coverage', 'net_income_coverage', False),
-                ('Interest Coverage', 'interest_coverage', False),
-            ],
             'es': [
                 ('Razón Corriente', 'current_ratio', False),
                 ('Apalancamiento (D/A)', 'leverage_ratio', True),
@@ -345,6 +347,8 @@ class ExcelReportGenerator:
             worksheet.write(row, 1, value, formats['percent'] if is_percent else formats['value'])
             worksheet.write(row, 2, self._interpret_ratio(field, value))
             row += 1
+            
+        self._add_footer(worksheet, row + 2, 2, formats)
     
     def _create_swot_sheet(self, workbook, analysis_data: Dict, formats):
         """Sheet 5: SWOT Analysis"""
@@ -387,6 +391,8 @@ class ExcelReportGenerator:
                 worksheet.write(row, 0, f"• {weaknesses[i]}")
             if i < len(threats):
                 worksheet.write(row, 1, f"• {threats[i]}")
+                
+        self._add_footer(worksheet, row + 2, 1, formats)
     
     def _create_credit_score_sheet(self, workbook, analysis_data: Dict, formats):
         """Sheet 6: Credit Score Breakdown"""

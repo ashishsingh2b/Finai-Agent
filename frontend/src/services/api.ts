@@ -66,7 +66,7 @@ export const analysisAPI = {
         });
     },
 
-    getAnalysis: (id: number) => api.get(`/analysis/${id}`),
+    getAnalysis: (id: number, language: string = 'es') => api.get(`/analysis/${id}?language=${language}`),
 
     downloadPDF: (id: number, language: string = 'es') =>
         api.get(`/analysis/${id}/export/pdf?language=${language}`, { responseType: 'blob' }),

@@ -42,7 +42,7 @@ export const LoginForm: React.FC = () => {
 
         try {
             await login(email, password);
-            addToast('Login successful! Redirecting...', 'success');
+            addToast(t('login.successToast'), 'success');
             navigate('/dashboard');
         } catch (err: any) {
             addToast(err.response?.data?.detail || t('login.invalidCredentials'), 'error');
@@ -73,7 +73,7 @@ export const LoginForm: React.FC = () => {
 
             {/* Main Content Card */}
             <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in duration-700">
-                <div className="bg-[#11303B] border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                <div className="bg-[#11303B] border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
 
                     {/* Close Button */}
                     <button
@@ -84,9 +84,8 @@ export const LoginForm: React.FC = () => {
                     </button>
 
                     <div className={`transition-all duration-500 ease-in-out ${view === 'login' ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 absolute inset-0 p-8 pointer-events-none'}`}>
-                        {/* Login View */}
-                        <div className="text-center mb-8">
-                            <div className="w-40 h-20 mx-auto mb-6 flex items-center justify-center transition-transform hover:scale-105 duration-500">
+                        <div className="text-center mb-6 sm:mb-8">
+                            <div className="w-32 h-16 sm:w-40 sm:h-20 mx-auto mb-4 sm:mb-6 flex items-center justify-center transition-transform hover:scale-105 duration-500">
                                 <img src="/logo.avif" alt="Moskalti Capital" className="w-full h-full object-contain drop-shadow-2xl" />
                             </div>
                             <h1 className="text-2xl font-black text-white tracking-tight mb-2">{t('login.welcome')}</h1>
