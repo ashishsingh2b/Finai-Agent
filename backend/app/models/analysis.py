@@ -19,6 +19,11 @@ class ApplicationStatus(str, enum.Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
 
+class ValidationStatus(str, enum.Enum):
+    VALID = "VALID"
+    WARNINGS = "WARNINGS"
+    INVALID = "INVALID"
+
 class PaymentBehavior(str, enum.Enum):
     ON_TIME = "ON_TIME"
     DELINQUENT = "DELINQUENT"
@@ -82,6 +87,10 @@ class AnalysisResult(Base):
     # Interest Rate
     applicable_interest_rate = Column(Numeric(5, 4))
     tiie_rate_used = Column(Numeric(5, 4))
+    
+    # Validation
+    validation_status = Column(SQLEnum(ValidationStatus, native_enum=False), default=ValidationStatus.VALID)
+    validation_alerts = Column(JSON)  # List of status/warning messages
     
     # Language
     language = Column(String(2), default='es')  # 'es' or 'en'

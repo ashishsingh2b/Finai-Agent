@@ -6,18 +6,15 @@ import {
     FileSpreadsheet,
     AlertCircle,
     CheckCircle,
-    CloudIcon,
     Zap,
     ArrowUpRight,
     Loader2,
     X,
-    RefreshCw,
-    Layers
+    RefreshCw
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { analysisAPI } from '../../services/api';
 
-type UploadMode = 'single' | 'batch';
 type FileStatus = 'pending' | 'uploading' | 'success' | 'error';
 
 interface UploadFile {
@@ -35,11 +32,18 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const MAX_RETRIES = 2;
 
 export const FileUpload: React.FC = () => {
-    const [uploadMode, setUploadMode] = useState<UploadMode>('single');
     const [files, setFiles] = useState<UploadFile[]>([]);
     const [uploading, setUploading] = useState(false);
     const [globalError, setGlobalError] = useState('');
+    const [validationAlerts, setValidationAlerts] = useState<any[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+
+    // Loan details state
+    const [loanAmount, setLoanAmount] = useState<number>(0);
+    const [loanTerm, setLoanTerm] = useState<number>(12);
+    const [creditType, setCreditType] = useState<string>('NEW');
+    const [creditScore, setCreditScore] = useState<number>(75);
+
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
@@ -71,7 +75,7 @@ export const FileUpload: React.FC = () => {
         setIsDragging(false);
         const droppedFiles = Array.from(e.dataTransfer.files);
         addFiles(droppedFiles);
-    }, [uploadMode, files]);
+    }, [files]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(e.target.files || []);
@@ -81,15 +85,10 @@ export const FileUpload: React.FC = () => {
 
     const addFiles = (newFiles: File[]) => {
         setGlobalError('');
+        setValidationAlerts([]);
 
-        if (uploadMode === 'single' && newFiles.length > 1) {
-            setGlobalError(t('upload.errSingleMode'));
-            return;
-        }
-
-        const currentCount = uploadMode === 'single' ? 0 : files.length;
-        if (currentCount + newFiles.length > (uploadMode === 'single' ? 1 : MAX_FILES)) {
-            setGlobalError(t('upload.errMaxFiles', { max: uploadMode === 'single' ? 1 : MAX_FILES }));
+        if (files.length + newFiles.length > MAX_FILES) {
+            setGlobalError(t('upload.errMaxFiles', { max: MAX_FILES }));
             return;
         }
 
@@ -104,7 +103,7 @@ export const FileUpload: React.FC = () => {
             } else {
                 validatedFiles.push({
                     file,
-                    id: `${Date.now()} -${Math.random()} `,
+                    id: `${Date.now()}-${Math.random()}`,
                     status: 'pending',
                     progress: 0,
                     retryCount: 0
@@ -113,13 +112,14 @@ export const FileUpload: React.FC = () => {
         });
 
         if (!hasError) {
-            setFiles(uploadMode === 'single' ? validatedFiles : [...files, ...validatedFiles]);
+            setFiles([...files, ...validatedFiles]);
         }
     };
 
     const removeFile = (id: string) => {
         setFiles(files.filter(f => f.id !== id));
         setGlobalError('');
+        setValidationAlerts([]);
     };
 
     const uploadSingleFile = async (uploadFile: UploadFile): Promise<void> => {
@@ -130,7 +130,14 @@ export const FileUpload: React.FC = () => {
         ));
 
         try {
-            const response = await analysisAPI.uploadFile(uploadFile.file, i18n.language);
+            const response = await analysisAPI.uploadFile(
+                uploadFile.file,
+                i18n.language,
+                loanAmount,
+                loanTerm,
+                creditType,
+                creditScore
+            );
             const { analysis_id } = response.data;
 
             setFiles(prev => prev.map(f =>
@@ -139,10 +146,15 @@ export const FileUpload: React.FC = () => {
                     : f
             ));
         } catch (err: any) {
-            const errorMessage = err.response?.data?.detail || t('upload.errFailed');
+            const detail = err.response?.data?.detail;
+            const errorMessage = typeof detail === 'string' ? detail : detail?.message || t('upload.errFailed');
 
-            if (uploadFile.retryCount < MAX_RETRIES) {
-                // Retry
+            if (detail?.alerts) {
+                setValidationAlerts(detail.alerts);
+            }
+
+            if (uploadFile.retryCount < MAX_RETRIES && !detail?.alerts) {
+                // Retry only if not a validation error
                 setFiles(prev => prev.map(f =>
                     f.id === uploadFile.id
                         ? { ...f, retryCount: f.retryCount + 1 }
@@ -165,29 +177,46 @@ export const FileUpload: React.FC = () => {
 
         setUploading(true);
         setGlobalError('');
+        setValidationAlerts([]);
 
         try {
-            if (uploadMode === 'single') {
-                await uploadSingleFile(files[0]);
-                const uploadedFile = files.find(f => f.status === 'success');
-                if (uploadedFile?.analysisId) {
-                    navigate(`/analysis/${uploadedFile.analysisId}`);
-                }
+            let response;
+            if (files.length === 1) {
+                // Single file analysis
+                response = await analysisAPI.uploadFile(
+                    files[0].file,
+                    i18n.language,
+                    loanAmount,
+                    loanTerm,
+                    creditType,
+                    creditScore
+                );
             } else {
-                // Batch mode: Upload sequentially
-                for (const file of files) {
-                    if (file.status === 'pending' || file.status === 'error') {
-                        await uploadSingleFile(file);
-                    }
-                }
-
-                const successCount = files.filter(f => f.status === 'success').length;
-                if (successCount > 0) {
-                    setTimeout(() => navigate('/dashboard'), 2000);
-                }
+                // Merged analysis for multiple files
+                response = await analysisAPI.uploadSplitFiles(
+                    files.map(f => f.file),
+                    i18n.language,
+                    loanAmount,
+                    loanTerm,
+                    creditType,
+                    creditScore
+                );
             }
-        } catch (err) {
-            setGlobalError(t('upload.errUnexpected'));
+
+            const { analysis_id } = response.data;
+            setFiles(prev => prev.map(f => ({ ...f, status: 'success' as FileStatus, progress: 100 })));
+
+            // Redirect to the single consolidated report
+            navigate(`/analysis/${analysis_id}`);
+        } catch (err: any) {
+            const detail = err.response?.data?.detail;
+            const errorMessage = typeof detail === 'string' ? detail : detail?.message || t('upload.errFailed');
+
+            if (detail?.alerts) {
+                setValidationAlerts(detail.alerts);
+            }
+            setGlobalError(errorMessage);
+            setFiles(prev => prev.map(f => ({ ...f, status: 'error' as FileStatus, error: errorMessage })));
         } finally {
             setUploading(false);
         }
@@ -219,62 +248,78 @@ export const FileUpload: React.FC = () => {
         }
     };
 
-    const successCount = files.filter(f => f.status === 'success').length;
     const errorCount = files.filter(f => f.status === 'error').length;
     const canUpload = files.length > 0 && !uploading && files.some(f => f.status === 'pending' || f.status === 'error');
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-4 sm:p-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-6 mb-8">
-                <div>
-                    <div className="flex items-center gap-2 text-[#253746] font-black text-[10px] uppercase tracking-[0.2em] mb-3">
-                        <CloudIcon size={14} />
-                        {t('upload.ingestionTerminal')}
-                    </div>
-                    <h1 className="text-[#1A1A1A] text-2xl sm:text-3xl font-black tracking-tight leading-none mb-3">
-                        {t('upload.initScan')}
-                    </h1>
-                    <p className="text-gray-500 font-medium text-sm sm:text-base">
-                        {t('upload.desc')}
-                    </p>
+        <div className="w-full">
+
+            {/* Loan Details Form */}
+            <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 sm:p-8 mb-6 shadow-sm">
+                <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-6">
+                    <Zap size={14} />
+                    {t('analysis.creditDetails')}
                 </div>
-                <div className="hidden sm:flex w-12 h-12 bg-gray-50 rounded-2xl items-center justify-center text-gray-300">
-                    <Zap size={24} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                            {t('analysis.approvedAmount')} (MXN)
+                        </label>
+                        <input
+                            type="number"
+                            value={loanAmount || ''}
+                            onChange={(e) => setLoanAmount(Number(e.target.value))}
+                            placeholder="e.g. 1000000"
+                            className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#11303B] focus:bg-white focus:ring-2 focus:ring-[#6ECEB2]/20 focus:border-[#6ECEB2] outline-none transition-all"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                            {t('analysis.term')} (Months)
+                        </label>
+                        <select
+                            value={loanTerm}
+                            onChange={(e) => setLoanTerm(Number(e.target.value))}
+                            className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#11303B] focus:bg-white focus:ring-2 focus:ring-[#6ECEB2]/20 focus:border-[#6ECEB2] outline-none transition-all"
+                        >
+                            {[6, 12, 18, 24, 36, 48].map(m => (
+                                <option key={m} value={m}>{m} {t('analysis.monthsUnit', { count: m })}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                            {t('analysis.creditType')}
+                        </label>
+                        <select
+                            value={creditType}
+                            onChange={(e) => setCreditType(e.target.value)}
+                            className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#11303B] focus:bg-white focus:ring-2 focus:ring-[#6ECEB2]/20 focus:border-[#6ECEB2] outline-none transition-all"
+                        >
+                            <option value="NEW">{t('analysis.types.new')}</option>
+                            <option value="RENEWAL">{t('analysis.types.renewal')}</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                            {t('analysis.creditScore')}
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={creditScore}
+                            onChange={(e) => setCreditScore(Number(e.target.value))}
+                            className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#11303B] focus:bg-white focus:ring-2 focus:ring-[#6ECEB2]/20 focus:border-[#6ECEB2] outline-none transition-all"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Mode Toggle */}
-            <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-                <button
-                    onClick={() => {
-                        setUploadMode('single');
-                        setFiles([]);
-                        setGlobalError('');
-                    }}
-                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center ${uploadMode === 'single'
-                        ? 'bg-[#253746] text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
-                >
-                    <FileSpreadsheet className="w-4 h-4 mr-2" />
-                    {t('upload.singleCompany')}
-                </button>
-                <button
-                    onClick={() => {
-                        setUploadMode('batch');
-                        setFiles([]);
-                        setGlobalError('');
-                    }}
-                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center ${uploadMode === 'batch'
-                        ? 'bg-[#253746] text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
-                >
-                    <Layers className="w-4 h-4 mr-2" />
-                    {t('upload.batchUpload', { max: MAX_FILES })}
-                </button>
-            </div>
 
             {/* Drop Zone */}
             <div
@@ -296,7 +341,7 @@ export const FileUpload: React.FC = () => {
                     </div>
 
                     <p className="text-lg sm:text-xl font-black text-[#1A1A1A] tracking-tight mb-1">
-                        {uploadMode === 'single' ? t('upload.dropHere') : t('upload.dropMultiple', { max: MAX_FILES })}
+                        {t('split.dropDesc')}
                     </p>
                     <p className="text-gray-400 font-medium text-xs sm:text-sm mb-4">{t('upload.clickBrowse')}</p>
 
@@ -313,7 +358,7 @@ export const FileUpload: React.FC = () => {
                     onChange={handleFileChange}
                     className="hidden"
                     id="file-input"
-                    multiple={uploadMode === 'batch'}
+                    multiple
                 />
             </div>
 
@@ -324,11 +369,6 @@ export const FileUpload: React.FC = () => {
                         <h3 className="font-black text-sm text-[#1A1A1A] uppercase tracking-wider">
                             {t('upload.files')} ({files.length})
                         </h3>
-                        {uploadMode === 'batch' && (
-                            <div className="text-xs font-bold text-gray-500">
-                                ✓ {successCount} • ✗ {errorCount} • ⏳ {files.length - successCount - errorCount}
-                            </div>
-                        )}
                     </div>
                     {files.map(uploadFile => (
                         <div
@@ -363,6 +403,24 @@ export const FileUpload: React.FC = () => {
                 </div>
             )}
 
+            {/* Validation Errors */}
+            {validationAlerts.length > 0 && (
+                <div className="mt-5 bg-red-50 border-2 border-red-200 rounded-2xl p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex items-center gap-3 text-red-700 font-extrabold text-xs uppercase tracking-widest mb-4">
+                        <AlertCircle className="w-5 h-5" />
+                        Analysis Blocked: Mandatory Rules Failed
+                    </div>
+                    <div className="space-y-3">
+                        {validationAlerts.map((alert, idx) => (
+                            <div key={idx} className="bg-white/50 border border-red-100 rounded-xl p-4">
+                                <p className="text-[#11303B] font-bold text-sm mb-1">{alert.message}</p>
+                                <p className="text-red-600/70 text-[10px] font-medium uppercase tracking-wider">{alert.details}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Global Error */}
             {globalError && (
                 <div className="mt-5 bg-red-50 border border-red-100 text-red-700 px-5 py-4 rounded-xl flex items-center gap-3">
@@ -394,15 +452,11 @@ export const FileUpload: React.FC = () => {
                 {uploading ? (
                     <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        {uploadMode === 'batch'
-                            ? t('upload.processingBatch', { current: successCount + 1, total: files.length })
-                            : t('upload.processingNeural')}
+                        {t('upload.processingNeural')}
                     </>
                 ) : (
                     <>
-                        {uploadMode === 'batch' && successCount > 0 && successCount === files.length
-                            ? t('upload.allComplete')
-                            : t('upload.runAnalysis')}
+                        {t('upload.runAnalysis')}
                         <ArrowUpRight className="w-5 h-5" />
                     </>
                 )}

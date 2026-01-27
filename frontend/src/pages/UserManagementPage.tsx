@@ -10,7 +10,7 @@ import {
     Shield,
     ShieldAlert,
     Trash2,
-    Edit2,
+    Settings,
     XCircle,
     CheckCircle,
     Ban
@@ -234,10 +234,10 @@ export const UserManagementPage: React.FC = () => {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={(e) => openEditModal(user, e)}
-                                                        className="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-200 hover:text-[#11303B] transition-all shadow-sm"
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm"
                                                         title={t('users.update')}
                                                     >
-                                                        <Edit2 size={14} strokeWidth={2.5} />
+                                                        <Settings size={14} strokeWidth={2.5} />
                                                     </button>
 
                                                     {user.id !== currentUser?.id && (
@@ -245,8 +245,8 @@ export const UserManagementPage: React.FC = () => {
                                                             <button
                                                                 onClick={(e) => toggleUserStatus(user.id, user.is_active, e)}
                                                                 className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${user.is_active
-                                                                    ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                                                    : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                                                    ? 'bg-[#1e293b] text-white hover:bg-[#0f172a]'
+                                                                    : 'bg-[#6ECEB2] text-[#11303B] hover:bg-[#5bc1a6]'
                                                                     }`}
                                                                 title={user.is_active ? t('users.deactivate') : t('users.activate')}
                                                             >
@@ -254,7 +254,7 @@ export const UserManagementPage: React.FC = () => {
                                                             </button>
                                                             <button
                                                                 onClick={(e) => handleDeleteUser(user.id, e)}
-                                                                className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all shadow-sm"
+                                                                className="w-8 h-8 flex items-center justify-center bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-all shadow-sm"
                                                                 title={t('users.delete')}
                                                             >
                                                                 <Trash2 size={14} strokeWidth={2.5} />

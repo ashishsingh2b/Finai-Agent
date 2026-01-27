@@ -172,21 +172,6 @@ export const LoginForm: React.FC = () => {
                                 </div>
                             </button>
                         </form>
-
-                        <div className="mt-8 pt-6 border-t border-white/5">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-gray-500 font-medium">{t('login.demo')}</span>
-                                <button
-                                    onClick={() => {
-                                        setEmail('admin@moskalti.com');
-                                        setPassword('admin123');
-                                    }}
-                                    className="text-white font-bold hover:text-white/80 transition-colors uppercase tracking-wider"
-                                >
-                                    {t('login.autofill')}
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     <div className={`transition-all duration-500 ease-in-out ${view === 'forgot' ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 absolute inset-0 p-8 pointer-events-none'}`}>

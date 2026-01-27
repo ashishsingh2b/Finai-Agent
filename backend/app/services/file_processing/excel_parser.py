@@ -1,6 +1,7 @@
 import openpyxl
 from typing import Dict, List, Any
 import logging
+from .normalization import normalize_label, is_match
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +89,10 @@ class ExcelParser:
 
     def _find_row_by_keywords(self, ws, keywords: List[str]):
         """Find a row number that contains any of the keywords in column A"""
-        for row in range(1, 100):
-            cell_val = str(ws[f'A{row}'].value or "").lower()
-            if any(k.lower() in cell_val for k in keywords):
+        normalized_keywords = [normalize_label(k) for k in keywords]
+        for row in range(1, 150): # Increased range for complex sheets
+            cell_val = normalize_label(str(ws[f'A{row}'].value or ""))
+            if any(k in cell_val for k in normalized_keywords) or any(cell_val in k for k in normalized_keywords):
                 return row
         return None
 
@@ -104,17 +106,17 @@ class ExcelParser:
             
             balance_sheet_data = {}
             
-            # Map fields to keyword lists
+            # Map fields to keyword lists (Expanded Synonyms)
             keyword_mappings = {
-                'cash': ['efectivo', 'caja', 'disponibilidades', 'efectivo y equivalentes'],
-                'accounts_receivable': ['clientes', 'cuentas por cobrar'],
-                'inventory': ['inventarios', 'mercancías'],
-                'current_assets': ['total activo circulante', 'total activo corriente', 'suma activo circulante'],
-                'fixed_assets': ['activo fijo', 'propiedades planta'],
-                'total_assets': ['total del activo', 'suma del activo', 'activo total'],
-                'current_liabilities': ['total pasivo circulante', 'pasivo a corto plazo', 'suma pasivo circulante'],
-                'total_liabilities': ['total del pasivo', 'suma del pasivo', 'pasivo total'],
-                'shareholder_equity': ['total capital contable', 'patrimonio neto', 'capital social'],
+                'cash': ['efectivo', 'caja', 'disponibilidades', 'efectivo y equivalentes', 'cash', 'cash and equivalents'],
+                'accounts_receivable': ['clientes', 'cuentas por cobrar', 'accounts receivable', 'debtors'],
+                'inventory': ['inventarios', 'mercancias', 'almacen', 'inventory', 'stocks'],
+                'current_assets': ['total activo circulante', 'total activo corriente', 'suma activo circulante', 'total current assets'],
+                'fixed_assets': ['activo fijo', 'propiedades planta', 'propiedades equipo', 'fixed assets', 'property plant and equipment', 'ppe'],
+                'total_assets': ['total del activo', 'suma del activo', 'activo total', 'total assets'],
+                'current_liabilities': ['total pasivo circulante', 'pasivo a corto plazo', 'suma pasivo circulante', 'total current liabilities'],
+                'total_liabilities': ['total del pasivo', 'suma del pasivo', 'pasivo total', 'total liabilities'],
+                'shareholder_equity': ['total capital contable', 'patrimonio neto', 'capital social', 'patrimonio', 'shareholder equity', 'equity'],
             }
             
             row_mappings = {}
@@ -145,11 +147,11 @@ class ExcelParser:
             income_statement_data = {}
             
             keyword_mappings = {
-                'revenue': ['ingresos', 'ventas netas'],
-                'cost_of_goods_sold': ['costo de ventas'],
-                'gross_profit': ['utilidad bruta'],
-                'ebitda': ['ebitda', 'uafida'],
-                'net_profit': ['utilidad neta', 'resultado neto'],
+                'revenue': ['ingresos', 'ventas netas', 'ventas totales', 'revenue', 'sales', 'turnover'],
+                'cost_of_goods_sold': ['costo de ventas', 'costo de lo vendido', 'cost of goods sold', 'cogs'],
+                'gross_profit': ['utilidad bruta', 'resultado bruto', 'gross profit', 'gross margin'],
+                'ebitda': ['ebitda', 'uafida', 'utilidad de operacion', 'operating profit'],
+                'net_profit': ['utilidad neta', 'resultado neto', 'utilidad del ejercicio', 'net profit', 'net income'],
             }
             
             row_mappings = {}

@@ -352,6 +352,7 @@
         "term": "Plazo:",
         "monthsUnit": "{{count}} meses",
         "interestRate": "Tasa de Interés:",
+        "creditScore": "Score de Crédito (0-100)",
         "creditType": "Tipo de Crédito:",
         "creditTypeRevolving": "Revolvente",
         "types": {
@@ -359,7 +360,9 @@
             "amortizado": "Amortizado",
             "revolving": "Revolvente",
             "simple": "Simple",
-            "linea_cre": "Línea de Crédito"
+            "linea_cre": "Línea de Crédito",
+            "new": "Crédito Nuevo",
+            "renewal": "Renovación"
         },
         "indicative": "Indicativo",
         "documents": "Documentos",

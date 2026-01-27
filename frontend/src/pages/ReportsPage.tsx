@@ -10,7 +10,11 @@ import {
     FileText,
     FileDown,
     Eye,
-    RefreshCcw
+    RefreshCcw,
+    ChevronDown,
+    FileSpreadsheet,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { analysisAPI } from '../services/api';
 import { AnalysisListItem } from '../types';
@@ -20,21 +24,51 @@ import { useUIStore } from '../store/uiStore';
 
 export const ReportsPage: React.FC = () => {
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { addToast } = useUIStore();
     const [analyses, setAnalyses] = useState<AnalysisListItem[]>([]);
     const [filteredAnalyses, setFilteredAnalyses] = useState<AnalysisListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
+    const [dateFilter, setDateFilter] = useState('');
     const [activeDownloadId, setActiveDownloadId] = useState<number | null>(null);
+    const [showExportMenu, setShowExportMenu] = useState(false);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
 
     useEffect(() => {
-        const handleClickOutside = () => setActiveDownloadId(null);
+        const handleClickOutside = () => {
+            setActiveDownloadId(null);
+            setShowExportMenu(false);
+        }
         window.addEventListener('click', handleClickOutside);
         fetchAnalyses();
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
+
+    const handleExportDataset = async (format: 'excel' | 'pdf') => {
+        try {
+            const response = await analysisAPI.exportAllAnalyses(i18n.language, format);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const ext = format === 'excel' ? 'xlsx' : 'pdf';
+            link.setAttribute('download', `all_credit_analyses_${new Date().toISOString().split('T')[0]}.${ext}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            addToast(t('reports.exportSuccess'), 'success');
+        } catch (error) {
+            console.error('Failed to export dataset:', error);
+            addToast(t('reports.exportFailed'), 'error');
+        } finally {
+            setShowExportMenu(false);
+        }
+    };
 
     const handleDownload = async (id: number, type: 'pdf' | 'excel', companyName: string) => {
         try {
@@ -69,8 +103,21 @@ export const ReportsPage: React.FC = () => {
             results = results.filter(a => a.category === filterCategory);
         }
 
+        if (dateFilter) {
+            results = results.filter(a => {
+                // Assuming a.created_at or similar exists. Based on listAnalyses, the model has created_at.
+                // However, AnalysisListItem type might need checking. 
+                // Let's assume the API returns a 'created_at' or 'date' field. If not, we might need to rely on ID or fetch full objects.
+                // Looking at analysis.py list_analyses, it returns Analysis objects which have created_at.
+                // Let's safe check date string matching.
+                if (!a.created_at) return false;
+                return a.created_at.startsWith(dateFilter);
+            });
+        }
+
         setFilteredAnalyses(results);
-    }, [searchTerm, filterCategory, analyses]);
+        setCurrentPage(1); // Reset to first page on filter change
+    }, [searchTerm, filterCategory, dateFilter, analyses]);
 
     const fetchAnalyses = async () => {
         try {
@@ -111,6 +158,16 @@ export const ReportsPage: React.FC = () => {
         }
     };
 
+
+    // Calculate Pagination
+    const emptyRows = itemsPerPage - Math.min(itemsPerPage, filteredAnalyses.length - (currentPage - 1) * itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentAnalyses = filteredAnalyses.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredAnalyses.length / itemsPerPage);
+
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
     const getCategoryStyles = (category: string) => {
         switch (category) {
             case 'A': return 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-500/10';
@@ -136,10 +193,49 @@ export const ReportsPage: React.FC = () => {
                         <p className="text-gray-500 font-medium text-xs">{t('reports.subtitle')}</p>
                     </div>
 
-                    <button className="w-full sm:w-auto bg-[#6ECEB2] text-[#11303B] px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group">
-                        <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
-                        {t('reports.export')}
-                    </button>
+                    <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowExportMenu(!showExportMenu);
+                            }}
+                            className="w-full sm:w-auto bg-[#6ECEB2] text-[#11303B] px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#5bc1a6] transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#6ECEB2]/20 group"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                            {t('reports.export')}
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {/* Export Menu */}
+                        {showExportMenu && (
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <button
+                                    onClick={() => handleExportDataset('excel')}
+                                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <FileSpreadsheet size={16} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-900">Excel Report</div>
+                                        <div className="text-[10px] text-gray-500 font-medium">Spreadsheet format</div>
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => handleExportDataset('pdf')}
+                                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left group border-t border-gray-50"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <FileText size={16} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-900">PDF Report</div>
+                                        <div className="text-[10px] text-gray-500 font-medium">Document format</div>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filters & Search Bar */}
@@ -164,16 +260,19 @@ export const ReportsPage: React.FC = () => {
                         >
                             <option value="All">{t('reports.filter.allGrades')}</option>
                             {['A', 'B', 'C', 'D', 'E'].map(grade => (
-                                <option key={grade} value={grade}>{t('reports.filter.grade', { grade })}</option>
+                                <option key={grade} value={grade}>{t('reports.filter.grade').replace('{grade}', grade)}</option>
                             ))}
                         </select>
                     </div>
 
                     <div className="relative group">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#253746] transition-colors" size={16} />
-                        <button className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm text-left font-black text-[10px] uppercase tracking-widest text-gray-500 group-hover:bg-gray-50 transition-all">
-                            {t('reports.filter.date')}
-                        </button>
+                        <input
+                            type="date"
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm text-left font-black text-[10px] uppercase tracking-widest text-gray-500 outline-none focus:ring-4 focus:ring-blue-900/5 focus:border-[#253746] transition-all"
+                            value={dateFilter}
+                            onChange={(e) => setDateFilter(e.target.value)}
+                        />
                     </div>
                 </div>
 
@@ -183,6 +282,9 @@ export const ReportsPage: React.FC = () => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center w-16">
+                                        #
+                                    </th>
                                     <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">
                                         <div className="flex items-center gap-2">
                                             {t('reports.col.entity')}
@@ -225,11 +327,14 @@ export const ReportsPage: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredAnalyses.map((analysis) => (
+                                    currentAnalyses.map((analysis) => (
                                         <tr
                                             key={analysis.id}
                                             className="hover:bg-gray-50/50 transition-all group border-b border-gray-50 last:border-0"
                                         >
+                                            <td className="px-6 py-4 text-center">
+                                                <span className="text-[10px] font-black text-gray-400">{(filteredAnalyses.indexOf(analysis) + 1).toString().padStart(2, '0')}</span>
+                                            </td>
                                             <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#11303B] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
@@ -258,7 +363,7 @@ export const ReportsPage: React.FC = () => {
                                             <td className="hidden sm:table-cell px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex justify-center">
                                                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-all ${getCategoryStyles(analysis.category)} shadow-sm`}>
-                                                        {t('reports.filter.grade', { grade: analysis.category })}
+                                                        {t('reports.filter.grade').replace('{grade}', analysis.category)}
                                                     </span>
                                                 </div>
                                             </td>
@@ -335,7 +440,7 @@ export const ReportsPage: React.FC = () => {
                                                                     }}
                                                                     className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"
                                                                 >
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef6b6b]" />
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
                                                                     {t('common.pdf_version')}
                                                                 </button>
                                                                 <button
@@ -370,18 +475,42 @@ export const ReportsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Pagination (Mockup) */}
-                <div className="mt-10 flex items-center justify-between px-2">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                        {t('reports.showing', { count: filteredAnalyses.length, total: analyses.length })}
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <button className="px-5 py-2.5 bg-white border border-gray-100 rounded-xl text-xs font-black text-gray-400 cursor-not-allowed">{t('reports.pagination.prev')}</button>
-                        <button className="px-5 py-2.5 bg-[#1A1A1A] rounded-xl text-xs font-black text-white shadow-lg">1</button>
-                        <button className="px-5 py-2.5 bg-white border border-gray-100 rounded-xl text-xs font-black text-[#1A1A1A] hover:bg-gray-50">2</button>
-                        <button className="px-5 py-2.5 bg-white border border-gray-100 rounded-xl text-xs font-black text-[#1A1A1A] hover:bg-gray-50">{t('reports.pagination.next')}</button>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/30">
+                        <div className="text-[10px] font-bold text-gray-500">
+                            Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredAnalyses.length)} of {filteredAnalyses.length}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => paginate(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+                            {Array.from({ length: totalPages }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => paginate(index + 1)}
+                                    className={`w-7 h-7 rounded-lg text-[10px] font-black transition-all ${currentPage === index + 1
+                                        ? 'bg-[#11303B] text-white shadow-md shadow-[#11303B]/20'
+                                        : 'text-gray-500 hover:bg-white hover:shadow-sm'
+                                        }`}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => paginate(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"
+                            >
+                                <ChevronRight size={14} />
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </DashboardLayout >
     );

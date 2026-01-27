@@ -162,7 +162,7 @@ class CreditScorer:
         }
     
     @staticmethod
-    def calculate_full_score(ratios: Dict, bureau_score: int = 75, revenue_growth: float = 0, profit_growth: float = 0) -> Dict:
+    def calculate_full_score(ratios: Dict, bureau_score: int, revenue_growth: float = 0, profit_growth: float = 0) -> Dict:
         """Calculate complete credit score from ratios and metadata"""
         
         credit_history_score = CreditScorer.score_credit_history(bureau_score)

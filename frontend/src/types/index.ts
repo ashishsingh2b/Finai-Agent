@@ -76,6 +76,13 @@ export interface AnalysisData {
     payment_behavior: 'ON_TIME' | 'DELINQUENT' | 'NA';
     applicable_interest_rate?: number;
     tiie_rate_used?: number;
+    validation_status?: 'VALID' | 'WARNINGS' | 'INVALID';
+    validation_alerts?: Array<{
+        level: 'BLOCKING' | 'WARNING';
+        rule: string;
+        message: string;
+        details?: string;
+    }>;
 }
 
 export interface AnalysisListItem {

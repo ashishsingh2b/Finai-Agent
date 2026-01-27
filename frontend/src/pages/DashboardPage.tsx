@@ -449,7 +449,7 @@ export const DashboardPage: React.FC = () => {
                                                                     }}
                                                                     className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"
                                                                 >
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
                                                                     {t('common.pdf_version')}
                                                                 </button>
                                                                 <button

@@ -9,6 +9,7 @@ from PIL import Image
 import re
 from typing import Dict, List, Tuple
 import logging
+from .normalization import normalize_label, is_match
 
 logger = logging.getLogger(__name__)
 
@@ -205,18 +206,18 @@ class PDFParser:
         
         target_keywords = {
             'balance': {
-                'total_assets': ['total activo', 'total de activos', 'suma del activo', 'suma de activos'],
-                'current_assets': ['activo circulante', 'activo corriente'],
-                'cash': ['efectivo', 'caja y bancos', 'disponibilidades', 'efectivo y equivalentes'],
-                'current_liabilities': ['pasivo circulante', 'pasivo corriente', 'pasivo a corto plazo'],
-                'total_liabilities': ['total pasivo', 'total de pasivos', 'suma del pasivo', 'pasivo total'],
-                'shareholder_equity': ['capital contable', 'patrimonio', 'capital social', 'total capital'],
+                'total_assets': ['total activo', 'total de activos', 'suma del activo', 'suma de activos', 'activo total', 'total assets', 'sum of assets'],
+                'current_assets': ['activo circulante', 'activo corriente', 'total activo circulante', 'current assets', 'total current assets'],
+                'cash': ['efectivo', 'caja y bancos', 'disponibilidades', 'efectivo y equivalentes', 'cash', 'cash and equivalents'],
+                'current_liabilities': ['pasivo circulante', 'pasivo corriente', 'pasivo a corto plazo', 'current liabilities', 'short term liabilities'],
+                'total_liabilities': ['total pasivo', 'total de pasivos', 'suma del pasivo', 'pasivo total', 'total liabilities'],
+                'shareholder_equity': ['capital contable', 'patrimonio', 'capital social', 'total capital', 'equity', 'shareholder equity'],
             },
             'income': {
-                'revenue': ['ingresos', 'ventas netas', 'ingresos por ventas', 'ventas totales'],
-                'gross_profit': ['utilidad bruta', 'margen bruto', 'beneficio bruto'],
-                'ebitda': ['ebitda', 'uafida', 'utilidad de operación'],
-                'net_profit': ['utilidad neta', 'resultado del ejercicio', 'utilidad del ejercicio', 'ejercicio neto']
+                'revenue': ['ingresos', 'ventas netas', 'ingresos por ventas', 'ventas totales', 'revenue', 'sales', 'turnover'],
+                'gross_profit': ['utilidad bruta', 'margen bruto', 'beneficio bruto', 'gross profit', 'gross margin'],
+                'ebitda': ['ebitda', 'uafida', 'utilidad de operacion', 'operating profit', 'ebitda'],
+                'net_profit': ['utilidad neta', 'resultado del ejercicio', 'utilidad del ejercicio', 'ejercicio neto', 'net profit', 'net income']
             }
         }
         
@@ -237,9 +238,10 @@ class PDFParser:
             
             # Find rows
             for row in table:
-                row_text = str(row[0] or "").lower()
+                row_text = normalize_label(str(row[0] or ""))
                 for field, markers in keywords.items():
-                    if any(m in row_text for m in markers):
+                    normalized_markers = [normalize_label(m) for m in markers]
+                    if any(m in row_text for m in normalized_markers) or any(row_text in m for m in normalized_markers):
                         try:
                             # Clean number
                             val_str = str(row[year_col] or "0").replace(',', '').replace('$', '').strip()

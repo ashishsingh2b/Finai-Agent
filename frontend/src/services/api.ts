@@ -51,16 +51,24 @@ export const authAPI = {
 
 // Analysis APIs
 export const analysisAPI = {
-    uploadFile: (file: File, language: string = 'es') => {
+    uploadFile: (file: File, language: string = 'es', loan_amount: number = 0, loan_term: number = 12, credit_type: string = 'NEW', credit_score: number = 75) => {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('loan_amount', loan_amount.toString());
+        formData.append('loan_term', loan_term.toString());
+        formData.append('credit_type', credit_type);
+        formData.append('credit_score', credit_score.toString());
         return api.post(`/analysis/upload?language=${language}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
     },
-    uploadSplitFiles: (files: File[], language: string = 'es') => {
+    uploadSplitFiles: (files: File[], language: string = 'es', loan_amount: number = 0, loan_term: number = 12, credit_type: string = 'NEW', credit_score: number = 75) => {
         const formData = new FormData();
         files.forEach(file => formData.append('files', file));
+        formData.append('loan_amount', loan_amount.toString());
+        formData.append('loan_term', loan_term.toString());
+        formData.append('credit_type', credit_type);
+        formData.append('credit_score', credit_score.toString());
         return api.post(`/analysis/upload-split?language=${language}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -74,11 +82,14 @@ export const analysisAPI = {
     downloadExcel: (id: number, language: string = 'es') =>
         api.get(`/analysis/${id}/export/excel?language=${language}`, { responseType: 'blob' }),
 
-    listAnalyses: (skip: number = 0, limit: number = 20) =>
+    listAnalyses: (skip: number = 0, limit: number = 1000) =>
         api.get(`/analysis/?skip=${skip}&limit=${limit}`),
 
     updateAnalysisStatus: (id: number, data: { application_status?: string, payment_behavior?: string }) =>
         api.post(`/analysis/${id}/status`, data),
+
+    exportAllAnalyses: (language: string = 'es', format: 'excel' | 'pdf' = 'excel') =>
+        api.get(`/analysis/export/bulk?language=${language}&format=${format}`, { responseType: 'blob' }),
 };
 
 // User Management APIs

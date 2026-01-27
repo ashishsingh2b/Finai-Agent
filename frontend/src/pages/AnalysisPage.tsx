@@ -209,163 +209,186 @@ export const AnalysisPage: React.FC = () => {
                         <div className="text-[12px] font-black text-gray-700 uppercase tracking-widest">{t('analysis.noData')}</div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-12 gap-4 items-start">
-                        {/* Sidebar */}
-                        <div className="col-span-12 lg:col-span-2 space-y-4">
-                            {/* General Information */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
-                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">{t('analysis.generalInfo')}</div>
-                                <div className="p-4 space-y-3">
-                                    <div className="flex justify-between items-center group/row">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.industry')}</div>
-                                        <div className="text-[11px] font-black text-[#11303B]">{data.company_industry || 'N/A'}</div>
-                                    </div>
-                                    <div className="flex justify-between items-center group/row">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.yearsInBusiness')}</div>
-                                        <div className="text-[11px] font-black text-[#11303B]">{data.years_in_business ? t('analysis.yearsUnit', { count: data.years_in_business }) : 'N/A'}</div>
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.topClients')}</div>
-                                        <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || t('analysis.seeBilling')}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-in slide-in-from-left duration-500">
-                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center gap-2">
-                                    <FileSearch size={14} className="opacity-80" />
-                                    {t('analysis.creditDetails')}
-                                </div>
-                                <div className="p-4 space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.approvedAmount')}</span>
-                                        <span className="text-[12px] font-black text-[#10b981]">
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.approved_amount || 0)}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.term')}</span>
-                                        <span className="text-[11px] font-black text-[#11303B]">{t('analysis.monthsUnit', { count: data.loan_term_months || 12 })}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.interestRate')}</span>
-                                        <span className="text-[11px] font-black text-[#11303B]">
-                                            {data.applicable_interest_rate
-                                                ? `TIIE + ${(data.applicable_interest_rate * 100).toFixed(1)}%`
-                                                : `TIIE + 5.5% (${t('analysis.indicative')})`}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-500">{t('analysis.creditType')}</span>
-                                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type ? t(`analysis.types.${data.credit_type.toLowerCase()}`, { defaultValue: data.credit_type }) : t('analysis.creditTypeRevolving')}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Documents */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
-                                    {t('analysis.documents')}
-                                    <button
-                                        onClick={() => navigate('/dashboard/upload')}
-                                        className="text-[8px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded transition-colors"
-                                    >
-                                        {t('analysis.edit')}
-                                    </button>
-                                </div>
-                                <div className="p-1 space-y-0.5">
-                                    {[
-                                        { icon: FileText, label: t('analysis.taxCertificate') },
-                                        { icon: FileSpreadsheet, label: t('analysis.financialStatements') },
-                                        { icon: FileSearch, label: t('analysis.billingReport') },
-                                        { icon: AlertCircle, label: t('analysis.riskReport') },
-                                        { icon: FileText, label: t('analysis.companyProfile') }
-                                    ].map((doc, i) => (
-                                        <div key={i} className="flex items-center gap-3 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg cursor-pointer group">
-                                            <doc.icon size={14} className="text-[#11303B]/60 group-hover:text-[#11303B]" />
-                                            <span className="text-[10px] font-bold text-gray-600 group-hover:text-[#11303B]">{doc.label}</span>
+                    <>
+                        {/* Risk Alerts */}
+                        {data.validation_alerts && data.validation_alerts.length > 0 && (
+                            <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                                {data.validation_alerts.filter((a: any) => a.level === 'WARNING').map((alert: any, idx: number) => (
+                                    <div key={idx} className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner">
+                                                <AlertCircle size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[#11303B] font-black text-xs uppercase tracking-wider mb-0.5">{alert.message}</p>
+                                                <p className="text-amber-800/60 text-[10px] font-bold uppercase tracking-tight">{alert.details}</p>
+                                            </div>
                                         </div>
-                                    ))}
+                                        <div className="hidden sm:block px-4 py-1.5 bg-amber-200/50 rounded-full text-[10px] font-black text-amber-700 uppercase tracking-widest leading-none border border-amber-200">
+                                            Risk Indicator
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-12 gap-4 items-start">
+                            {/* Sidebar */}
+                            <div className="col-span-12 lg:col-span-2 space-y-4">
+                                {/* General Information */}
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
+                                    <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">{t('analysis.generalInfo')}</div>
+                                    <div className="p-4 space-y-3">
+                                        <div className="flex justify-between items-center group/row">
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.industry')}</div>
+                                            <div className="text-[11px] font-black text-[#11303B]">{data.company_industry || 'N/A'}</div>
+                                        </div>
+                                        <div className="flex justify-between items-center group/row">
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.yearsInBusiness')}</div>
+                                            <div className="text-[11px] font-black text-[#11303B]">{data.years_in_business ? t('analysis.yearsUnit', { count: data.years_in_business }) : 'N/A'}</div>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.topClients')}</div>
+                                            <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || t('analysis.seeBilling')}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-in slide-in-from-left duration-500">
+                                    <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center gap-2">
+                                        <FileSearch size={14} className="opacity-80" />
+                                        {t('analysis.creditDetails')}
+                                    </div>
+                                    <div className="p-4 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-gray-500">{t('analysis.approvedAmount')}</span>
+                                            <span className="text-[12px] font-black text-[#10b981]">
+                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.approved_amount || 0)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-gray-500">{t('analysis.term')}</span>
+                                            <span className="text-[11px] font-black text-[#11303B]">{t('analysis.monthsUnit', { count: data.loan_term_months || 12 })}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-gray-500">{t('analysis.interestRate')}</span>
+                                            <span className="text-[11px] font-black text-[#11303B]">
+                                                {data.applicable_interest_rate
+                                                    ? `TIIE + ${(data.applicable_interest_rate * 100).toFixed(1)}%`
+                                                    : `TIIE + 5.5% (${t('analysis.indicative')})`}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-gray-500">{t('analysis.creditType')}</span>
+                                            <span className="text-[11px] font-black text-blue-600 uppercase tracking-wider">{data.credit_type ? t(`analysis.types.${data.credit_type.toLowerCase()}`, { defaultValue: data.credit_type }) : t('analysis.creditTypeRevolving')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Documents */}
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                    <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
+                                        {t('analysis.documents')}
+                                        <button
+                                            onClick={() => navigate('/dashboard/upload')}
+                                            className="text-[8px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded transition-colors"
+                                        >
+                                            {t('analysis.edit')}
+                                        </button>
+                                    </div>
+                                    <div className="p-1 space-y-0.5">
+                                        {[
+                                            { icon: FileText, label: t('analysis.taxCertificate') },
+                                            { icon: FileSpreadsheet, label: t('analysis.financialStatements') },
+                                            { icon: FileSearch, label: t('analysis.billingReport') },
+                                            { icon: AlertCircle, label: t('analysis.riskReport') },
+                                            { icon: FileText, label: t('analysis.companyProfile') }
+                                        ].map((doc, i) => (
+                                            <div key={i} className="flex items-center gap-3 transition-colors hover:bg-gray-50 px-4 py-2 rounded-lg cursor-pointer group">
+                                                <doc.icon size={14} className="text-[#11303B]/60 group-hover:text-[#11303B]" />
+                                                <span className="text-[10px] font-bold text-gray-600 group-hover:text-[#11303B]">{doc.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="col-span-12 lg:col-span-10 space-y-4">
+                                {/* Status Bar */}
+                                <div className="bg-white/50 border-b border-gray-200 py-2 sm:py-1.5 flex flex-wrap items-center justify-start gap-y-3 gap-x-6 px-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-bold text-gray-700">{t('analysis.riskLabel')}</span>
+                                        <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'A' ? 'bg-emerald-500' :
+                                            data.credit_category === 'B' ? 'bg-blue-500' :
+                                                data.credit_category === 'C' ? 'bg-amber-500' :
+                                                    'bg-red-500'
+                                            }`}>
+                                            <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
+                                                <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] ${data.credit_category === 'A' ? 'bg-emerald-400' :
+                                                    data.credit_category === 'B' ? 'bg-blue-400' :
+                                                        data.credit_category === 'C' ? 'bg-amber-400' :
+                                                            'bg-red-400'
+                                                    }`} />
+                                            </div>
+                                            <span className={`text-[10px] font-black leading-none ${['A', 'B', 'D', 'E'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'}`}>
+                                                {t('analysis.category', { category: data.credit_category })}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{t('analysis.analyst')}</span>
+                                        <span className="text-[10px] font-black text-[#11303B]">{data.analyzed_by_name || t('analysis.systemEngine')}</span>
+                                    </div>
+                                    <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-bold text-gray-700">{t('analysis.behaviorLabel')}</span>
+                                        <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior ? t(`behavior.${data.payment_behavior}`) : 'NA'}</span>
+                                    </div>
+
+                                    <div className="hidden xl:flex flex-1"></div>
+
+                                    <div className="flex items-center gap-2 ml-auto sm:ml-0">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">{t('analysis.liveAnalysis')}</span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-10 gap-6">
+                                    {/* Middle */}
+                                    <div className="col-span-12 lg:col-span-6 space-y-4">
+                                        <FinancialIndicators ratios={{
+                                            current_ratio: data.current_ratio ?? 0,
+                                            debt_to_assets: data.debt_to_assets ?? 0,
+                                            roe: data.roe ?? 0,
+                                            roa: data.roa ?? 0,
+                                            profit_margin: data.profit_margin ?? 0,
+                                            ebitda_margin: data.ebitda_margin ?? 0,
+                                            interest_coverage: data.interest_coverage,
+                                            leverage_ratio: data.leverage_ratio,
+                                            sales_trend: data.sales_trend
+                                        }} />
+                                        <SWOTAnalysis swot={swot} />
+                                    </div>
+
+                                    {/* Right */}
+                                    <div className="col-span-12 lg:col-span-4 space-y-4 flex flex-col">
+                                        <FinancialCharts analysis={data} />
+                                        <Recommendation
+                                            recommendation={data.recommendation}
+                                            category={data.credit_category}
+                                            score={data.total_credit_score}
+                                            justification={data.justification || []}
+                                            conditions={data.conditions || []}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Main Content Area */}
-                        <div className="col-span-12 lg:col-span-10 space-y-4">
-                            {/* Status Bar */}
-                            <div className="bg-white/50 border-b border-gray-200 py-2 sm:py-1.5 flex flex-wrap items-center justify-start gap-y-3 gap-x-6 px-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-bold text-gray-700">{t('analysis.riskLabel')}</span>
-                                    <div className={`flex items-center rounded-full pl-1 pr-3 py-0.5 gap-2 border border-black/10 shadow-sm ${data.credit_category === 'A' ? 'bg-emerald-500' :
-                                        data.credit_category === 'B' ? 'bg-blue-500' :
-                                            data.credit_category === 'C' ? 'bg-amber-500' :
-                                                'bg-red-500'
-                                        }`}>
-                                        <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                            <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] ${data.credit_category === 'A' ? 'bg-emerald-400' :
-                                                data.credit_category === 'B' ? 'bg-blue-400' :
-                                                    data.credit_category === 'C' ? 'bg-amber-400' :
-                                                        'bg-red-400'
-                                                }`} />
-                                        </div>
-                                        <span className={`text-[10px] font-black leading-none ${['A', 'B', 'D', 'E'].includes(data.credit_category) ? 'text-white' : 'text-gray-900'}`}>
-                                            {t('analysis.category', { category: data.credit_category })}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
-                                <div className="flex flex-col">
-                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">{t('analysis.analyst')}</span>
-                                    <span className="text-[10px] font-black text-[#11303B]">{data.analyzed_by_name || t('analysis.systemEngine')}</span>
-                                </div>
-                                <div className="hidden sm:block h-4 w-px bg-gray-300"></div>
-
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-bold text-gray-700">{t('analysis.behaviorLabel')}</span>
-                                    <span className="text-[11px] font-black text-gray-900 tracking-tight">{data.payment_behavior ? t(`behavior.${data.payment_behavior}`) : 'NA'}</span>
-                                </div>
-
-                                <div className="hidden xl:flex flex-1"></div>
-
-                                <div className="flex items-center gap-2 ml-auto sm:ml-0">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">{t('analysis.liveAnalysis')}</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-10 gap-6">
-                                {/* Middle */}
-                                <div className="col-span-10 lg:col-span-6 space-y-4">
-
-                                    <FinancialIndicators ratios={{
-                                        current_ratio: data.current_ratio ?? 0,
-                                        debt_to_assets: data.debt_to_assets ?? 0,
-                                        roe: data.roe ?? 0,
-                                        roa: data.roa ?? 0,
-                                        profit_margin: data.profit_margin ?? 0,
-                                        ebitda_margin: data.ebitda_margin ?? 0,
-                                        interest_coverage: data.interest_coverage,
-                                        leverage_ratio: data.leverage_ratio,
-                                        sales_trend: data.sales_trend
-                                    }} />
-                                    <SWOTAnalysis swot={swot} />
-                                </div>
-
-                                {/* Right */}
-                                <div className="col-span-10 lg:col-span-4 space-y-4 flex flex-col">
-                                    <FinancialCharts analysis={data} />
-                                    <Recommendation
-                                        recommendation={data.recommendation}
-                                        category={data.credit_category}
-                                        score={data.total_credit_score}
-                                        justification={data.justification || []}
-                                        conditions={data.conditions || []}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </>
                 )}
             </main>
         </div>
