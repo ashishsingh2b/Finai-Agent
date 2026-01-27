@@ -134,11 +134,16 @@ export const DashboardPage: React.FC = () => {
 
     // 3. High Risk Units
     const currentHighRisk = analyses.filter(a => ['D', 'E'].includes(a.category)).length;
-    const prevHighRisk = prevAnalyses.filter(a => ['D', 'E'].includes(a.category)).length;
-    const highRiskTrend = (currentHighRisk - prevHighRisk);
+    const recentHighRisk = recentAnalyses.filter(a => ['D', 'E'].includes(a.category)).length;
+    const prevHighRiskCount = prevAnalyses.filter(a => ['D', 'E'].includes(a.category)).length;
+    const highRiskTrend = (recentHighRisk - prevHighRiskCount);
 
     // 4. Total Active Portfolio (Sum of APPROVED credits)
     const totalActivePortfolio = analyses
+        .filter(a => a.application_status === 'APPROVED')
+        .reduce((sum, curr) => sum + (curr.credit_amount || 0), 0);
+
+    const recentActivePortfolio = recentAnalyses
         .filter(a => a.application_status === 'APPROVED')
         .reduce((sum, curr) => sum + (curr.credit_amount || 0), 0);
 
@@ -146,7 +151,7 @@ export const DashboardPage: React.FC = () => {
         .filter(a => a.application_status === 'APPROVED')
         .reduce((sum, curr) => sum + (curr.credit_amount || 0), 0);
 
-    const portfolioTrendPercentage = prevActivePortfolio === 0 ? '+100%' : `${(((totalActivePortfolio - prevActivePortfolio) / prevActivePortfolio) * 100).toFixed(0)}%`;
+    const portfolioTrendPercentage = prevActivePortfolio === 0 ? '+100%' : `${(((recentActivePortfolio - prevActivePortfolio) / prevActivePortfolio) * 100).toFixed(0)}%`;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-MX', {
