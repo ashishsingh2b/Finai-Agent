@@ -1,3 +1,8 @@
+/**
+ * Institutional Analytics & Reporting Hub.
+ * Provides advanced filtering, search, and bulk export capabilities 
+ * for the complete historical analysis dataset.
+ */
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -35,10 +40,14 @@ export const ReportsPage: React.FC = () => {
     const [activeDownloadId, setActiveDownloadId] = useState<number | null>(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
 
-    // Pagination State
+    // --- Pagination Infrastructure ---
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
 
+    /**
+     * Reports Initialization Lifecycle.
+     * Hydrates the complete analysis list and registers global event listeners.
+     */
     useEffect(() => {
         const handleClickOutside = () => {
             setActiveDownloadId(null);
@@ -49,6 +58,10 @@ export const ReportsPage: React.FC = () => {
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
+    /**
+     * Dataset Export Orchestrator.
+     * Generates a consolidated institutional report (PDF/Excel) for all historical records.
+     */
     const handleExportDataset = async (format: 'excel' | 'pdf') => {
         try {
             const response = await analysisAPI.exportAllAnalyses(i18n.language, format);
@@ -63,13 +76,17 @@ export const ReportsPage: React.FC = () => {
             window.URL.revokeObjectURL(url);
             addToast(t('reports.exportSuccess'), 'success');
         } catch (error) {
-            console.error('Failed to export dataset:', error);
+            console.error('Core dataset export failure:', error);
             addToast(t('reports.exportFailed'), 'error');
         } finally {
             setShowExportMenu(false);
         }
     };
 
+    /**
+     * Granular Entity Export.
+     * Extracts a specific report (PDF/Excel) for an individual portfolio entry.
+     */
     const handleDownload = async (id: number, type: 'pdf' | 'excel', companyName: string) => {
         try {
             const response = type === 'pdf'
@@ -85,11 +102,16 @@ export const ReportsPage: React.FC = () => {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error(`Failed to download ${type}:`, error);
+            console.error(`Granular export interruption [${type}]:`, error);
             alert(t('analysis.downloadFailed', { type: type.toUpperCase() }));
         }
     };
 
+    /**
+     * Analytical Filtering Pipeline.
+     * Re-evaluates search, category, and date constraints whenever the dataset 
+     * or filter state changes.
+     */
     useEffect(() => {
         let results = analyses;
 
@@ -105,28 +127,23 @@ export const ReportsPage: React.FC = () => {
 
         if (dateFilter) {
             results = results.filter(a => {
-                // Assuming a.created_at or similar exists. Based on listAnalyses, the model has created_at.
-                // However, AnalysisListItem type might need checking. 
-                // Let's assume the API returns a 'created_at' or 'date' field. If not, we might need to rely on ID or fetch full objects.
-                // Looking at analysis.py list_analyses, it returns Analysis objects which have created_at.
-                // Let's safe check date string matching.
                 if (!a.created_at) return false;
                 return a.created_at.startsWith(dateFilter);
             });
         }
 
         setFilteredAnalyses(results);
-        setCurrentPage(1); // Reset to first page on filter change
+        setCurrentPage(1); // Reset pagination index on filter mutation
     }, [searchTerm, filterCategory, dateFilter, analyses]);
 
     const fetchAnalyses = async () => {
         try {
-            const response = await analysisAPI.listAnalyses(0, 50);
+            const response = await analysisAPI.listAnalyses(0, 1000); // Fetch deep historical slice
             const data = response.data.analyses || [];
             setAnalyses(data);
             setFilteredAnalyses(data);
         } catch (error) {
-            console.error('Failed to fetch analyses:', error);
+            console.error('Analysis repository retrieval failure:', error);
         } finally {
             setLoading(false);
         }
@@ -142,7 +159,7 @@ export const ReportsPage: React.FC = () => {
             fetchAnalyses();
             addToast(`Status updated to ${status}`, 'success');
         } catch (error) {
-            console.error('Failed to update status:', error);
+            console.error('Status synchronization failure:', error);
             addToast('Failed to update analysis status.', 'error');
         }
     };
@@ -153,14 +170,12 @@ export const ReportsPage: React.FC = () => {
             fetchAnalyses();
             addToast('Payment behavior updated.', 'success');
         } catch (error) {
-            console.error('Failed to update behavior:', error);
+            console.error('Behavior logging failure:', error);
             addToast('Error saving behavior.', 'error');
         }
     };
 
-
-    // Calculate Pagination
-    const emptyRows = itemsPerPage - Math.min(itemsPerPage, filteredAnalyses.length - (currentPage - 1) * itemsPerPage);
+    // --- Pagination Calculation ---
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentAnalyses = filteredAnalyses.slice(indexOfFirstItem, indexOfLastItem);
@@ -169,20 +184,20 @@ export const ReportsPage: React.FC = () => {
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
     const getCategoryStyles = (category: string) => {
-        switch (category) {
-            case 'A': return 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-500/10';
-            case 'B': return 'bg-blue-50 text-blue-700 border-blue-100 ring-blue-500/10';
-            case 'C': return 'bg-amber-50 text-amber-700 border-amber-100 ring-amber-500/10';
-            case 'D': return 'bg-orange-50 text-orange-700 border-orange-100 ring-orange-500/10';
-            case 'E': return 'bg-red-50 text-red-700 border-red-100 ring-red-500/10';
-            default: return 'bg-gray-50 text-gray-700 border-gray-100 ring-gray-500/10';
-        }
+        const styles: Record<string, string> = {
+            'A': 'bg-emerald-50 text-emerald-700 border-emerald-100 ring-emerald-500/10',
+            'B': 'bg-blue-50 text-blue-700 border-blue-100 ring-blue-500/10',
+            'C': 'bg-amber-50 text-amber-700 border-amber-100 ring-amber-500/10',
+            'D': 'bg-orange-50 text-orange-700 border-orange-100 ring-orange-500/10',
+            'E': 'bg-red-50 text-red-700 border-red-100 ring-red-500/10',
+        };
+        return styles[category] || 'bg-gray-50 text-gray-700 border-gray-100 ring-gray-500/10';
     };
 
     return (
         <DashboardLayout>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                {/* Header Area */}
+                {/* Reports Navigation Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                     <div>
                         <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
@@ -206,7 +221,7 @@ export const ReportsPage: React.FC = () => {
                             <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
                         </button>
 
-                        {/* Export Menu */}
+                        {/* Automated Bulk Export Control */}
                         {showExportMenu && (
                             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
                                 <button
@@ -238,7 +253,7 @@ export const ReportsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Filters & Search Bar */}
+                {/* Search & Intelligence Filtering Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-6">
                     <div className="lg:col-span-2 relative group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#11303B] transition-colors" size={16} />
@@ -276,21 +291,14 @@ export const ReportsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Table Section */}
+                {/* Audit Repository: Interactive Documentation Table */}
                 <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center w-16">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">
-                                        <div className="flex items-center gap-2">
-                                            {t('reports.col.entity')}
-                                            <ArrowUpDown size={10} />
-                                        </div>
-                                    </th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center w-16">#</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]"><div className="flex items-center gap-2">{t('reports.col.entity')}<ArrowUpDown size={10} /></div></th>
                                     <th className="hidden lg:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('reports.col.health')}</th>
                                     <th className="hidden sm:table-cell px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em] text-center">{t('reports.col.grade')}</th>
                                     <th className="px-6 py-4 text-[9px] font-black text-[#11303B] uppercase tracking-[0.15em]">{t('dash.cols.status')}</th>
@@ -313,33 +321,19 @@ export const ReportsPage: React.FC = () => {
                                     <tr>
                                         <td colSpan={7} className="px-8 py-24 text-center">
                                             <div className="flex flex-col items-center gap-3 opacity-30">
-                                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                                                    <Search size={24} className="text-gray-400" />
-                                                </div>
+                                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center"><Search size={24} className="text-gray-400" /></div>
                                                 <p className="text-gray-400 font-bold text-sm">{t('reports.noResults.title')}</p>
-                                                <button
-                                                    onClick={() => { setSearchTerm(''); setFilterCategory('All'); }}
-                                                    className="text-[#11303B] text-[10px] font-black uppercase tracking-widest hover:underline"
-                                                >
-                                                    {t('reports.noResults.clear')}
-                                                </button>
+                                                <button onClick={() => { setSearchTerm(''); setFilterCategory('All'); }} className="text-[#11303B] text-[10px] font-black uppercase tracking-widest hover:underline">{t('reports.noResults.clear')}</button>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     currentAnalyses.map((analysis) => (
-                                        <tr
-                                            key={analysis.id}
-                                            className="hover:bg-gray-50/50 transition-all group border-b border-gray-50 last:border-0"
-                                        >
-                                            <td className="px-6 py-4 text-center">
-                                                <span className="text-[10px] font-black text-gray-400">{(filteredAnalyses.indexOf(analysis) + 1).toString().padStart(2, '0')}</span>
-                                            </td>
+                                        <tr key={analysis.id} className="hover:bg-gray-50/50 transition-all group border-b border-gray-50 last:border-0">
+                                            <td className="px-6 py-4 text-center"><span className="text-[10px] font-black text-gray-400">{(filteredAnalyses.indexOf(analysis) + 1).toString().padStart(2, '0')}</span></td>
                                             <td className="px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#11303B] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">
-                                                        {analysis.company_name.charAt(0)}
-                                                    </div>
+                                                    <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center font-black text-[#11303B] text-sm group-hover:bg-white group-hover:shadow-md group-hover:scale-105 transition-all">{analysis.company_name.charAt(0)}</div>
                                                     <div>
                                                         <div className="text-xs font-black text-[#1A1A1A] group-hover:text-[#11303B] transition-colors">{analysis.company_name}</div>
                                                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">ID: {analysis.id.toString().padStart(6, '0')}</div>
@@ -352,119 +346,49 @@ export const ReportsPage: React.FC = () => {
                                                         <span className="text-[9px] font-black text-[#1A1A1A] uppercase">{t('reports.col.health')}</span>
                                                         <span className="text-[10px] font-black text-[#11303B]">{analysis.credit_score.toFixed(0)}%</span>
                                                     </div>
-                                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-gradient-to-r from-[#11303B] to-[#76d2b1] rounded-full transition-all duration-1000"
-                                                            style={{ width: `${analysis.credit_score}%` }}
-                                                        ></div>
-                                                    </div>
+                                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-[#11303B] to-[#76d2b1] rounded-full transition-all duration-1000" style={{ width: `${analysis.credit_score}%` }}></div></div>
                                                 </div>
                                             </td>
                                             <td className="hidden sm:table-cell px-6 py-4 cursor-pointer" onClick={() => navigate(`/analysis/${analysis.id}`)}>
-                                                <div className="flex justify-center">
-                                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-all ${getCategoryStyles(analysis.category)} shadow-sm`}>
-                                                        {t('reports.filter.grade').replace('{grade}', analysis.category)}
-                                                    </span>
-                                                </div>
+                                                <div className="flex justify-center"><span className={`px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider transition-all ${getCategoryStyles(analysis.category)} shadow-sm`}>{t('reports.filter.grade').replace('{grade}', analysis.category)}</span></div>
                                             </td>
-                                            {/* Status Column */}
                                             <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     value={analysis.application_status}
                                                     onChange={(e) => handleStatusUpdate(analysis.id, e.target.value, analysis.payment_behavior)}
-                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider cursor-pointer shadow-sm outline-none transition-all ${analysis.application_status === 'APPROVED' ? 'bg-[#5aac44] text-white border-[#5aac44]' :
-                                                        analysis.application_status === 'REJECTED' ? 'bg-[#ef4444] text-white border-[#ef4444]' :
-                                                            'bg-[#fbbf24] text-white border-[#fbbf24]'
-                                                        }`}
+                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider cursor-pointer shadow-sm outline-none transition-all ${analysis.application_status === 'APPROVED' ? 'bg-[#5aac44] text-white border-[#5aac44]' : analysis.application_status === 'REJECTED' ? 'bg-[#ef4444] text-white border-[#ef4444]' : 'bg-[#fbbf24] text-white border-[#fbbf24]'}`}
                                                 >
                                                     <option value="UNDER_REVIEW" className="bg-white text-gray-800">{t('status.UNDER_REVIEW')}</option>
                                                     <option value="APPROVED" className="bg-white text-gray-800">{t('status.APPROVED')}</option>
                                                     <option value="REJECTED" className="bg-white text-gray-800">{t('status.REJECTED')}</option>
                                                 </select>
                                             </td>
-                                            {/* Behavior Column */}
                                             <td className="hidden xl:table-cell px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <select
                                                     disabled={analysis.application_status !== 'APPROVED'}
                                                     value={analysis.payment_behavior}
                                                     onChange={(e) => handleBehaviorUpdate(analysis.id, e.target.value)}
-                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider shadow-sm outline-none transition-all appearance-none cursor-pointer ${analysis.application_status !== 'APPROVED'
-                                                        ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
-                                                        : 'bg-white text-[#11303B] border-[#11303B]/20 hover:border-[#11303B] hover:shadow-md'
-                                                        }`}
+                                                    className={`w-full px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider shadow-sm outline-none transition-all appearance-none cursor-pointer ${analysis.application_status !== 'APPROVED' ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed' : 'bg-white text-[#11303B] border-[#11303B]/20 hover:border-[#11303B] hover:shadow-md'}`}
                                                 >
                                                     <option value="NA">{t('behavior.NA')}</option>
                                                     <option value="ON_TIME">{t('behavior.ON_TIME')}</option>
                                                     <option value="DELINQUENT">{t('behavior.DELINQUENT')}</option>
                                                 </select>
                                             </td>
-                                            <td className="hidden md:table-cell px-6 py-4">
-                                                <div className="flex items-center gap-2 text-[#11303B]">
-                                                    <Calendar size={12} className="text-[#11303B]/60" />
-                                                    <span className="text-[11px] font-black">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                </div>
-                                            </td>
+                                            <td className="hidden md:table-cell px-6 py-4"><div className="flex items-center gap-2 text-[#11303B]"><Calendar size={12} className="text-[#11303B]/60" /><span className="text-[11px] font-black">{new Date(analysis.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span></div></td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    <button
-                                                        onClick={() => navigate(`/analysis/${analysis.id}`)}
-                                                        className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group"
-                                                        title={t('dash.viewReport')}
-                                                    >
-                                                        <Eye size={14} strokeWidth={2.5} />
-                                                    </button>
-
-                                                    {/* Consolidated Download Button */}
+                                                    <button onClick={() => navigate(`/analysis/${analysis.id}`)} className="w-8 h-8 flex items-center justify-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all shadow-sm group" title={t('dash.viewReport')}><Eye size={14} strokeWidth={2.5} /></button>
                                                     <div className="relative">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setActiveDownloadId(activeDownloadId === analysis.id ? null : analysis.id);
-                                                            }}
-                                                            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${activeDownloadId === analysis.id
-                                                                ? 'bg-[#111827] text-white'
-                                                                : 'bg-[#1e293b] text-white hover:bg-[#0f172a]'
-                                                                }`}
-                                                            title={t('common.download_report')}
-                                                        >
-                                                            <FileDown size={14} strokeWidth={2.5} />
-                                                        </button>
-
+                                                        <button onClick={(e) => { e.stopPropagation(); setActiveDownloadId(activeDownloadId === analysis.id ? null : analysis.id); }} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shadow-sm ${activeDownloadId === analysis.id ? 'bg-[#111827] text-white' : 'bg-[#1e293b] text-white hover:bg-[#0f172a]'}`} title={t('common.download_report')}><FileDown size={14} strokeWidth={2.5} /></button>
                                                         {activeDownloadId === analysis.id && (
                                                             <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in zoom-in-95 duration-200">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDownload(analysis.id, 'pdf', analysis.company_name);
-                                                                        setActiveDownloadId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"
-                                                                >
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
-                                                                    {t('common.pdf_version')}
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDownload(analysis.id, 'excel', analysis.company_name);
-                                                                        setActiveDownloadId(null);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-[#5aac44] hover:bg-gray-50 flex items-center gap-2 transition-colors"
-                                                                >
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#5aac44]" />
-                                                                    {t('common.excel_version')}
-                                                                </button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleDownload(analysis.id, 'pdf', analysis.company_name); setActiveDownloadId(null); }} className="w-full text-left px-4 py-2 text-[10px] font-black text-[#11303B] hover:bg-gray-50 flex items-center gap-2 transition-colors"><div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />{t('common.pdf_version')}</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); handleDownload(analysis.id, 'excel', analysis.company_name); setActiveDownloadId(null); }} className="w-full text-left px-4 py-2 text-[10px] font-black text-[#5aac44] hover:bg-gray-50 flex items-center gap-2 transition-colors"><div className="w-1.5 h-1.5 rounded-full bg-[#5aac44]" />{t('common.excel_version')}</button>
                                                             </div>
                                                         )}
                                                     </div>
-
-                                                    <button
-                                                        onClick={() => navigate('/dashboard/upload')}
-                                                        className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm"
-                                                        title={t('dash.updateEdit')}
-                                                    >
-                                                        <RefreshCcw size={14} strokeWidth={2.5} />
-                                                    </button>
+                                                    <button onClick={() => navigate('/dashboard/upload')} className="w-8 h-8 flex items-center justify-center bg-[#e5e7eb] text-[#374151] rounded-lg hover:bg-gray-300 transition-all shadow-sm" title={t('dash.updateEdit')}><RefreshCcw size={14} strokeWidth={2.5} /></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -473,45 +397,23 @@ export const ReportsPage: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/30">
-                        <div className="text-[10px] font-bold text-gray-500">
-                            Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredAnalyses.length)} of {filteredAnalyses.length}
+                    {/* Pagination Context Bar */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/30">
+                            <div className="text-[10px] font-bold text-gray-500">Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredAnalyses.length)} of {filteredAnalyses.length}</div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"><ChevronLeft size={14} /></button>
+                                {Array.from({ length: totalPages }).map((_, index) => (
+                                    <button key={index} onClick={() => paginate(index + 1)} className={`w-7 h-7 rounded-lg text-[10px] font-black transition-all ${currentPage === index + 1 ? 'bg-[#11303B] text-white shadow-md shadow-[#11303B]/20' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}>{index + 1}</button>
+                                ))}
+                                <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"><ChevronRight size={14} /></button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => paginate(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"
-                            >
-                                <ChevronLeft size={14} />
-                            </button>
-                            {Array.from({ length: totalPages }).map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => paginate(index + 1)}
-                                    className={`w-7 h-7 rounded-lg text-[10px] font-black transition-all ${currentPage === index + 1
-                                        ? 'bg-[#11303B] text-white shadow-md shadow-[#11303B]/20'
-                                        : 'text-gray-500 hover:bg-white hover:shadow-sm'
-                                        }`}
-                                >
-                                    {index + 1}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => paginate(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className="p-2 rounded-lg hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all text-gray-500"
-                            >
-                                <ChevronRight size={14} />
-                            </button>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
-        </DashboardLayout >
+        </DashboardLayout>
     );
 };
+

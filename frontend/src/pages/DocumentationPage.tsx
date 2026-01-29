@@ -29,7 +29,14 @@ import {
     Activity
 } from 'lucide-react';
 
+/**
+ * DocumentationPage Component.
+ * Comprehensive user manual and methodology breakdown for the 
+ * FinAI Agent terminal. Features interactive workflow visualizations
+ * and deep-dives into credit risk pondering logic.
+ */
 export const DocumentationPage: React.FC = () => {
+
     const { t } = useTranslation();
     const [activeSection, setActiveSection] = useState('getting-started');
     const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -37,12 +44,13 @@ export const DocumentationPage: React.FC = () => {
     const sections = [
         { id: 'getting-started', icon: Zap, label: t('docs.gettingStarted') },
         { id: 'upload', icon: Upload, label: t('docs.uploadGuide') },
-        { id: 'methodology', icon: Scale, label: 'Credit Methodology' },
+        { id: 'methodology', icon: Scale, label: t('docs.methodology') },
         { id: 'analysis', icon: BarChart3, label: t('docs.analysisGuide') },
         { id: 'reports', icon: FileText, label: t('docs.reportsGuide') },
         { id: 'users', icon: Users, label: t('docs.userManagement') },
         { id: 'faq', icon: HelpCircle, label: t('docs.faq') },
     ];
+
 
     const faqs = [
         { q: t('docs.faq1Q'), a: t('docs.faq1A') },
@@ -99,12 +107,13 @@ export const DocumentationPage: React.FC = () => {
                             <div className="mt-8 pt-6 border-t border-gray-100 px-2">
                                 <div className="flex items-center gap-2 text-[10px] font-black text-[#11303B]/40 uppercase mb-3">
                                     <Lock size={12} />
-                                    Security Level
+                                    {t('docs.securityLevel')}
                                 </div>
                                 <div className="bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg text-[10px] font-black flex items-center gap-2">
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                                    SSL-ENCRYPTED TERMINAL
+                                    {t('docs.sslTerminal')}
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -131,11 +140,12 @@ export const DocumentationPage: React.FC = () => {
                                             <h4 className="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-10">{t('docs.workflow')}</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
                                                 {[
-                                                    { icon: Upload, label: 'Data Ingestion', desc: 'Secure File Upload' },
-                                                    { icon: Cpu, label: 'Neural Parsing', desc: 'Fuzzy Match Extract' },
-                                                    { icon: Database, label: 'Risk Modeling', desc: '40-30-30 Ponderation' },
-                                                    { icon: FileText, label: 'Stratification', desc: 'Final Report Gen' }
+                                                    { icon: Upload, label: t('docs.stepIngestion'), desc: t('docs.descIngestion') },
+                                                    { icon: Cpu, label: t('docs.stepParsing'), desc: t('docs.descParsing') },
+                                                    { icon: Database, label: t('docs.stepModeling'), desc: t('docs.descModeling') },
+                                                    { icon: FileText, label: t('docs.stepStratification'), desc: t('docs.descStratification') }
                                                 ].map((step, idx) => (
+
                                                     <div key={idx} className="flex flex-col items-center text-center relative z-10 group">
                                                         <div className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-4 border border-gray-100 group-hover:-translate-y-1 transition-transform">
                                                             <step.icon size={24} className="text-[#11303B]" />
@@ -251,8 +261,9 @@ export const DocumentationPage: React.FC = () => {
                                     <div className="flex items-center justify-between border-b-4 border-[#11303B] pb-6 mb-8">
                                         <h2 className="text-3xl font-black text-[#11303B] uppercase tracking-tighter flex items-center gap-4">
                                             <Scale size={32} className="text-[#6ECEB2]" strokeWidth={3} />
-                                            40-30-30 Model
+                                            {t('docs.modelTitle')}
                                         </h2>
+
                                     </div>
 
                                     <div className="prose prose-sm max-w-none">

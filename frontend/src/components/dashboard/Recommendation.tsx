@@ -3,18 +3,30 @@ import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RecommendationProps } from '../../types';
 
+/**
+ * Recommendation Component.
+ * Displays final credit determination (Approve/Reject) with 
+ * prioritized justifications and contractual conditions.
+ */
 export const Recommendation: React.FC<RecommendationProps> = ({
     recommendation,
     justification,
     conditions
 }) => {
+
     const { t } = useTranslation();
 
+    /**
+     * Analytical String Processing.
+     * Converts raw text or array inputs into structured bullet points
+     * for institutional reporting layout.
+     */
     const processPoints = (data: string | string[] | undefined) => {
         if (!data) return [];
         if (Array.isArray(data)) return data;
         return data.split('.').filter(s => s.trim().length > 0).map(s => s.trim());
     };
+
 
     const justificationPoints = processPoints(justification);
     const conditionPoints = processPoints(conditions);

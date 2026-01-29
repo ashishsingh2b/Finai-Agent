@@ -1,21 +1,33 @@
 """
-Bulk Excel Report Generator for Credit Analysis
-Generates a summary Excel sheet with multiple analysis records
+Batch Reporting: Consolidated Credit Portfolios (Excel).
+Produces comprehensive workbook summaries for large-scale analysis management,
+featuring institutional branding and high-density performance tracking.
 """
 import xlsxwriter
 from datetime import datetime
 from typing import List, Dict
-import tempfile
+import os
 
 class BulkExcelReportGenerator:
+    """
+    Expert-level portfolio data orchestrator.
+    Serializes a collection of credit analyses into a structured Excel workbook 
+    for audit and administrative oversight.
+    """
+    
     def __init__(self, language='es'):
         self.language = language
         
     def generate(self, data: List[Dict], output_path: str):
+        """
+        Builds the consolidated workbook.
+        Handles worksheet sharding, cell formatting, and branding placement.
+        """
         workbook = xlsxwriter.Workbook(output_path)
-        worksheet = workbook.add_worksheet('Analysis Results' if self.language == 'en' else 'Resultados de Análisis')
+        sheet_name = 'Analysis Results' if self.language == 'en' else 'Resultados de Análisis'
+        worksheet = workbook.add_worksheet(sheet_name)
         
-        # Formats
+        # Define institutional cell design system
         formats = {
             'header': workbook.add_format({
                 'bold': True,
@@ -34,11 +46,6 @@ class BulkExcelReportGenerator:
                 'font_color': '#11303B',
                 'align': 'left'
             }),
-            'subtitle': workbook.add_format({
-                'font_size': 10,
-                'font_color': '#666666',
-                'align': 'left'
-            }),
             'footer': workbook.add_format({
                 'font_size': 9,
                 'italic': True,
@@ -47,53 +54,49 @@ class BulkExcelReportGenerator:
             })
         }
         
-        # Add Branding Header
-        logo_path = 'app/assets/logo.png' 
-        # Note: xlsxwriter looks for file path relative to execution or absolute. 
-        # Ensuring we check if it exists or use absolute path logic if needed, but 'app/assets/logo.png' assumes running from root.
-        # Better to be safe with safe check or try/except logic implicitly by xlsxwriter (it warns if not found).
-        
+        # Integrated Branding (Preferring institutional logo if available)
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'assets', 'logo.png')
         try:
              worksheet.insert_image('A1', logo_path, {'x_scale': 0.4, 'y_scale': 0.4, 'x_offset': 5, 'y_offset': 5})
         except:
-             pass # Use text branding if image fails
+             pass # Graceful fallback to text-only branding
              
-        # Move Title down because of Logo
-        worksheet.write('A4', 'Reporte Consolidado de Créditos' if self.language == 'es' else 'Consolidated Credit Report', formats['title'])
+        title_text = 'Reporte Consolidado de Créditos' if self.language == 'es' else 'Consolidated Credit Report'
+        worksheet.write('A4', title_text, formats['title'])
         
-        # Table Start Row
+        # Structural Grid Initialization
         start_row = 6
-        
-        # Headers
         headers = {
             'en': ['Sr No', 'ID', 'Company Name', 'Analysis Date', 'Credit Score', 'Category', 'Status', 'Requested Amount', 'Approved Amount'],
             'es': ['No.', 'ID', 'Nombre de Empresa', 'Fecha de Análisis', 'Puntaje', 'Categoría', 'Estado', 'Monto Solicitado', 'Monto Autorizado']
-        }[self.language]
+        }[self.language if self.language in ['es', 'en'] else 'es']
         
         for col, header in enumerate(headers):
             worksheet.write(start_row, col, header, formats['header'])
+            # Optimal column sizing for readability
             width = 15 if col in [0, 1, 4, 5] else 25
             worksheet.set_column(col, col, width)
             
-        # Data
+        # Data Serialization
         for i, item in enumerate(data, start=1):
             row = start_row + i
             worksheet.write(row, 0, i, formats['center'])
             worksheet.write(row, 1, str(item.get('id')).zfill(6), formats['center'])
-            worksheet.write(row, 2, item.get('company_name'), formats['cell'])
-            worksheet.write(row, 3, item.get('date'), formats['center'])
-            worksheet.write(row, 4, item.get('credit_score'), formats['num'])
-            worksheet.write(row, 5, item.get('category'), formats['center'])
-            worksheet.write(row, 6, item.get('status'), formats['center'])
-            worksheet.write(row, 7, item.get('requested_amount'), formats['num'])
-            worksheet.write(row, 8, item.get('approved_amount'), formats['num'])
+            worksheet.write(row, 2, item.get('company_name', 'N/A'), formats['cell'])
+            worksheet.write(row, 3, item.get('date', 'N/A'), formats['center'])
+            worksheet.write(row, 4, item.get('credit_score', 0), formats['num'])
+            worksheet.write(row, 5, item.get('category', 'C'), formats['center'])
+            worksheet.write(row, 6, item.get('status', 'PENDING'), formats['center'])
+            worksheet.write(row, 7, item.get('requested_amount', 0), formats['num'])
+            worksheet.write(row, 8, item.get('approved_amount', 0), formats['num'])
             
-        # Footer
+        # Legal & System Certification Footer
         footer_row = start_row + len(data) + 2
-        footer_text = f"Generado por Moskalti FinAI Agent - {datetime.now().strftime('%d/%m/%Y')} | © {datetime.now().year} Moskalti Capital"
+        footer_tmpl = "Generado por Moskalti FinAI Agent - {dt} | © {yr} Moskalti Capital"
         if self.language != 'es':
-            footer_text = f"Generated by Moskalti FinAI Agent - {datetime.now().strftime('%d/%m/%Y')} | © {datetime.now().year} Moskalti Capital"
-            
+            footer_tmpl = "Generated by Moskalti FinAI Agent - {dt} | © {yr} Moskalti Capital"
+        
+        footer_text = footer_tmpl.format(dt=datetime.now().strftime('%d/%m/%Y'), yr=datetime.now().year)
         worksheet.merge_range(footer_row, 0, footer_row, len(headers)-1, footer_text, formats['footer'])
             
         workbook.close()

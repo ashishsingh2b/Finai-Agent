@@ -7,7 +7,7 @@ from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.api import deps
 from app.utils.security import get_password_hash
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["User Management"])
 
 @router.get("/", response_model=List[UserResponse])
 def read_users(
@@ -17,10 +17,14 @@ def read_users(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Retrieve users. Only admins can access this.
+    Retrieve a list of all system users.
+    Access restricted to Admin roles only.
     """
     if current_user.role != "admin" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Administrative privileges required for this operation."
+        )
     
     users = db.query(User).offset(skip).limit(limit).all()
     return users
@@ -33,16 +37,20 @@ def create_user(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Create new user.
+    Manually create a new system user.
+    Access restricted to Admin roles only.
     """
     if current_user.role != "admin" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Administrative privileges required for this operation."
+        )
         
     user = db.query(User).filter(User.email == user_in.email).first()
     if user:
         raise HTTPException(
-            status_code=400,
-            detail="The user with this username already exists in the system.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this email identity already exists.",
         )
     
     user = User(
@@ -66,16 +74,21 @@ def update_user(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Update user details.
+    Update specific user details by ID.
+    Enforces unique email constraints across the entire system.
+    Access restricted to Admin roles only.
     """
     if current_user.role != "admin" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Administrative privileges required for this operation."
+        )
         
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="The user with this id does not exist in the system",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in system records."
         )
     
     if user_in.full_name is not None:
@@ -83,12 +96,11 @@ def update_user(
     if user_in.role is not None:
         user.role = user_in.role
     if user_in.email is not None:
-        # Check if email is taken by another user
         existing_user = db.query(User).filter(User.email == user_in.email).first()
         if existing_user and existing_user.id != user_id:
             raise HTTPException(
-                status_code=400,
-                detail="Email already registered by another user",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email address is already claimed by another user.",
             )
         user.email = user_in.email
     if user_in.password is not None:
@@ -107,16 +119,20 @@ def update_user_status(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Update user active status.
+    Toggle user active status.
+    Access restricted to Admin roles only.
     """
     if current_user.role != "admin" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Administrative privileges required for this operation."
+        )
         
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="The user with this id does not exist in the system",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in system records."
         )
     
     user.is_active = is_active
@@ -132,16 +148,20 @@ def delete_user(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Delete user.
+    Permanently delete a user account from the system.
+    Access restricted to Admin roles only.
     """
     if current_user.role != "admin" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Administrative privileges required for this operation."
+        )
         
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="The user with this id does not exist in the system",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in system records."
         )
         
     db.delete(user)

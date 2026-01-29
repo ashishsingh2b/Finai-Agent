@@ -4,7 +4,13 @@ import { FileUpload } from '../components/upload/FileUpload';
 import { useTranslation } from 'react-i18next';
 import { CloudIcon, Zap } from 'lucide-react';
 
+/**
+ * UploadPage Component.
+ * Entry point for document ingestion. Houses the `FileUpload` neural
+ * processing terminal.
+ */
 export const UploadPage: React.FC = () => {
+
     const { t } = useTranslation();
 
     return (

@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { SWOTAnalysisProps } from '../../types';
 import { CheckCircle2, TrendingUp, AlertCircle, ShieldAlert } from 'lucide-react';
 
+/**
+ * SWOTAnalysis Component.
+ * Visualizes Strengths, Weaknesses, Opportunities, and Threats
+ * derived from the AI-driven financial dissection.
+ */
 export const SWOTAnalysis: React.FC<SWOTAnalysisProps> = ({ swot }) => {
+
     const { t } = useTranslation();
     const s = swot.strengths || [];
     const w = swot.weaknesses || [];

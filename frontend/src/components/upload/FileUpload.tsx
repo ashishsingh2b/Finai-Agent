@@ -28,10 +28,20 @@ interface UploadFile {
 }
 
 const MAX_FILES = 10;
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+/** Maximum individual file size: 50MB institutional limit. */
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+/** Fault tolerance: Maximum automated ingestion retries. */
 const MAX_RETRIES = 2;
 
+
+/**
+ * FileUpload Component.
+ * High-precision document ingestion system for financial statements.
+ * Supports split file ingestion (Spreadsheets/PDFs) with consolidated
+ * analytical redirection.
+ */
 export const FileUpload: React.FC = () => {
+
     const [files, setFiles] = useState<UploadFile[]>([]);
     const [uploading, setUploading] = useState(false);
     const [globalError, setGlobalError] = useState('');
@@ -242,11 +252,12 @@ export const FileUpload: React.FC = () => {
     const getStatusText = (uploadFile: UploadFile) => {
         switch (uploadFile.status) {
             case 'pending': return t('upload.status.ready');
-            case 'uploading': return `${t('upload.status.processing')} ${uploadFile.retryCount > 0 ? `(Retry ${uploadFile.retryCount})` : ''} `;
+            case 'uploading': return `${t('upload.status.processing')} ${uploadFile.retryCount > 0 ? `(Retry ${uploadFile.retryCount})` : ''}`;
             case 'success': return t('upload.status.complete');
             case 'error': return uploadFile.error || t('upload.status.failed');
         }
     };
+
 
     const errorCount = files.filter(f => f.status === 'error').length;
     const canUpload = files.length > 0 && !uploading && files.some(f => f.status === 'pending' || f.status === 'error');
@@ -382,10 +393,10 @@ export const FileUpload: React.FC = () => {
                                 <p className="font-bold text-sm text-[#1A1A1A] truncate">
                                     {uploadFile.file.name}
                                 </p>
-                                <p className={`text - xs font - medium ${uploadFile.status === 'error' ? 'text-red-500' : 'text-gray-500'
-                                    } `}>
+                                <p className={`text-xs font-medium ${uploadFile.status === 'error' ? 'text-red-500' : 'text-gray-500'}`}>
                                     {getStatusText(uploadFile)}
                                 </p>
+
                             </div>
                             {uploadFile.status === 'pending' && !uploading && (
                                 <button

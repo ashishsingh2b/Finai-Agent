@@ -1,6 +1,7 @@
 """
-Bulk PDF Report Generator for Credit Analysis
-Generates a summary PDF with multiple analysis records
+Batch Reporting: Consolidated Credit Portfolio Reports.
+Generates tabular PDF summaries for large-scale analysis reviews and executive 
+oversight, presented in landscape format for maximum data density.
 """
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import landscape, letter
@@ -12,16 +13,28 @@ from typing import List, Dict
 import os
 
 class BulkPDFReportGenerator:
+    """
+    Expert-level portfolio document generator.
+    Processes collections of Analysis objects into professional landscape summaries.
+    """
+    
     def __init__(self, language='es'):
         self.language = language
         
     def generate(self, data: List[Dict], output_path: str):
-        doc = SimpleDocTemplate(output_path, pagesize=landscape(letter), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+        """
+        Orchestrates the bulk generation flow.
+        Handles branding, landscape template initialization, and data serialization.
+        """
+        doc = SimpleDocTemplate(
+            output_path, 
+            pagesize=landscape(letter), 
+            rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30
+        )
         elements = []
         styles = getSampleStyleSheet()
         
-        # Branding Header
-        # Logo
+        # 1. Branding Header Reconstruction
         logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'assets', 'logo.png')
         if os.path.exists(logo_path):
             img = Image(logo_path, width=2.5*inch, height=0.8*inch)
@@ -29,38 +42,41 @@ class BulkPDFReportGenerator:
             elements.append(img)
             elements.append(Spacer(1, 10))
         else:
-            # Fallback if logo not found
             elements.append(Paragraph("MOSKALTI CAPITAL", styles['Title']))
         
-        # Subtitle - Centered
+        # 2. Section Subtitles
         subtitle_text = "Reporte Consolidado de Créditos" if self.language == 'es' else "Consolidated Credit Report"
-        subtitle_style = ParagraphStyle('SubtitleCenter', parent=styles['Heading2'], alignment=1, spaceAfter=20, textColor=colors.HexColor('#11303B'))
-        
+        subtitle_style = ParagraphStyle(
+            'SubtitleCenter', 
+            parent=styles['Heading2'], 
+            alignment=1, 
+            spaceAfter=20, 
+            textColor=colors.HexColor('#11303B')
+        )
         elements.append(Paragraph(subtitle_text, subtitle_style))
         
-        # Table Data
+        # 3. High-Density Data Tabulation
         headers = {
             'en': ['Sr No', 'ID', 'Company', 'Date', 'Score', 'Cat', 'Status', 'Requested', 'Approved'],
             'es': ['No.', 'ID', 'Empresa', 'Fecha', 'Puntaje', 'Cat', 'Estado', 'Solicitado', 'Autorizado']
-        }[self.language]
+        }[self.language if self.language in ['es', 'en'] else 'es']
         
         table_data = [headers]
-        
         for i, item in enumerate(data, start=1):
             row = [
                 str(i),
-                str(item.get('id')).zfill(6),
-                item.get('company_name')[:25], # Truncate long names
-                item.get('date'),
-                f"{item.get('credit_score'):.2f}",
-                item.get('category'),
-                item.get('status'),
-                f"${item.get('requested_amount'):,.0f}",
-                f"${item.get('approved_amount'):,.0f}"
+                str(item.get('id')).zfill(6), # Institutional ID padding
+                item.get('company_name', 'N/A')[:25], 
+                item.get('date', 'N/A'),
+                f"{item.get('credit_score', 0):.2f}",
+                item.get('category', 'C'),
+                item.get('status', 'PENDING'),
+                f"${item.get('requested_amount', 0):,.0f}",
+                f"${item.get('approved_amount', 0):,.0f}"
             ]
             table_data.append(row)
             
-        # Table Style
+        # Standardized Institutional Table Aesthetic
         table = Table(table_data, colWidths=[30, 50, 180, 70, 50, 40, 80, 80, 80])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#253746')),
@@ -70,9 +86,6 @@ class BulkPDFReportGenerator:
             ('FONTSIZE', (0, 0), (-1, 0), 9),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
@@ -80,11 +93,15 @@ class BulkPDFReportGenerator:
         elements.append(table)
         elements.append(Spacer(1, 30))
         
-        # Footer
-        footer_text = f"Generado por Moskalti FinAI Agent - {datetime.now().strftime('%d/%m/%Y')} | © {datetime.now().year} Moskalti Capital"
+        # 4. Certification Footer
+        footer_tmpl = "Generado por Moskalti FinAI Agent - {dt} | © {yr} Moskalti Capital"
         if self.language != 'es':
-             footer_text = f"Generated by Moskalti FinAI Agent - {datetime.now().strftime('%d/%m/%Y')} | © {datetime.now().year} Moskalti Capital"
+             footer_tmpl = "Generated by Moskalti FinAI Agent - {dt} | © {yr} Moskalti Capital"
              
-        elements.append(Paragraph(footer_text, ParagraphStyle('Footer', parent=styles['Normal'], alignment=1, fontSize=8, textColor=colors.gray)))
+        footer_text = footer_tmpl.format(dt=datetime.now().strftime('%d/%m/%Y'), yr=datetime.now().year)
+        elements.append(Paragraph(
+            footer_text, 
+            ParagraphStyle('Footer', parent=styles['Normal'], alignment=1, fontSize=8, textColor=colors.gray)
+        ))
         
         doc.build(elements)

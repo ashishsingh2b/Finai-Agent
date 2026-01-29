@@ -1,4 +1,5 @@
 import i18n from 'i18next';
+
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
@@ -13,9 +14,10 @@ i18n
             en: { translation: en },
             es: { translation: es }
         },
-        fallbackLng: 'es', // Default to Spanish as requested
+        // Institutional default is Spanish (Mexico)
+        fallbackLng: 'es',
         interpolation: {
-            escapeValue: false // React already safes from xss
+            escapeValue: false // React implements native XSS protection
         },
         detection: {
             order: ['localStorage', 'navigator'],
@@ -24,3 +26,4 @@ i18n
     });
 
 export default i18n;
+

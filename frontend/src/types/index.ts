@@ -63,6 +63,7 @@ export interface AnalysisData {
     interest_coverage?: number;
     sales_trend?: number;
     net_income_coverage?: number;
+    profit_to_loan_ratio?: number;
     approved_amount?: number;
     loan_term_months?: number;
     credit_type?: string;
@@ -109,6 +110,8 @@ export interface FinancialIndicatorsProps {
         interest_coverage?: number;
         leverage_ratio?: number;
         sales_trend?: number;
+        net_income_coverage?: number;
+        profit_to_loan_ratio?: number;
     };
 }
 

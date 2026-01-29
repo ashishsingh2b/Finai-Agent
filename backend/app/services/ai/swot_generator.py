@@ -1,64 +1,74 @@
+"""
+Strategic Analysis Layer: Automated SWOT Synthesis.
+Generates bilingual SWOT matrixes using Large Language Models with a procedural 
+rule-based fallback for high-availability environments.
+"""
 from typing import Dict
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 import os
 import json
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 class SWOTGenerator:
-    """Generate SWOT analysis using GPT-4"""
+    """
+    Orchestrator for qualitative financial analysis.
+    Synthesizes numerical ratios into actionable business insights (Strengths, Weaknesses, 
+    Opportunities, Threats).
+    """
     
     def __init__(self):
         try:
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key or api_key == "your-openai-api-key-here":
-                # Fallback to rule-based SWOT if no API key
                 self.llm = None
             else:
                 self.llm = ChatOpenAI(
-                    model="gpt-4",
-                    temperature=0.7,
+                    model="gpt-4", # High-density reasoning model
+                    temperature=0.7, # Moderate creativity for qualitative insights
                     openai_api_key=api_key
                 )
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Failed to initialize ChatOpenAI: {e}")
+            logger.error(f"SWOT AI Engine initialization failed: {e}")
             self.llm = None
     
     def generate_swot(self, company_data: dict, ratios: dict, language='es') -> dict:
-        """Generate SWOT analysis"""
-        
-        # If no OpenAI key, use rule-based SWOT
+        """
+        Generates a 4-quadrant SWOT matrix.
+        Attempts AI-driven synthesis first; falls back to deterministic rule-based generator on error.
+        """
         if not self.llm:
             return self._generate_rule_based_swot(ratios, language)
         
-        # Use AI-powered SWOT
+        # Construct the context-rich prompt for the financial analyst persona
         template = """
         You are a financial analyst for Moskalti Capital, a Mexican SOFOM specializing in SME loans.
         
         Company: {company_name}
         Industry: {industry}
         
-        Financial Ratios:
+        Financial Performance Metrics:
         - Current Ratio: {current_ratio}
         - ROE: {roe}%
         - ROA: {roa}%
         - Debt-to-Assets: {debt_to_assets:.1%}
         - Profit Margin: {profit_margin}%
-        - Leverage: {leverage}
+        - Leverage Index: {leverage}
         
-        Generate a SWOT analysis in {language}. Format as JSON:
+        Task: Generate a professional SWOT matrix in {language}. 
+        Focus strictly on financial stability, operational efficiency, and credit risk.
+        
+        Format as JSON:
         {{
-            "strengths": ["point 1", "point 2", "point 3"],
-            "weaknesses": ["point 1", "point 2", "point 3"],
-            "opportunities": ["point 1", "point 2", "point 3"],
-            "threats": ["point 1", "point 2", "point 3"]
+            "strengths": ["Item 1", "Item 2", "Item 3"],
+            "weaknesses": ["Item 1", "Item 2", "Item 3"],
+            "opportunities": ["Item 1", "Item 2", "Item 3"],
+            "threats": ["Item 1", "Item 2", "Item 3"]
         }}
-        
-        Each category should have 3-4 specific, data-driven points.
-        Focus on financial health and creditworthiness.
         """
         
         prompt = ChatPromptTemplate.from_template(template)
@@ -66,7 +76,7 @@ class SWOTGenerator:
         
         try:
             response = chain.invoke({
-                "company_name": company_data.get('name', 'Company'),
+                "company_name": company_data.get('name', 'Identidad Desconocida'),
                 "industry": company_data.get('industry', 'General'),
                 "current_ratio": ratios.get('current_ratio', 0),
                 "roe": ratios.get('roe', 0),
@@ -77,85 +87,50 @@ class SWOTGenerator:
                 "language": "Spanish" if language == 'es' else "English"
             })
             
-            # Parse JSON response
-            swot = json.loads(response.content)
-            return swot
-            
+            return json.loads(response.content)
         except Exception as e:
-            # Fallback to rule-based if AI fails
+            logger.warning(f"SWOT AI synthesis failed, engaging rule-based fallback: {e}")
             return self._generate_rule_based_swot(ratios, language)
     
     def _generate_rule_based_swot(self, ratios: dict, language='es') -> dict:
-        """Generate rule-based SWOT when AI is unavailable"""
+        """
+        Deterministic SWOT generation based on institutional risk thresholds.
+        Ensures system stability even during AI latency or outages.
+        """
+        swot = {
+            "strengths": [],
+            "weaknesses": [],
+            "opportunities": [],
+            "threats": []
+        }
         
         if language == 'es':
-            swot = {
-                "strengths": [],
-                "weaknesses": [],
-                "opportunities": [],
-                "threats": []
-            }
-            
-            # Strengths
+            # Logic mapping for Spanish reports
             if ratios.get('current_ratio', 0) > 1.5:
-                swot['strengths'].append("Buena liquidez para cubrir obligaciones a corto plazo")
+                swot['strengths'].append("Sólida posición de liquidez de corto plazo")
             if ratios.get('roe', 0) > 15:
-                swot['strengths'].append("Alta rentabilidad sobre capital propio")
+                swot['strengths'].append("Alta eficiencia en generación de utilidad sobre capital")
             if ratios.get('debt_to_assets', 0) < 0.5:
-                swot['strengths'].append("Nivel de endeudamiento moderado")
+                swot['strengths'].append("Estructura de deuda conservadora")
             
-            # Weaknesses
             if ratios.get('current_ratio', 0) < 1.0:
-                swot['weaknesses'].append("Liquidez insuficiente")
+                swot['weaknesses'].append("Capacidad de pago inmediata comprometida")
             if ratios.get('profit_margin', 0) < 5:
-                swot['weaknesses'].append("Márgenes de utilidad bajos")
-            if ratios.get('debt_to_assets', 0) > 0.7:
-                swot['weaknesses'].append("Alto nivel de endeudamiento")
+                swot['weaknesses'].append("Márgenes operativos reducidos")
             
-            # Opportunities
-            swot['opportunities'].append("Expansión de mercado con financiamiento adecuado")
-            swot['opportunities'].append("Optimización de estructura de capital")
-            swot['opportunities'].append("Mejora en eficiencia operativa")
-            
-            # Threats
-            swot['threats'].append("Volatilidad en tasas de interés")
-            swot['threats'].append("Competencia en el sector")
-            if ratios.get('leverage_ratio', 0) > 3:
-                swot['threats'].append("Riesgo de sobreapalancamiento")
-            
-        else:  # English
-            swot = {
-                "strengths": [],
-                "weaknesses": [],
-                "opportunities": [],
-                "threats": []
-            }
-            
-            # Strengths
+            swot['opportunities'].append("Potencial de crecimiento mediante apalancamiento estratégico")
+            swot['threats'].append("Sensibilidad a fluctuaciones en tasas TIIE")
+        else:
+            # Logic mapping for English reports
             if ratios.get('current_ratio', 0) > 1.5:
-                swot['strengths'].append("Good liquidity to cover    short-term obligations")
+                swot['strengths'].append("Strong short-term liquidity position")
             if ratios.get('roe', 0) > 15:
-                swot['strengths'].append("High return on equity")
-            if ratios.get('debt_to_assets', 0) < 0.5:
-                swot['strengths'].append("Moderate debt level")
+                swot['strengths'].append("High return on equity efficiency")
             
-            # Weaknesses
             if ratios.get('current_ratio', 0) < 1.0:
-                swot['weaknesses'].append("Insufficient liquidity")
-            if ratios.get('profit_margin', 0) < 5:
-                swot['weaknesses'].append("Low profit margins")
-            if ratios.get('debt_to_assets', 0) > 0.7:
-                swot['weaknesses'].append("High debt level")
+                swot['weaknesses'].append("Compromised immediate debt service coverage")
             
-            # Opportunities
-            swot['opportunities'].append("Market expansion with adequate financing")
-            swot['opportunities'].append("Capital structure optimization")
-            swot['opportunities'].append("Operational efficiency improvement")
+            swot['opportunities'].append("Growth potential through strategic credit injection")
+            swot['threats'].append("Sensitivity to interest rate volatility")
             
-            # Threats
-            swot['threats'].append("Interest rate volatility")
-            swot['threats'].append("Industry competition")
-            if ratios.get('leverage_ratio', 0) > 3:
-                swot['threats'].append("Over-leverage risk")
-        
         return swot

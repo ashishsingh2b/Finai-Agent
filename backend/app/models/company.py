@@ -4,22 +4,34 @@ from sqlalchemy.sql import func
 from app.utils.database import Base
 
 class Company(Base):
+    """
+    Profile of the legal entity being analyzed for credit.
+    Acts as the parent container for financial history and scoring results.
+    """
     __tablename__ = "companies"
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
     industry = Column(String)
     years_in_business = Column(Integer)
-    fiscal_status = Column(String)
-    top_clients = Column(Text)  # JSON string or comma-separated
+    fiscal_status = Column(String)  # Operational status (e.g., 'En Cumplimiento')
+    top_clients = Column(Text)       # Qualitative data from parsing
     
-    # Relationships
-    financial_statements = relationship("FinancialStatement", back_populates="company", cascade="all, delete-orphan")
-    analyses = relationship("AnalysisResult", back_populates="company", cascade="all, delete-orphan")
+    # Cascade relationships to ensure data integrity during deletions
+    financial_statements = relationship(
+        "FinancialStatement", 
+        back_populates="company", 
+        cascade="all, delete-orphan"
+    )
+    analyses = relationship(
+        "AnalysisResult", 
+        back_populates="company", 
+        cascade="all, delete-orphan"
+    )
     
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     def __repr__(self):
-        return f"<Company {self.name}>"
+        return f"<Company {self.name} ID:{self.id}>"

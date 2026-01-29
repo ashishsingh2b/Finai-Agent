@@ -9,7 +9,13 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * ProfilePage Component.
+ * Manages institutional user identity and security credentials.
+ * Handles credential synchronization through the auth service.
+ */
 export const ProfilePage: React.FC = () => {
+
     const { user } = useAuthStore();
     const [activeTab, setActiveTab] = useState('profile');
     const { t } = useTranslation();
@@ -116,20 +122,21 @@ export const ProfilePage: React.FC = () => {
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.firstName')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
-                                            defaultValue={user?.full_name?.split(' ')[0]}
+                                            defaultValue={user?.full_name?.split(' ')[0] || ''}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                            placeholder="First name"
+                                            placeholder={t('profile.placeholders.firstName')}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.lastName')} <span className="text-red-500">*</span></label>
                                         <input
                                             type="text"
-                                            defaultValue={user?.full_name?.split(' ')[1] || ''}
+                                            defaultValue={user?.full_name?.split(' ').slice(1).join(' ') || ''}
                                             className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                            placeholder="Last name"
+                                            placeholder={t('profile.placeholders.lastName')}
                                         />
                                     </div>
+
 
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.email')}</label>
@@ -137,9 +144,10 @@ export const ProfilePage: React.FC = () => {
                                             type="email"
                                             defaultValue={user?.email}
                                             className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                            placeholder="examples@gmail.com"
+                                            placeholder={t('profile.placeholders.email')}
                                         />
                                     </div>
+
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('profile.mobileNumber')} <span className="text-red-500">*</span></label>
                                         <div className="flex gap-2">
@@ -151,8 +159,9 @@ export const ProfilePage: React.FC = () => {
                                             <input
                                                 type="text"
                                                 className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                                placeholder="0806 123 7890"
+                                                placeholder={t('profile.placeholders.mobile')}
                                             />
+
                                         </div>
                                     </div>
 
@@ -194,8 +203,9 @@ export const ProfilePage: React.FC = () => {
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
                                             className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                            placeholder="Enter new password"
+                                            placeholder={t('profile.placeholders.newPassword')}
                                         />
+
                                     </div>
 
                                     <div className="space-y-2">
@@ -205,8 +215,9 @@ export const ProfilePage: React.FC = () => {
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11303B]/20 focus:border-[#11303B] transition-all"
-                                            placeholder="Confirm new password"
+                                            placeholder={t('profile.placeholders.confirmPassword')}
                                         />
+
                                     </div>
                                 </div>
 

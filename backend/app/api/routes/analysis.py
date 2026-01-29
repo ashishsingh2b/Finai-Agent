@@ -15,10 +15,11 @@ from app.services.financial.recommendation_engine import RecommendationEngine
 from app.services.financial.validation_service import FinancialValidationService
 from app.services.ai.swot_generator import SWOTGenerator
 from app.services.file_processing.file_merger import FileMerger
+from app.services.file_processing.file_manager import FileManager
 from app.models.user import User
 from app.models.company import Company
 from app.models.financial_statement import FinancialStatement
-from app.models.analysis import AnalysisResult, ApplicationStatus, PaymentBehavior
+from app.models.analysis import AnalysisResult, ApplicationStatus, PaymentBehavior, ValidationStatus
 from app.schemas.analysis import AnalysisResponse, AnalysisUpdateStatus
 import tempfile
 import os
@@ -53,15 +54,15 @@ async def upload_and_analyze(
             detail="Only Excel (.xlsx, .xls) and PDF files are supported"
         )
     
-    # Determine file type and save temporarily
+    # Determine file type and save using FileManager
     file_ext = '.pdf' if file.filename.lower().endswith('.pdf') else '.xlsx'
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp:
-        contents = await file.read()
-        tmp.write(contents)
-        tmp_path = tmp.name
     
     try:
-        # Step 1: Parse file (Excel or PDF)
+        # Save file to permanent storage
+        tmp_path = FileManager.save_upload(file)
+        logger.info(f"File stored properly at: {tmp_path}")
+        
+        # Initialize appropriate parser based on extension
         logger.info(f"Parsing file: {file.filename}")
         if file_ext == '.pdf':
             parser = PDFParser(tmp_path)
@@ -77,15 +78,20 @@ async def upload_and_analyze(
         
         # Check if any data was extracted
         if not balance_sheet or not income_statement:
+            error_msg = "Could not extract financial data from the provided file. Please ensure it follows the required format."
+            logger.error(f"Upload 422 Error: {error_msg}")
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Could not extract financial data from the provided file. Please ensure it follows the required format."
+                detail=error_msg
             )
 
         # Step 1.5: Mandatory Validations
         final_loan_amount = company_info.get('requested_amount', 0) if company_info.get('requested_amount', 0) > 0 else loan_amount
         final_loan_term = company_info.get('loan_term', 0) if company_info.get('loan_term', 0) > 0 else loan_term
         final_credit_type = company_info.get('credit_type') if company_info.get('credit_type') else credit_type
+        
+        # Log parsed values for debugging
+        logger.info(f"Parsed Info - Amount: {final_loan_amount}, Term: {final_loan_term}, Type: {final_credit_type}")
 
         is_valid, validation_alerts = FinancialValidationService.validate(
             balance_sheet, 
@@ -97,6 +103,7 @@ async def upload_and_analyze(
 
         if not is_valid:
             logger.warning(f"Mandatory validation failed for {file.filename}: {validation_alerts}")
+            logger.error(f"Upload 422 Error: Mandatory validation failed")
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={
@@ -108,9 +115,11 @@ async def upload_and_analyze(
         # Get latest year data
         years = list(balance_sheet.keys())
         if not years:
+            error_msg = "No financial years found in the document. Please provide a standard balance sheet."
+            logger.error(f"Upload 422 Error: {error_msg}")
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="No financial years found in the document. Please provide a standard balance sheet."
+                detail=error_msg
             )
             
         latest_year = max(years)
@@ -119,30 +128,41 @@ async def upload_and_analyze(
         
         # Validate that we actually have enough data to calculate ratios
         if latest_balance.get('total_assets', 0) == 0:
+            error_msg = "Could not find 'Total Assets' in the document. Please ensure your balance sheet is clearly readable."
+            logger.error(f"Upload 422 Error: {error_msg}")
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Could not find 'Total Assets' in the document. Please ensure your balance sheet is clearly readable."
+                detail=error_msg
             )
 
         if not latest_income or latest_income.get('revenue', 0) == 0:
+            error_msg = f"Income statement data (Revenue/Sales) missing or zero for year {latest_year}. Please provide a complete profit and loss statement."
+            logger.error(f"Upload 422 Error: {error_msg}")
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Income statement data (Revenue/Sales) missing or zero for year {latest_year}. Please provide a complete profit and loss statement."
+                detail=error_msg
             )
         
-        # Step 2: Create company record
-        # Use extracted metadata if available
+        # Entity Management: Identify or create Company
+        # Use extracted metadata if available, fallback to filename if unknown
+        company_name = company_info.get('name', 'Unknown Company')
+        if company_name == 'Unknown Company':
+            # Clean filename (remove extension) as fallback
+            company_name = os.path.splitext(file.filename)[0].replace('_', ' ').replace('-', ' ').title()
+
         industry = company_info.get('industry')
         years_in_business = company_info.get('years_in_business')
         
-        company = Company(
-            name=company_info.get('name', 'Unknown Company'),
-            industry=industry,
-            years_in_business=years_in_business,
-            created_by=current_user.id
-        )
-        db.add(company)
-        db.flush()  # Get company ID
+        company = db.query(Company).filter(Company.name == company_name, Company.created_by == current_user.id).first()
+        if not company:
+            company = Company(
+                name=company_name,
+                industry=industry,
+                years_in_business=years_in_business,
+                created_by=current_user.id
+            )
+            db.add(company)
+            db.flush()  # Get company ID
         
         # Step 3: Save financial statements
         for year in balance_sheet.keys():
@@ -168,6 +188,7 @@ async def upload_and_analyze(
         file_amount = company_info.get('requested_amount', 0)
         file_term = company_info.get('loan_term', 0)
         file_rate = company_info.get('interest_rate', 0)
+        file_collateral = company_info.get('collateral_type', 2)
         file_type = company_info.get('credit_type')
 
         final_loan_amount = loan_amount if loan_amount > 0 else file_amount
@@ -219,39 +240,74 @@ async def upload_and_analyze(
         if credit_score_result['category'] == 'A':
             approved_amt = final_loan_amount # 100% approval for A grade
             
+        if recommendation['decision'] == 'REJECT':
+            approved_amt = 0 # No amount authorized if rejected
+            
+        # Calculate calculated interest rate (Spread only, TIIE is separate field)
+        spread_matrix = {
+            'A': {1: 10.0, 2: 12.0, 3: 16.0, 4: 22.0, 5: 30.0},
+            'B': {1: 12.5, 2: 14.5, 3: 18.5, 4: 24.5, 5: 32.5},
+            'C': {1: 17.5, 2: 19.5, 3: 23.5, 4: 29.5, 5: 37.5}, 
+            'D': {1: 25.0, 2: 27.0, 3: 31.0, 4: 37.0, 5: 45.0},
+            'E': {1: 35.0, 2: 37.0, 3: 41.0, 4: 47.0, 5: 55.0}
+        }
+        
+        category = credit_score_result['category']
+        # Default to collateral quality 2 (Standard Secured) if not specified
+        current_collateral = file_collateral if file_collateral in [1, 2, 3, 4, 5] else 2
+        spread = spread_matrix.get(category, spread_matrix['C']).get(current_collateral, 12.0)
+        calculated_spread = spread / 100.0 # Convert to decimal (e.g. 0.12)
+            
         analysis = AnalysisResult(
             company_id=company.id,
             requested_loan_amount=final_loan_amount,
             approved_amount=approved_amt, 
             loan_term_months=final_loan_term,
             credit_type=final_credit_type,
-            applicable_interest_rate=file_rate,
-            tiie_rate_used=0.1125, # Mock current TIIE
+            collateral_type=file_collateral,
+            applicable_interest_rate=calculated_spread, 
+            tiie_rate_used=0.1125, # Synchronized 11.25% TIIE
+            
+            # Solvency & Liquidity
             current_ratio=ratios.get('current_ratio'),
             debt_to_assets=ratios.get('debt_to_assets'),
             leverage_ratio=ratios.get('leverage_ratio'),
+            interest_coverage=ratios.get('interest_coverage'),
+            
+            # Profitability
             roe=ratios.get('roe'),
             roa=ratios.get('roa'),
             profit_margin=ratios.get('profit_margin'),
             ebitda_margin=ratios.get('ebitda_margin'),
-            interest_coverage=ratios.get('interest_coverage'),
             asset_turnover=ratios.get('asset_turnover'),
+            
+            # Trends & Coverage
             sales_trend=sales_trend,
             net_income_coverage=net_income_coverage,
+            profit_to_loan_ratio=profit_to_loan,
+            
+            # Cycles
             dso=ratios.get('dso'),
             dio=ratios.get('dio'),
             dpo=ratios.get('dpo'),
             cash_conversion_cycle=ratios.get('cash_conversion_cycle'),
+            
+            # Scoring (using breakdown keys from CreditScorer)
             credit_history_score=credit_score_result['breakdown']['credit_history'],
             solvency_score=credit_score_result['breakdown']['solvency'],
             profitability_score=credit_score_result['breakdown']['profitability'],
             total_credit_score=credit_score_result['total_score'],
             credit_category=credit_score_result['category'],
+            risk_level=RecommendationEngine.generate_recommendation(credit_score_result['total_score'], credit_score_result['category'], profit_to_loan, ratios, language).get('risk_level', 'MEDIUM'),
+            
+            # SWOT & Recommendations
             swot_analysis=swot,
             recommendation=recommendation['decision'],
             recommendation_justification=recommendation['justification'],
             conditions=recommendation.get('conditions'),
-            language=language,
+            
+            validation_status=ValidationStatus.VALID if is_valid else ValidationStatus.WARNINGS,
+            validation_alerts=validation_alerts,
             analyzed_by=current_user.id
         )
         
@@ -596,6 +652,7 @@ async def export_pdf(
         'company_name': company.name if company else 'Unknown',
         'total_credit_score': float(analysis.total_credit_score) if analysis.total_credit_score else 0,
         'credit_category': analysis.credit_category,
+        'collateral_type': analysis.collateral_type if analysis.collateral_type else 2,
         'credit_history_score': float(analysis.credit_history_score) if analysis.credit_history_score else 0,
         'solvency_score': float(analysis.solvency_score) if analysis.solvency_score else 0,
         'profitability_score': float(analysis.profitability_score) if analysis.profitability_score else 0,

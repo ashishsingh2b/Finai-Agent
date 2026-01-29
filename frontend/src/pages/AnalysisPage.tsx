@@ -1,3 +1,8 @@
+/**
+ * Specialized Credit Analysis Engine View.
+ * Orchestrates the rendering of numerical financial indicators, 
+ * AI-generated SWOT insights, and final institutional recommendations.
+ */
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -5,6 +10,7 @@ import { FinancialIndicators } from '../components/dashboard/FinancialIndicators
 import { SWOTAnalysis } from '../components/dashboard/SWOTAnalysis';
 import { Recommendation } from '../components/dashboard/Recommendation';
 import { FinancialCharts } from '../components/dashboard/FinancialCharts';
+import { DocumentViewerModal } from '../components/dashboard/DocumentViewerModal';
 import { analysisAPI } from '../services/api';
 import { AnalysisData } from '../types';
 import {
@@ -29,8 +35,14 @@ export const AnalysisPage: React.FC = () => {
     const [data, setData] = useState<AnalysisData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const [selectedDocType, setSelectedDocType] = useState<'TAX' | 'FINANCIALS' | 'BILLING' | 'RISK' | 'PROFILE' | null>(null);
+    const [isDocModalOpen, setIsDocModalOpen] = useState(false);
     const { setLoading: setGlobalLoading, addToast } = useUIStore();
 
+    /**
+     * Component Lifecycle: Data Hydration.
+     * Fetches the complete analysis record upon mount or ID/Language change.
+     */
     useEffect(() => {
         const handleClickOutside = () => setIsDownloadOpen(false);
         window.addEventListener('click', handleClickOutside);
@@ -49,7 +61,7 @@ export const AnalysisPage: React.FC = () => {
         fetchAnalysis(parsedId);
 
         return () => window.removeEventListener('click', handleClickOutside);
-    }, [id, i18n.language]);
+    }, [id, i18n.language, t]);
 
     const fetchAnalysis = async (analysisId: number) => {
         try {
@@ -71,13 +83,10 @@ export const AnalysisPage: React.FC = () => {
         }
     };
 
-    const swot = data?.swot_analysis || {
-        strengths: [],
-        weaknesses: [],
-        opportunities: [],
-        threats: []
-    };
-
+    /**
+     * Document Export Orchestrator.
+     * Handles binary download streams for PDF and Excel reports.
+     */
     const handleDownload = async (type: 'pdf' | 'excel') => {
         if (!id || !data) return;
         setGlobalLoading(true);
@@ -87,6 +96,7 @@ export const AnalysisPage: React.FC = () => {
                 ? await analysisAPI.downloadPDF(parsedId, i18n.language)
                 : await analysisAPI.downloadExcel(parsedId, i18n.language);
 
+            // Stream processing and blob anchoring
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -104,9 +114,16 @@ export const AnalysisPage: React.FC = () => {
         }
     };
 
+    const swot = data?.swot_analysis || {
+        strengths: [],
+        weaknesses: [],
+        opportunities: [],
+        threats: []
+    };
+
     return (
         <div className="min-h-screen bg-[#F0F2F5] font-sans text-gray-900 overflow-x-hidden">
-            {/* Header */}
+            {/* Institutional Top Navigation Bar */}
             <header className="bg-[#11303B] px-6 py-2 flex items-center justify-between text-white shadow-lg relative z-20">
                 <div className="flex items-center gap-6">
                     <button onClick={() => navigate('/dashboard')} className="hover:opacity-80 transition-opacity flex items-center gap-2">
@@ -117,15 +134,17 @@ export const AnalysisPage: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Breadcrumb / Bread-title Area */}
                 <div className="flex-1 flex justify-center px-4 overflow-hidden">
                     <div className="text-[10px] sm:text-[10px] font-black opacity-90 bg-white/10 px-4 py-1 rounded-full border border-white/10 max-w-xs sm:max-w-md truncate">
                         <span className="hidden xs:inline">{t('analysis.fileLabel')}</span> <span className="text-white">{data?.company_name || t('analysis.loading')}</span>
                     </div>
                 </div>
 
+                {/* Global Command Center */}
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:flex items-center gap-2 mr-2">
-                        {/* Consolidated Download Button */}
+                        {/* Unified Reporting Control */}
                         <div className="relative">
                             <button
                                 onClick={(e) => {
@@ -210,7 +229,7 @@ export const AnalysisPage: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Risk Alerts */}
+                        {/* Risk Threshold Alerts (Prioritized Context) */}
                         {data.validation_alerts && data.validation_alerts.length > 0 && (
                             <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
                                 {data.validation_alerts.filter((a: any) => a.level === 'WARNING').map((alert: any, idx: number) => (
@@ -233,9 +252,8 @@ export const AnalysisPage: React.FC = () => {
                         )}
 
                         <div className="grid grid-cols-12 gap-4 items-start">
-                            {/* Sidebar */}
+                            {/* Analysis Sidebar: Metadata & Source Documentation */}
                             <div className="col-span-12 lg:col-span-2 space-y-4">
-                                {/* General Information */}
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-[#11303B]">
                                     <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner">{t('analysis.generalInfo')}</div>
                                     <div className="p-4 space-y-3">
@@ -249,7 +267,7 @@ export const AnalysisPage: React.FC = () => {
                                         </div>
                                         <div className="flex flex-col gap-1">
                                             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{t('analysis.topClients')}</div>
-                                            <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || t('analysis.seeBilling')}</div>
+                                            <div className="text-[10px] font-black text-[#11303B] leading-tight">{data.top_clients || 'N/A'}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -275,7 +293,7 @@ export const AnalysisPage: React.FC = () => {
                                             <span className="text-[11px] font-black text-[#11303B]">
                                                 {data.applicable_interest_rate
                                                     ? `TIIE + ${(data.applicable_interest_rate * 100).toFixed(1)}%`
-                                                    : `TIIE + 5.5% (${t('analysis.indicative')})`}
+                                                    : 'N/A'}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
@@ -285,7 +303,7 @@ export const AnalysisPage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Documents */}
+                                {/* Source Document Management */}
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                                     <div className="bg-[#11303B] px-4 py-2 text-white font-black text-[10px] uppercase tracking-wider shadow-inner flex items-center justify-between">
                                         {t('analysis.documents')}
@@ -298,24 +316,35 @@ export const AnalysisPage: React.FC = () => {
                                     </div>
                                     <div className="p-1 space-y-0.5">
                                         {[
-                                            { icon: FileText, label: t('analysis.taxCertificate') },
-                                            { icon: FileSpreadsheet, label: t('analysis.financialStatements') },
-                                            { icon: FileSearch, label: t('analysis.billingReport') },
-                                            { icon: AlertCircle, label: t('analysis.riskReport') },
-                                            { icon: FileText, label: t('analysis.companyProfile') }
+                                            { icon: FileText, label: t('analysis.taxCertificate'), type: 'TAX', exists: !!data.fiscal_status || true },
+                                            { icon: FileSpreadsheet, label: t('analysis.financialStatements'), type: 'FINANCIALS', exists: true },
+                                            { icon: FileSearch, label: t('analysis.billingReport'), type: 'BILLING', exists: !!data.top_clients },
+                                            { icon: AlertCircle, label: t('analysis.riskReport'), type: 'RISK', exists: !!data.validation_alerts && data.validation_alerts.length > 0 },
+                                            { icon: FileText, label: t('analysis.companyProfile'), type: 'PROFILE', exists: !!data.company_industry || !!data.years_in_business }
                                         ].map((doc, i) => (
-                                            <div key={i} className="flex items-center gap-3 transition-colors hover:bg-gray-50 px-4 py-2 rounded-lg cursor-pointer group">
-                                                <doc.icon size={14} className="text-[#11303B]/60 group-hover:text-[#11303B]" />
-                                                <span className="text-[10px] font-bold text-gray-600 group-hover:text-[#11303B]">{doc.label}</span>
+                                            <div
+                                                key={i}
+                                                onClick={() => {
+                                                    if (doc.exists) {
+                                                        setSelectedDocType(doc.type as any);
+                                                        setIsDocModalOpen(true);
+                                                    }
+                                                }}
+                                                className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer group transition-colors ${doc.exists ? 'hover:bg-gray-50' : 'opacity-40 grayscale pointer-events-none'}`}
+                                            >
+                                                <doc.icon size={14} className={`${doc.exists ? 'text-[#11303B]/60 group-hover:text-[#11303B]' : 'text-gray-400'}`} />
+                                                <span className={`text-[10px] font-bold ${doc.exists ? 'text-gray-600 group-hover:text-[#11303B]' : 'text-gray-400'}`}>
+                                                    {doc.label} {!doc.exists && '(N/A)'}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Main Content Area */}
+                            {/* Main Analytical Canvas Area */}
                             <div className="col-span-12 lg:col-span-10 space-y-4">
-                                {/* Status Bar */}
+                                {/* Risk Status Indicator Bar */}
                                 <div className="bg-white/50 border-b border-gray-200 py-2 sm:py-1.5 flex flex-wrap items-center justify-start gap-y-3 gap-x-6 px-4">
                                     <div className="flex items-center gap-2">
                                         <span className="text-[11px] font-bold text-gray-700">{t('analysis.riskLabel')}</span>
@@ -357,8 +386,9 @@ export const AnalysisPage: React.FC = () => {
                                     </div>
                                 </div>
 
+                                {/* Structural Analysis Grids */}
                                 <div className="grid grid-cols-10 gap-6">
-                                    {/* Middle */}
+                                    {/* Primary Financial & Qualitative Metrics */}
                                     <div className="col-span-12 lg:col-span-6 space-y-4">
                                         <FinancialIndicators ratios={{
                                             current_ratio: data.current_ratio ?? 0,
@@ -369,12 +399,14 @@ export const AnalysisPage: React.FC = () => {
                                             ebitda_margin: data.ebitda_margin ?? 0,
                                             interest_coverage: data.interest_coverage,
                                             leverage_ratio: data.leverage_ratio,
-                                            sales_trend: data.sales_trend
+                                            sales_trend: data.sales_trend,
+                                            net_income_coverage: data.net_income_coverage,
+                                            profit_to_loan_ratio: data.profit_to_loan_ratio
                                         }} />
                                         <SWOTAnalysis swot={swot} />
                                     </div>
 
-                                    {/* Right */}
+                                    {/* Visualizations & Decision Engine Output */}
                                     <div className="col-span-12 lg:col-span-4 space-y-4 flex flex-col">
                                         <FinancialCharts analysis={data} />
                                         <Recommendation
@@ -391,6 +423,17 @@ export const AnalysisPage: React.FC = () => {
                     </>
                 )}
             </main>
+
+            {/* Document Telemetry Viewer */}
+            {data && (
+                <DocumentViewerModal
+                    isOpen={isDocModalOpen}
+                    onClose={() => setIsDocModalOpen(false)}
+                    type={selectedDocType}
+                    data={data}
+                />
+            )}
         </div>
     );
 };
+

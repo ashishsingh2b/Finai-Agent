@@ -2,7 +2,13 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FinancialIndicatorsProps } from '../../types';
 
+/**
+ * FinancialIndicators Component.
+ * High-level display of key institutional ratios (Liquidity, ROE, Leverage, etc.)
+ * with automated status categorization.
+ */
 export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios }) => {
+
     const { t } = useTranslation();
 
     const indicators = [
@@ -25,6 +31,11 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
             label: t('fin.salesTrend'),
             value: `${(ratios.sales_trend || 0).toFixed(1)}%`,
             status: (ratios.sales_trend || 0) > 0 ? t('fin.growth') : t('fin.decline'),
+        },
+        {
+            label: t('fin.coverage'),
+            value: (ratios.net_income_coverage || ratios.profit_to_loan_ratio || 0).toFixed(2),
+            status: (ratios.net_income_coverage || ratios.profit_to_loan_ratio || 0) > 2 ? t('fin.adequate') : t('fin.low'),
         }
     ];
 
@@ -34,19 +45,19 @@ export const FinancialIndicators: React.FC<FinancialIndicatorsProps> = ({ ratios
                 {t('fin.title')}
             </div>
             <div className="p-5 bg-white">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-gray-200 border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                     {indicators.map((ind, i) => (
                         <div key={i} className="flex flex-col items-center py-5 px-2 bg-gray-50/30 hover:bg-white transition-colors group">
-                            <div className="text-[10px] font-black text-gray-500 mb-3 group-hover:text-[#11303B] transition-colors whitespace-nowrap uppercase tracking-widest leading-none">
+                            <div className="h-8 flex items-center justify-center text-[10px] font-black text-gray-500 mb-3 group-hover:text-[#11303B] transition-colors uppercase tracking-widest leading-none text-center px-1">
                                 {ind.label}
                             </div>
                             <div className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-5 group-hover:scale-105 transition-transform leading-none text-center">
                                 {ind.value}
                             </div>
-                            <div className={`w-full max-w-[110px] text-center text-[10px] font-black px-3 py-2 rounded-md shadow-md uppercase tracking-wider ${ind.status === t('fin.adequate') ? 'bg-[#6ECEB2] text-[#11303B]' :
+                            <div className={`min-w-[90px] text-center text-[10px] font-black px-3 py-2 rounded-md shadow-md uppercase tracking-wider ${ind.status === t('fin.adequate') ? 'bg-[#6ECEB2] text-[#11303B]' :
                                 ind.status === t('fin.profitable') ? 'bg-[#EF6C00] text-white' :
                                     ind.status === t('fin.moderate') ? 'bg-[#6ECEB2] text-[#11303B]' :
-                                        ind.status === t('fin.acceptable') ? 'bg-[#6ECEB2] text-[#11303B]' :
+                                        ind.status === t('fin.growth') ? 'bg-[#EF6C00] text-white' :
                                             'bg-red-600 text-white'
                                 }`}>
                                 {ind.status}

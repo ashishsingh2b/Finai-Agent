@@ -1,3 +1,8 @@
+/**
+ * Centralized API Client.
+ * Configures Axios with interceptors for JWT injection and 
+ * global error handling (e.g., automated logout on 401).
+ */
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -9,7 +14,11 @@ const api = axios.create({
     },
 });
 
-// Request interceptor to add auth token
+/**
+ * Request Interceptor.
+ * Injects the Bearer token from localStorage into the Authorization header 
+ * if a valid session exists.
+ */
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('access_token');
@@ -21,7 +30,11 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+/**
+ * Response Interceptor.
+ * Implements global security policies, such as clearing local storage 
+ * and redirecting to login upon session expiration (401 Unauthorized).
+ */
 api.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -33,8 +46,8 @@ api.interceptors.response.use(
     }
 );
 
-// Auth APIs
 export const authAPI = {
+
     login: (email: string, password: string) =>
         api.post('/auth/login', new URLSearchParams({ username: email, password }), {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -44,14 +57,21 @@ export const authAPI = {
         api.post('/auth/register', data),
 
     me: () => api.get('/auth/me'),
-    updateProfile: (data: { full_name?: string; password?: string; email?: string; role?: string }) => api.put('/auth/me', data),
-    forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
-    resetPassword: (data: { token: string; new_password: string }) => api.post('/auth/reset-password', data),
+
+    updateProfile: (data: { full_name?: string; password?: string; email?: string; role?: string }) =>
+        api.put('/auth/me', data),
+
+    forgotPassword: (email: string) =>
+        api.post('/auth/forgot-password', { email }),
+
+    resetPassword: (data: { token: string; new_password: string }) =>
+        api.post('/auth/reset-password', data),
 };
 
-// Analysis APIs
 export const analysisAPI = {
+
     uploadFile: (file: File, language: string = 'es', loan_amount: number = 0, loan_term: number = 12, credit_type: string = 'NEW', credit_score: number = 75) => {
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('loan_amount', loan_amount.toString());
@@ -62,7 +82,9 @@ export const analysisAPI = {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
     },
+
     uploadSplitFiles: (files: File[], language: string = 'es', loan_amount: number = 0, loan_term: number = 12, credit_type: string = 'NEW', credit_score: number = 75) => {
+
         const formData = new FormData();
         files.forEach(file => formData.append('files', file));
         formData.append('loan_amount', loan_amount.toString());
@@ -74,7 +96,8 @@ export const analysisAPI = {
         });
     },
 
-    getAnalysis: (id: number, language: string = 'es') => api.get(`/analysis/${id}?language=${language}`),
+    getAnalysis: (id: number, language: string = 'es') =>
+        api.get(`/analysis/${id}?language=${language}`),
 
     downloadPDF: (id: number, language: string = 'es') =>
         api.get(`/analysis/${id}/export/pdf?language=${language}`, { responseType: 'blob' }),
@@ -92,8 +115,8 @@ export const analysisAPI = {
         api.get(`/analysis/export/bulk?language=${language}&format=${format}`, { responseType: 'blob' }),
 };
 
-// User Management APIs
 export const userAPI = {
+
     listUsers: (skip: number = 0, limit: number = 100) =>
         api.get(`/users/?skip=${skip}&limit=${limit}`),
 
@@ -111,3 +134,4 @@ export const userAPI = {
 };
 
 export default api;
+

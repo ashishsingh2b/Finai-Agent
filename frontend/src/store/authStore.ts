@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import { authAPI } from '../services/api';
 import { User } from '../types';
 
@@ -12,8 +13,10 @@ interface AuthState {
     checkAuth: () => Promise<void>;
 }
 
+
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
+    // Initial hydration from persistent storage
     token: localStorage.getItem('access_token'),
     isAuthenticated: !!localStorage.getItem('access_token'),
     loading: false,
@@ -24,9 +27,10 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await authAPI.login(email, password);
             const { access_token } = response.data;
 
+            // Persistence layer update
             localStorage.setItem('access_token', access_token);
 
-            // Fetch user profile
+            // Hydrate complete profile immediately after successful login
             const userResponse = await authAPI.me();
             set({
                 token: access_token,
@@ -56,8 +60,10 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await authAPI.me();
             set({ user: response.data, isAuthenticated: true });
         } catch (error) {
+            // Self-healing state on token corruption or expiration
             localStorage.removeItem('access_token');
             set({ isAuthenticated: false });
         }
     },
 }));
+

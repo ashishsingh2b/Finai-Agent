@@ -126,7 +126,8 @@
         "acceptable": "Aceptable",
         "salesTrend": "Tendencia de Ventas",
         "growth": "Crecimiento",
-        "decline": "Decremento"
+        "decline": "Decremento",
+        "coverage": "Cobertura de Utilidad (2:1)"
     },
     "rec": {
         "title": "Evaluación y Recomendación",
@@ -315,7 +316,19 @@
         "contextMappingDesc": "El motor de IA no solo lee números; los mapea contra promedios del sector y entornos de tasas de interés actuales (TIIE).",
         "narrativeGen": "Generación Narrativa",
         "narrativeGenDesc": "Convierte tendencias complejas del balance general en puntos claros y accionables para el FODA (Fortalezas, Debilidades, Oportunidades, Amenazas).",
-        "g": "G"
+        "g": "G",
+        "methodology": "Metodología Crediticia",
+        "securityLevel": "Nivel de Seguridad",
+        "sslTerminal": "TERMINAL CON CIFRADO SSL",
+        "stepIngestion": "Ingesta de Datos",
+        "stepParsing": "Análisis Neuronal",
+        "stepModeling": "Modelado de Riesgo",
+        "stepStratification": "Estratificación",
+        "descIngestion": "Carga Segura de Archivos",
+        "descParsing": "Extracción por Coincidencia Difusa",
+        "descModeling": "Ponderación 40-30-30",
+        "descStratification": "Gen. de Reporte Final",
+        "modelTitle": "Modelo 40-30-30"
     },
     "resetPassword": {
         "title": "Restablecer Acceso a Terminal",

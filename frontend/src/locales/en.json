@@ -126,7 +126,8 @@
         "acceptable": "Acceptable",
         "salesTrend": "Sales Trend",
         "growth": "Growth",
-        "decline": "Decline"
+        "decline": "Decline",
+        "coverage": "Profit Coverage (2:1)"
     },
     "rec": {
         "title": "Evaluation & Recommendation",
@@ -315,7 +316,19 @@
         "contextMappingDesc": "The AI engine doesn't just read numbers; it maps them against sector averages and current interest rate environments (TIIE).",
         "narrativeGen": "Narrative Generation",
         "narrativeGenDesc": "Converts complex balance sheet trends into clear, actionable bullet points for the SWOT (Strengths, Weaknesses, Opportunities, Threats).",
-        "g": "G"
+        "g": "G",
+        "methodology": "Credit Methodology",
+        "securityLevel": "Security Level",
+        "sslTerminal": "SSL-ENCRYPTED TERMINAL",
+        "stepIngestion": "Data Ingestion",
+        "stepParsing": "Neural Parsing",
+        "stepModeling": "Risk Modeling",
+        "stepStratification": "Stratification",
+        "descIngestion": "Secure File Upload",
+        "descParsing": "Fuzzy Match Extract",
+        "descModeling": "40-30-30 Ponderation",
+        "descStratification": "Final Report Gen",
+        "modelTitle": "40-30-30 Model"
     },
     "resetPassword": {
         "title": "Reset Terminal Access",

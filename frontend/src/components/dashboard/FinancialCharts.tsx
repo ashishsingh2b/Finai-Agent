@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import {
-    ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+    ComposedChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
     PieChart, Pie, Cell, Tooltip
 } from 'recharts';
 
@@ -10,26 +10,38 @@ interface ChartProps {
     analysis?: any;
 }
 
+/**
+ * FinancialCharts Component.
+ * Orchestrates dynamic Recharts visualizations including Composed Trend
+ * and Debt-to-Equity distribution metrics.
+ */
 export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
+
     const [isFullScreen, setIsFullScreen] = React.useState(false);
     const { t } = useTranslation();
 
-    // Dynamic data derivation
-    const debtValue = analysis?.debt_to_assets ? Math.round(analysis.debt_to_assets * 100) : 55;
-    const equityValue = 100 - debtValue;
+    /**
+     * Behavioral Data Derivation.
+     * Computes Debt/Equity distribution from raw analytical ratios
+     * for specialized pie chart visualization.
+     */
+    const hasDebtData = analysis?.debt_to_assets !== undefined && analysis?.debt_to_assets !== null;
+    const debtValue = hasDebtData ? Math.round(analysis.debt_to_assets * 100) : 0;
+    const equityValue = hasDebtData ? 100 - debtValue : 0;
 
-    const pieData = [
+    const pieData = hasDebtData ? [
         { name: t('charts.debt'), value: debtValue },
         { name: t('charts.equity'), value: equityValue },
-    ];
+    ] : [];
 
-    // Simplistic trend data derived from scores/ratios
+
+    // Real indicators for the chart - No more fake fallbacks
     const trendData = [
-        { name: 'Score', revenue: 12, profit1: (analysis?.total_credit_score ? (analysis.total_credit_score / 4) : 15) },
-        { name: 'ROE', revenue: 18, profit1: (analysis?.roe ? (analysis.roe / 2) : 18) },
-        { name: 'Liq', revenue: 16, profit1: (analysis?.current_ratio ? (analysis.current_ratio * 10) : 15) },
-        { name: 'Sol', revenue: 22, profit1: (analysis?.solvency_score ? (analysis.solvency_score / 4) : 21) },
-        { name: 'Prof', revenue: 26, profit1: (analysis?.profitability_score ? (analysis.profitability_score / 4) : 25) },
+        { name: 'Score', value: analysis?.total_credit_score ? (analysis.total_credit_score / 10) : 0 },
+        { name: 'ROE', value: analysis?.roe || 0 },
+        { name: 'Liq', value: analysis?.current_ratio ? (analysis.current_ratio * 5) : 0 },
+        { name: 'Cov', value: (analysis?.net_income_coverage || analysis?.profit_to_loan_ratio || 0) * 2 },
+        { name: 'Prof', value: analysis?.profit_margin || 0 },
     ];
 
     const ChartContent = ({ full = false }) => (
@@ -53,18 +65,18 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                                 tickLine={false}
                                 axisLine={false}
                                 tick={{ fill: '#333333', fontWeight: 600 }}
-                                domain={[0, 30]}
-                                ticks={[0, 10, 20, 30]}
+                                domain={['auto', 'auto']}
                                 tickFormatter={(val) => `${val}`}
                             />
-                            <Tooltip />
-                            <Bar dataKey="revenue" fill="#11303B" barSize={20} />
-                            <Line
-                                type="monotone"
-                                dataKey="profit1"
-                                stroke="#6ECEB2"
-                                strokeWidth={2}
-                                dot={{ r: full ? 4 : 2, fill: '#ED7D31', stroke: '#ED7D31' }}
+                            <Tooltip
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                cursor={{ fill: '#f3f4f6' }}
+                            />
+                            <Bar
+                                dataKey="value"
+                                fill="#11303B"
+                                barSize={24}
+                                radius={[4, 4, 0, 0]}
                             />
                         </ComposedChart>
                     </ResponsiveContainer>
@@ -89,25 +101,43 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                                 dataKey="value"
                                 stroke="white"
                                 strokeWidth={2}
-                                label={full ? (props: any) => {
-                                    const { cx, cy, midAngle, outerRadius, percent } = props;
-                                    const radius = outerRadius * 0.6; // Position at 60% of radius (inside the slice)
+                                labelLine={false}
+                                label={(props: any) => {
+                                    const { cx, cy, midAngle, outerRadius, percent, name } = props;
+                                    const radius = outerRadius * 0.7;
                                     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
                                     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+
+                                    if (percent < 0.05) return null;
+
                                     return (
-                                        <text
-                                            x={x}
-                                            y={y}
-                                            fill="white"
-                                            textAnchor="middle"
-                                            dominantBaseline="central"
-                                            fontSize={16}
-                                            fontWeight="bold"
-                                        >
-                                            {`${(percent * 100).toFixed(0)}%`}
-                                        </text>
+                                        <g>
+                                            <text
+                                                x={x}
+                                                y={y - (full ? 8 : 4)}
+                                                fill="white"
+                                                textAnchor="middle"
+                                                dominantBaseline="central"
+                                                fontSize={full ? 14 : 9}
+                                                fontWeight="bold"
+                                            >
+                                                {`${(percent * 100).toFixed(0)}%`}
+                                            </text>
+                                            <text
+                                                x={x}
+                                                y={y + (full ? 10 : 5)}
+                                                fill="white"
+                                                textAnchor="middle"
+                                                dominantBaseline="central"
+                                                fontSize={full ? 9 : 6}
+                                                fontWeight="600"
+                                                style={{ textTransform: 'uppercase', opacity: 0.9 }}
+                                            >
+                                                {name}
+                                            </text>
+                                        </g>
                                     );
-                                } : false}
+                                }}
                             >
                                 {pieData.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={index === 0 ? '#ef6b6b' : '#11303B'} style={{ outline: 'none' }} />
@@ -116,18 +146,9 @@ export const FinancialCharts: React.FC<ChartProps> = ({ analysis }) => {
                             <Tooltip />
                         </PieChart>
                     </ResponsiveContainer>
-                    {!full && (
-                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                            <div className="relative w-full h-full">
-                                <div className="absolute top-[42%] right-[28%] flex flex-col items-center">
-                                    <span className="text-white text-[10px] font-black leading-tight">{debtValue}%</span>
-                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">{t('charts.debt')}</span>
-                                </div>
-                                <div className="absolute top-[42%] left-[28%] flex flex-col items-center">
-                                    <span className="text-white text-[10px] font-black leading-tight">{equityValue}%</span>
-                                    <span className="text-white text-[7px] font-bold leading-tight uppercase">{t('charts.equity')}</span>
-                                </div>
-                            </div>
+                    {!hasDebtData && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('swot.noData')}</span>
                         </div>
                     )}
                 </div>

@@ -4,13 +4,18 @@ from sqlalchemy.sql import func
 from app.utils.database import Base
 
 class FinancialStatement(Base):
+    """
+    Representation of a company's financial snapshot for a specific fiscal year.
+    Stores raw accounting data extracted from normalized Excel or PDF documents.
+    Used as the primary input for the FinancialCalculator.
+    """
     __tablename__ = "financial_statements"
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     year = Column(Integer, nullable=False)
     
-    # Balance Sheet - Assets
+    # Balance Sheet: Liquid and Fixed Assets
     cash = Column(Numeric(15, 2), default=0)
     accounts_receivable = Column(Numeric(15, 2), default=0)
     inventory = Column(Numeric(15, 2), default=0)
@@ -18,16 +23,16 @@ class FinancialStatement(Base):
     fixed_assets = Column(Numeric(15, 2), default=0)
     total_assets = Column(Numeric(15, 2), default=0)
     
-    # Balance Sheet - Liabilities
+    # Balance Sheet: Obligations and Debts
     accounts_payable = Column(Numeric(15, 2), default=0)
     current_liabilities = Column(Numeric(15, 2), default=0)
     long_term_liabilities = Column(Numeric(15, 2), default=0)
     total_liabilities = Column(Numeric(15, 2), default=0)
     
-    # Balance Sheet - Equity
+    # Balance Sheet: Equity Ownership
     shareholder_equity = Column(Numeric(15, 2), default=0)
     
-    # Income Statement
+    # Income Statement: Operational Performance
     revenue = Column(Numeric(15, 2), default=0)
     cost_of_goods_sold = Column(Numeric(15, 2), default=0)
     gross_profit = Column(Numeric(15, 2), default=0)
@@ -36,10 +41,10 @@ class FinancialStatement(Base):
     interest_expense = Column(Numeric(15, 2), default=0)
     net_profit = Column(Numeric(15, 2), default=0)
     
-    # Relationships
+    # ORM Relationship
     company = relationship("Company", back_populates="financial_statements")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     def __repr__(self):
-        return f"<FinancialStatement Company:{self.company_id} Year:{self.year}>"
+        return f"<FinancialStatement CompanyID:{self.company_id} Year:{self.year}>"

@@ -2,11 +2,13 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict
 
 class CompanyCreate(BaseModel):
+    """Schema for manual company entity creation."""
     name: str
     industry: Optional[str] = None
     years_in_business: Optional[int] = None
 
 class CompanyResponse(BaseModel):
+    """Schema for company data retrieval."""
     id: int
     name: str
     industry: Optional[str] = None
@@ -15,6 +17,7 @@ class CompanyResponse(BaseModel):
         from_attributes = True
 
 class FinancialStatementCreate(BaseModel):
+    """Schema for batch financial data ingestion."""
     year: int
     cash: float = 0
     accounts_receivable: float = 0
@@ -36,6 +39,10 @@ class FinancialStatementCreate(BaseModel):
     net_profit: float = 0
 
 class AnalysisResponse(BaseModel):
+    """
+    Comprehensive schema for front-end analysis rendering.
+    Combines company profile, calculated ratios, and AI-driven recommendations.
+    """
     id: int
     company_id: int
     company_name: str
@@ -54,7 +61,7 @@ class AnalysisResponse(BaseModel):
     application_status: str
     payment_behavior: str
     
-    # Financial ratios
+    # Financial ratios (Aggregated for Dashboard use)
     current_ratio: Optional[float] = None
     roe: Optional[float] = None
     roa: Optional[float] = None
@@ -69,7 +76,7 @@ class AnalysisResponse(BaseModel):
     applicable_interest_rate: Optional[float] = None
     tiie_rate_used: Optional[float] = None
     
-    # Company detail fallbacks/merges
+    # Dynamic Metadata
     company_industry: Optional[str] = None
     years_in_business: Optional[int] = None
     top_clients: Optional[str] = None
@@ -80,5 +87,6 @@ class AnalysisResponse(BaseModel):
         from_attributes = True
 
 class AnalysisUpdateStatus(BaseModel):
+    """Schema for updating manual tracking fields."""
     application_status: Optional[str] = None
     payment_behavior: Optional[str] = None

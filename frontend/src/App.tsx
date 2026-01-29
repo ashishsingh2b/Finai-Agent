@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import { LandingPage } from './pages/LandingPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -22,16 +23,23 @@ function App() {
     const { checkAuth } = useAuthStore();
 
     useEffect(() => {
+
         checkAuth();
-    }, []);
+    }, [checkAuth]);
 
     return (
         <BrowserRouter>
+            {/* Global UI Infrastructure */}
             <GlobalLoader />
             <ToastContainer />
+
             <Routes>
+                {/* Public Access Points */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginForm />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                {/* Protected Enterprise Dashboard */}
                 <Route
                     path="/dashboard"
                     element={
@@ -72,7 +80,6 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-
                 <Route
                     path="/dashboard/users"
                     element={
@@ -81,6 +88,8 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* Granular Analysis View */}
                 <Route
                     path="/analysis/:id"
                     element={
@@ -89,7 +98,8 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                {/* Catch-all Fallback */}
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
@@ -97,3 +107,4 @@ function App() {
 }
 
 export default App;
+

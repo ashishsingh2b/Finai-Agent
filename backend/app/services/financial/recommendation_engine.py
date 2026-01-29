@@ -1,7 +1,13 @@
 from typing import Dict, List
 
 class RecommendationEngine:
-    """Generate credit recommendation based on score and financials"""
+    """
+    Core engine for generating credit recommendations.
+    Uses a combination of:
+    - Weighted Credit Score (Category A-E)
+    - Profit-to-Loan Coverage (Minimum 2:1 recommended)
+    - Key Financial Ratios (Liquidity, Leverage)
+    """
     
     @staticmethod
     def generate_recommendation(
@@ -12,7 +18,8 @@ class RecommendationEngine:
         language: str = 'es'
     ) -> Dict:
         """
-        Generate final credit recommendation
+        Orchestrate the recommendation process.
+        Evaluates constraints and credit scoring to determine the final decision.
         Returns: APPROVE, APPROVE_WITH_CONDITIONS, or REJECT
         """
         
@@ -48,7 +55,7 @@ class RecommendationEngine:
     
     @staticmethod
     def _approve(score: float, category: str, profit_ratio: float, ratios: Dict, language: str) -> Dict:
-        """Generate APPROVE recommendation"""
+        """Logic for standard approval with good financials."""
         
         if language == 'es':
             justification = [
@@ -77,7 +84,7 @@ class RecommendationEngine:
     
     @staticmethod
     def _approve_with_conditions(score: float, category: str, profit_ratio: float, ratios: Dict, language: str, reason: str) -> Dict:
-        """Generate APPROVE_WITH_CONDITIONS recommendation"""
+        """Logic for conditional approval when minor weaknesses are present."""
         
         if language == 'es':
             justification = [
@@ -126,7 +133,7 @@ class RecommendationEngine:
     
     @staticmethod
     def _reject(score: float, category: str, profit_ratio: float, ratios: Dict, language: str) -> Dict:
-        """Generate REJECT recommendation"""
+        """Logic for rejection when risk thresholds are exceeded."""
         
         if language == 'es':
             justification = [

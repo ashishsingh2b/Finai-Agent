@@ -1,3 +1,8 @@
+/**
+ * Administrative User & Role Governance.
+ * Manages the institutional user registry, role-based access controls (RBAC), 
+ * and account lifecycle (activation/deactivation).
+ */
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { useAuthStore } from '../store/authStore';
@@ -35,6 +40,11 @@ export const UserManagementPage: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [formData, setFormData] = useState({ email: '', full_name: '', password: '', role: 'analyst' });
+
+    /**
+     * Governance Initialization Lifecycle.
+     * Hydrates the user registry for administrative overview.
+     */
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -44,12 +54,16 @@ export const UserManagementPage: React.FC = () => {
             const response = await userAPI.listUsers();
             setUsers(response.data);
         } catch (error) {
-            console.error('Failed to fetch users:', error);
+            console.error('Identity repository retrieval failure:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    /**
+     * Identity Creation Pipeline.
+     * Provisions new accounts with specific role assignments.
+     */
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setGlobalLoading(true);
@@ -60,13 +74,17 @@ export const UserManagementPage: React.FC = () => {
             setFormData({ email: '', full_name: '', password: '', role: 'analyst' });
             fetchUsers();
         } catch (error: any) {
-            console.error('Failed to create user:', error);
+            console.error('Account provisioning failure:', error);
             addToast(error.response?.data?.detail || t('users.errCreate'), 'error');
         } finally {
             setGlobalLoading(false);
         }
     };
 
+    /**
+     * Identity Modification Orchestrator.
+     * Updates profile metadata and synchronizes role transitions.
+     */
     const handleUpdateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedUser) return;
@@ -86,13 +104,17 @@ export const UserManagementPage: React.FC = () => {
             setFormData({ email: '', full_name: '', password: '', role: 'analyst' });
             fetchUsers();
         } catch (error: any) {
-            console.error('Failed to update user:', error);
+            console.error('Account synchronization failure:', error);
             addToast(error.response?.data?.detail || t('users.errUpdate'), 'error');
         } finally {
             setGlobalLoading(false);
         }
     };
 
+    /**
+     * Access Control Enforcement.
+     * Toggles the active status of an identity, effectively barring/allowing system access.
+     */
     const toggleUserStatus = async (userId: number, currentStatus: boolean, e?: React.MouseEvent) => {
         e?.stopPropagation();
         setGlobalLoading(true);
@@ -101,13 +123,17 @@ export const UserManagementPage: React.FC = () => {
             addToast(t(!currentStatus ? 'users.activated' : 'users.deactivated'), 'success');
             fetchUsers();
         } catch (error: any) {
-            console.error('Failed to update user status:', error);
+            console.error('Access control mutation failure:', error);
             addToast(t('users.errStatus'), 'error');
         } finally {
             setGlobalLoading(false);
         }
     };
 
+    /**
+     * Permanent Identity Removal.
+     * Purges a user record from the institutional registry.
+     */
     const handleDeleteUser = async (userId: number, e?: React.MouseEvent) => {
         e?.stopPropagation();
         if (window.confirm(t('users.confirmDelete'))) {
@@ -117,7 +143,7 @@ export const UserManagementPage: React.FC = () => {
                 addToast(t('users.successDelete') || 'User deleted successfully', 'success');
                 fetchUsers();
             } catch (error: any) {
-                console.error('Failed to delete user:', error);
+                console.error('Record purge failure:', error);
                 addToast(t('users.errDelete'), 'error');
             } finally {
                 setGlobalLoading(false);
@@ -131,12 +157,13 @@ export const UserManagementPage: React.FC = () => {
         setFormData({
             email: user.email,
             full_name: user.full_name,
-            password: '', // Don't fill password
+            password: '', // Password hash remains server-side unless explicitly overwritten
             role: user.role
         });
         setShowEditModal(true);
     };
 
+    // Institutional Security Guard: Restricted to Superusers
     if (currentUser?.role !== 'admin') {
         return (
             <DashboardLayout>
@@ -152,7 +179,7 @@ export const UserManagementPage: React.FC = () => {
     return (
         <DashboardLayout>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                {/* Header */}
+                {/* Governance Command Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
                         <div className="flex items-center gap-2 text-[#11303B] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
@@ -177,7 +204,7 @@ export const UserManagementPage: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Users Table */}
+                {/* Identity Audit Table */}
                 <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
                     {loading ? (
                         <div className="p-10 flex justify-center">
@@ -271,7 +298,7 @@ export const UserManagementPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Create/Edit User Modal */}
+                {/* Identity Management & Logic Provisioning Modal */}
                 {(showCreateModal || showEditModal) && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                         <div className="bg-white rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 duration-200 border border-gray-100">
@@ -356,3 +383,4 @@ export const UserManagementPage: React.FC = () => {
         </DashboardLayout>
     );
 };
+
